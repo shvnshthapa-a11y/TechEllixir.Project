@@ -14,7 +14,16 @@ import {
   BarChart2,
   ShieldCheck,
   Building2,
+  Newspaper,
+  Calendar,
+  User,
+  Video,
+  MapPin,
+  FileText,
 } from "lucide-react";
+
+// Types
+type SectionTab = "resources" | "blogs" | "news" | "events";
 
 interface ResourceItem {
   id: string;
@@ -31,6 +40,44 @@ interface ResourceItem {
   featured?: boolean;
 }
 
+interface BlogItem {
+  id: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  role: string;
+  date: string;
+  readTime: string;
+  tag: string;
+  featured?: boolean;
+}
+
+interface NewsItem {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  source: string;
+  summary: string;
+  fullStory: string;
+}
+
+interface EventItem {
+  id: string;
+  title: string;
+  type: "Webinar" | "Workshop" | "Conference" | "Live Demo";
+  date: string;
+  time: string;
+  location: string;
+  speaker: string;
+  speakerTitle: string;
+  description: string;
+  topics: string[];
+  status: "Upcoming" | "Past Recording";
+}
+
+// 1. Resources Mock Data
 const resourcesList: ResourceItem[] = [
   {
     id: "ai-enterprise-guide",
@@ -48,7 +95,7 @@ const resourcesList: ResourceItem[] = [
       "Step-by-step RAG architecture comparing Pinecone, Qdrant, and pgvector",
       "Token usage cost-containment strategies for enterprise LLM APIs",
       "Data sandboxing and PII redaction protocols for AI agent workflows",
-      "Continuous model evaluation & halluncination benchmark frameworks"
+      "Continuous model evaluation & hallucination benchmark frameworks"
     ]
   },
   {
@@ -60,7 +107,7 @@ const resourcesList: ResourceItem[] = [
     tag: "FinTech & Analytics",
     readTime: "8 min read",
     fileFormat: "Case Study PDF",
-    description: "Discover how TechEllixir transformed an multi-currency fintech platform's legacy batch pipeline into a sub-second SQL analytics dashboard using Power BI and Snowflake.",
+    description: "Discover how TechEllixir transformed a multi-currency fintech platform's legacy batch pipeline into a sub-second SQL analytics dashboard using Power BI and Snowflake.",
     summary: "By migrating legacy ETL jobs to streaming ELT pipelines, the client reduced end-of-month reconciliation times from 48 hours to under 15 minutes while improving data accuracy across 1.2M daily transactions.",
     takeaways: [
       "Architecting automated ELT pipelines with Snowflake & dbt",
@@ -138,13 +185,151 @@ const resourcesList: ResourceItem[] = [
   }
 ];
 
+// 2. Blogs Data
+const blogsList: BlogItem[] = [
+  {
+    id: "blog-rag-vs-[#FF4D37]",
+    title: "Why Fine-Tuning LLMs Fails Without Proper RAG Architecture",
+    excerpt: "Many enterprises rush to fine-tune open-weight models on proprietary data, only to suffer from hallucination and high retraining costs. Here is why RAG is the true foundation.",
+    content: "When engineering AI applications for businesses, data freshness and factual accuracy are paramount. Fine-tuning alters model weights but does not guarantee memory precision. Retrieval-Augmented Generation (RAG) acts as an external search index that injects exact context into prompts in real time. In this technical deep dive, we compare dense vector embeddings vs hybrid keyword retrieval (BM25 + HNSW) and demonstrate how reranking with Cohere improves accuracy by 34%.",
+    author: "Avneesh Singh",
+    role: "Lead AI Architect",
+    date: "July 18, 2026",
+    readTime: "6 min read",
+    tag: "AI & Machine Learning",
+    featured: true
+  },
+  {
+    id: "blog-[#FF4D37]-react19",
+    title: "Migrating Production Enterprise Apps to React 19 & Tailwind v4",
+    excerpt: "A practical walkthrough on upgrading large codebase repositories to React 19, taking advantage of the new React Compiler and CSS-first Tailwind configuration.",
+    content: "React 19 brings automatic memoization and server actions out of the box, eliminating manual useMemo and useCallback clutter. Paired with Tailwind v4's CSS-first theme configuration, bundle size decreases significantly while build speeds double. We share real metrics and common pitfalls from migrating client dashboards.",
+    author: "Rudra Pratap Singh",
+    role: "Senior Frontend Engineer",
+    date: "July 10, 2026",
+    readTime: "8 min read",
+    tag: "Web Engineering"
+  },
+  {
+    id: "blog-n8n-[#FF4D37]",
+    title: "Building Resilient AI Workflows With Self-Hosted n8n & Python",
+    excerpt: "How to automate multi-step invoice approvals and customer ticket classification using self-hosted n8n nodes and custom Python webhooks.",
+    content: "No-code and low-code workflow orchestration engines have matured for enterprise operations. By combining n8n's visual node graph with custom Python microservices, engineers can build fault-tolerant pipelines that gracefully handle API rate limits, retry failed requests, and log events into centralized databases.",
+    author: "Priya Sharma",
+    role: "Automation Engineer",
+    date: "June 28, 2026",
+    readTime: "7 min read",
+    tag: "DevOps & Automation"
+  }
+];
+
+// 3. News Data
+const newsList: NewsItem[] = [
+  {
+    id: "news-ai-partner",
+    title: "TechEllixir Recognized as Top AI Solutions Provider 2026",
+    category: "Company Milestone",
+    date: "July 15, 2026",
+    source: "TechEllixir Press",
+    summary: "TechEllixir has been honored as one of the leading enterprise AI and data automation solution partners for delivering custom LLM and RAG platforms across APAC.",
+    fullStory: "NOIDA, INDIA — TechEllixir today announced its inclusion in the 2026 Global AI & Data Excellence list. Recognized for its practical engineering approach and high client satisfaction rates across healthcare, fintech, and retail industries, TechEllixir continues to empower businesses with cutting-edge software solutions."
+  },
+  {
+    id: "news-v2-framework",
+    title: "TechEllixir Unveils Enterprise AI Agent Framework v2.0",
+    category: "Product Launch",
+    date: "June 30, 2026",
+    source: "Product Release",
+    summary: "The upgraded AI Agent Framework v2.0 introduces multi-modal document processing, automated fallback routing, and zero-trust data encryption for cloud workloads.",
+    fullStory: "TechEllixir's AI engineering team has released version 2.0 of its internal AI Agent Framework. The release features native support for multi-vector retrieval, automated sub-agent task delegation, and built-in token optimization controls."
+  },
+  {
+    id: "news-regional-expansion",
+    title: "TechEllixir Expands Regional R&D Hub in Noida Tech Sector",
+    category: "Expansion",
+    date: "June 12, 2026",
+    source: "Corporate News",
+    summary: "To support growing demand for custom AI software and data engineering services, TechEllixir opens a state-of-the-art R&D center in Noida, Uttar Pradesh.",
+    fullStory: "TechEllixir's expansion in Noida doubles its dedicated engineering space, establishing specialized labs for Generative AI prototyping, high-concurrency cloud benchmarking, and client co-creation workshops."
+  }
+];
+
+// 4. Events Data
+const eventsList: EventItem[] = [
+  {
+    id: "event-llm-masterclass",
+    title: "Live Masterclass: Building & Scaling Enterprise RAG Applications",
+    type: "Webinar",
+    date: "August 12, 2026",
+    time: "4:00 PM - 5:30 PM IST",
+    location: "Online (Zoom & YouTube Live)",
+    speaker: "Avneesh Singh",
+    speakerTitle: "Head of AI Architecture, TechEllixir",
+    description: "Join our live 90-minute hands-on masterclass as we code a production-ready RAG application live, from document chunking strategies to vector indexing and Cohere reranking.",
+    topics: [
+      "Chunking strategies: Fixed-size vs Semantic vs Markdown headers",
+      "Benchmarking Pinecone vs Qdrant vs pgvector",
+      "Implementing hybrid search (BM25 + Dense embeddings)",
+      "Live Q&A session with senior AI engineers"
+    ],
+    status: "Upcoming"
+  },
+  {
+    id: "event-n8n-workshop",
+    title: "Hands-on Workshop: Automating Business Ops with n8n & OpenAI",
+    type: "Workshop",
+    date: "August 26, 2026",
+    time: "3:00 PM - 5:00 PM IST",
+    location: "Online Virtual Lab",
+    speaker: "Priya Sharma",
+    speakerTitle: "Senior Automation Specialist",
+    description: "An interactive technical workshop designed for IT leads and developers wanting to automate document processing, lead qualification, and CRM synchronization without custom servers.",
+    topics: [
+      "Setting up self-hosted n8n instances in under 10 minutes",
+      "Connecting OpenAI Vision API for invoice data extraction",
+      "Building webhook alerts and database sync workflows"
+    ],
+    status: "Upcoming"
+  },
+  {
+    id: "event-cloud-summit-recording",
+    title: "Keynote: Zero-Trust Security Patterns for Cloud-Native AI Apps",
+    type: "Conference",
+    date: "July 04, 2026",
+    time: "Recorded (On-Demand)",
+    location: "On-Demand Video Recording",
+    speaker: "TechEllixir Security Lab",
+    speakerTitle: "Cloud & Cyber Security Team",
+    description: "Watch the recorded keynote from the Global Cloud Security Summit detailing PII isolation protocols, API gateway rate limiting, and encrypted vector database storage.",
+    topics: [
+      "PII masking & tokenization techniques",
+      "Zero-trust API key management for LLM APIs",
+      "SOC2 compliance readiness checklist"
+    ],
+    status: "Past Recording"
+  }
+];
+
 const Resources = () => {
+  // Main Section Tab state
+  const [activeTab, setActiveTab] = useState<SectionTab>("resources");
+
+  // Filter & Search states
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [activeModalResource, setActiveModalResource] = useState<ResourceItem | null>(null);
-  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
-  const [emailInput, setEmailInput] = useState<string>("");
 
+  // Modal states
+  const [activeModalResource, setActiveModalResource] = useState<ResourceItem | null>(null);
+  const [activeModalBlog, setActiveModalBlog] = useState<BlogItem | null>(null);
+  const [activeModalNews, setActiveModalNews] = useState<NewsItem | null>(null);
+  const [activeModalEvent, setActiveModalEvent] = useState<EventItem | null>(null);
+
+  // Form states
+  const [emailInput, setEmailInput] = useState<string>("");
+  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
+  const [eventRegSuccess, setEventRegSuccess] = useState<boolean>(false);
+
+  // Categories for resources sub-filter
   const categories = [
     { id: "all", label: "All Resources" },
     { id: "whitepaper", label: "Whitepapers & E-Books" },
@@ -164,7 +349,7 @@ const Resources = () => {
 
   const featuredResource = resourcesList.find((r) => r.featured) || resourcesList[0];
 
-  const handleDownload = (e: React.FormEvent) => {
+  const handleDownloadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput) return;
     setDownloadSuccess(true);
@@ -172,14 +357,25 @@ const Resources = () => {
       setDownloadSuccess(false);
       setEmailInput("");
       setActiveModalResource(null);
-    }, 2500);
+    }, 2200);
+  };
+
+  const handleEventRegSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!emailInput) return;
+    setEventRegSuccess(true);
+    setTimeout(() => {
+      setEventRegSuccess(false);
+      setEmailInput("");
+      setActiveModalEvent(null);
+    }, 2200);
   };
 
   return (
     <div className="pt-28 pb-20 bg-[#fffaf7] dark:bg-[#0d111a] min-h-screen text-[#182033] dark:text-gray-100 transition-colors duration-300">
       
-      {/* 1. Header & Hero Banner */}
-      <section className="relative overflow-hidden py-12 lg:py-16">
+      {/* 1. Header Hero Banner */}
+      <section className="relative overflow-hidden py-10 lg:py-14">
         <div className="container-shell text-center max-w-4xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 25 }}
@@ -187,159 +383,167 @@ const Resources = () => {
             transition={{ duration: 0.6 }}
           >
             <span className="eyebrow justify-center">
-              <Sparkles size={16} /> Knowledge Hub & Engineering Assets
+              <Sparkles size={16} /> KNOWLEDGE HUB & COMMUNITY
             </span>
             <h1 className="section-title mt-4 text-4xl sm:text-5xl lg:text-6xl font-black">
-              TechEllixir <span className="text-[#FF4D37]">Resources</span> & Insights
+              TechEllixir <span className="text-[#FF4D37]">Hub</span>
             </h1>
-            <p className="section-copy mt-6 text-base sm:text-lg max-w-2xl mx-auto">
-              Explore our curated library of technical whitepapers, production blueprints, AI architecture case studies, developer templates, and security checklists.
+            <p className="section-copy mt-4 text-base sm:text-lg max-w-2xl mx-auto">
+              Discover engineering whitepapers, technical blog posts, official news announcements, and live tech events.
             </p>
           </motion.div>
 
-          {/* Search & Category Filter Bar */}
+          {/* 2. Main Pill Tab Navigation (Requested UI Feature) */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.15 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-between gap-4"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
+            className="mt-10 flex justify-center"
           >
-            {/* Search Input */}
-            <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Search resources, topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] shadow-sm transition"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-bold"
-                >
-                  Clear
-                </button>
-              )}
-            </div>
+            <div className="inline-flex flex-wrap items-center justify-center gap-1.5 rounded-full border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 p-2 shadow-lg backdrop-blur-md">
+              <button
+                onClick={() => setActiveTab("resources")}
+                className={`rounded-full px-5 py-2.5 text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+                  activeTab === "resources"
+                    ? "bg-[#FF4D37] text-white shadow-md scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                <FileText size={16} /> Resources & Blueprints
+              </button>
 
-            {/* Category Tabs */}
-            <div className="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                    selectedCategory === cat.id
-                      ? "bg-[#FF4D37] text-white shadow-md"
-                      : "bg-white/80 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 hover:border-[#FF4D37]"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+              <button
+                onClick={() => setActiveTab("blogs")}
+                className={`rounded-full px-5 py-2.5 text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+                  activeTab === "blogs"
+                    ? "bg-[#FF4D37] text-white shadow-md scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                <BookOpen size={16} /> Blogs & Articles
+              </button>
+
+              <button
+                onClick={() => setActiveTab("news")}
+                className={`rounded-full px-5 py-2.5 text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+                  activeTab === "news"
+                    ? "bg-[#FF4D37] text-white shadow-md scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                <Newspaper size={16} /> News & Press
+              </button>
+
+              <button
+                onClick={() => setActiveTab("events")}
+                className={`rounded-full px-5 py-2.5 text-xs sm:text-sm font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+                  activeTab === "events"
+                    ? "bg-[#FF4D37] text-white shadow-md scale-105"
+                    : "text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                }`}
+              >
+                <Calendar size={16} /> Events & Webinars
+              </button>
             </div>
           </motion.div>
         </div>
       </section>
 
-      <div className="container-shell max-w-7xl mx-auto space-y-16">
+      <div className="container-shell max-w-7xl mx-auto space-y-12">
 
-        {/* 2. Featured Resource Banner */}
-        {selectedCategory === "all" && !searchQuery && (
+        {/* TAB 1: RESOURCES & BLUEPRINTS */}
+        {activeTab === "resources" && (
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative rounded-3xl overflow-hidden border border-[#ffd5ca] dark:border-slate-800 bg-gradient-to-br from-[#FFF5F2] via-white to-[#FFF0EC] dark:from-[#161c2a] dark:via-[#131924] dark:to-[#1a2234] p-8 lg:p-12 shadow-xl"
+            transition={{ duration: 0.4 }}
+            className="space-y-12"
           >
-            <div className="grid lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-8 space-y-4">
-                <div className="flex items-center gap-3">
-                  <span className="rounded-full bg-[#FF4D37] text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                    Featured Asset
-                  </span>
-                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                    <BookOpen size={14} /> {featuredResource.readTime}
-                  </span>
-                </div>
-
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight text-[#182033] dark:text-white">
-                  {featuredResource.title}
-                </h2>
-
-                <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
-                  {featuredResource.description}
-                </p>
-
-                <div className="pt-2 flex flex-wrap gap-4">
-                  <button
-                    onClick={() => setActiveModalResource(featuredResource)}
-                    className="brand-button px-6 py-3.5 text-xs font-bold cursor-pointer flex items-center gap-2 shadow-lg"
-                  >
-                    <Download size={16} /> Access Free Blueprint
-                  </button>
-
-                  <button
-                    onClick={() => setActiveModalResource(featuredResource)}
-                    className="ghost-button px-6 py-3.5 text-xs font-bold cursor-pointer flex items-center gap-2"
-                  >
-                    Preview Content <ArrowRight size={16} />
-                  </button>
-                </div>
+            {/* Search & Category Sub-Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <input
+                  type="text"
+                  placeholder="Search whitepapers, templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] shadow-sm transition"
+                />
               </div>
 
-              <div className="lg:col-span-4 flex justify-center">
-                <div className="soft-card p-6 rounded-3xl w-full max-w-sm text-center border border-[#ffd8ce] dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 shadow-md">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] mb-4">
-                    <Brain size={36} />
+              <div className="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                      selectedCategory === cat.id
+                        ? "bg-[#FF4D37] text-white shadow-md"
+                        : "bg-white/80 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 hover:border-[#FF4D37]"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Featured Resource Spotlight */}
+            {selectedCategory === "all" && !searchQuery && (
+              <div className="relative rounded-3xl overflow-hidden border border-[#ffd5ca] dark:border-slate-800 bg-gradient-to-br from-[#FFF5F2] via-white to-[#FFF0EC] dark:from-[#161c2a] dark:via-[#131924] dark:to-[#1a2234] p-8 lg:p-12 shadow-xl">
+                <div className="grid lg:grid-cols-12 gap-8 items-center">
+                  <div className="lg:col-span-8 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <span className="rounded-full bg-[#FF4D37] text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                        Featured Asset
+                      </span>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                        <BookOpen size={14} /> {featuredResource.readTime}
+                      </span>
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black leading-tight text-[#182033] dark:text-white">
+                      {featuredResource.title}
+                    </h2>
+
+                    <p className="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed">
+                      {featuredResource.description}
+                    </p>
+
+                    <div className="pt-2 flex flex-wrap gap-4">
+                      <button
+                        onClick={() => setActiveModalResource(featuredResource)}
+                        className="brand-button px-6 py-3.5 text-xs font-bold cursor-pointer flex items-center gap-2 shadow-lg"
+                      >
+                        <Download size={16} /> Access Free Blueprint
+                      </button>
+                    </div>
                   </div>
-                  <h4 className="font-extrabold text-sm text-[#182033] dark:text-white">
-                    Format: {featuredResource.fileFormat}
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Free download • No credit card required
-                  </p>
+
+                  <div className="lg:col-span-4 flex justify-center">
+                    <div className="soft-card p-6 rounded-3xl w-full max-w-sm text-center border border-[#ffd8ce] dark:border-slate-700 bg-white/90 dark:bg-slate-900/90 shadow-md">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] mb-4">
+                        <Brain size={36} />
+                      </div>
+                      <h4 className="font-extrabold text-sm text-[#182033] dark:text-white">
+                        Format: {featuredResource.fileFormat}
+                      </h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Free download • No credit card required
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            )}
 
-        {/* 3. Resources Grid */}
-        <section>
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-2xl font-black text-[#182033] dark:text-white">
-              {selectedCategory === "all" ? "All Engineering & AI Resources" : categories.find(c => c.id === selectedCategory)?.label}
-            </h2>
-            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">
-              Showing {filteredResources.length} items
-            </span>
-          </div>
-
-          {filteredResources.length === 0 ? (
-            <div className="soft-card rounded-3xl p-12 text-center my-8">
-              <p className="text-gray-500 dark:text-gray-400 font-semibold text-sm">
-                No resources found matching "{searchQuery}". Try searching for another topic or reset filters.
-              </p>
-              <button
-                onClick={() => {
-                  setSearchQuery("");
-                  setSelectedCategory("all");
-                }}
-                className="brand-button mt-4 px-6 py-2.5 text-xs font-bold"
-              >
-                Reset Search
-              </button>
-            </div>
-          ) : (
+            {/* Resources Grid */}
             <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
               {filteredResources.map((item) => (
                 <motion.article
                   key={item.id}
                   whileHover={{ y: -6, scale: 1.01 }}
-                  transition={{ type: "spring", stiffness: 200, damping: 15 }}
                   onClick={() => setActiveModalResource(item)}
                   className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between transition-shadow duration-300 hover:shadow-xl hover:border-[#ffd5ca] bg-white dark:bg-[#161c2a]"
                 >
@@ -385,46 +589,172 @@ const Resources = () => {
                 </motion.article>
               ))}
             </div>
-          )}
-        </section>
+          </motion.div>
+        )}
 
-        {/* 4. Newsletter / Custom Technical Inquiry Box */}
-        <section className="soft-card rounded-3xl p-8 sm:p-12 text-center bg-gradient-to-r from-[#FFFaf7] via-white to-[#FFF3EF] dark:from-[#131924] dark:via-[#161c2a] dark:to-[#1a2234] border border-[#ffd5ca] dark:border-slate-800">
-          <div className="max-w-2xl mx-auto space-y-4">
-            <span className="eyebrow justify-center">STAY AHEAD OF THE CURVE</span>
-            <h3 className="text-2xl sm:text-3xl font-black text-[#182033] dark:text-white">
-              Need a Custom AI or Engineering Resource?
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-              Our engineering team regularly publishes tech whitepapers and open-source starter repos. Subscribe or contact our architects for custom feasibility reports.
-            </p>
+        {/* TAB 2: BLOGS & ARTICLES */}
+        {activeTab === "blogs" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-8"
+          >
+            <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+              {blogsList.map((blog) => (
+                <motion.article
+                  key={blog.id}
+                  whileHover={{ y: -6, scale: 1.01 }}
+                  onClick={() => setActiveModalBlog(blog)}
+                  className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca]"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="rounded-xl bg-[#FFF1EC] dark:bg-slate-800/80 px-3 py-1 text-xs font-bold text-[#FF4D37]">
+                        {blog.tag}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-400">
+                        {blog.readTime}
+                      </span>
+                    </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert("Thank you! You have been subscribed to TechEllixir technical updates.");
-              }}
-              className="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
-            >
-              <input
-                type="email"
-                required
-                placeholder="Enter work email..."
-                className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-xs font-semibold outline-none focus:border-[#FF4D37]"
-              />
-              <button
-                type="submit"
-                className="brand-button px-6 py-3 text-xs font-bold whitespace-nowrap cursor-pointer"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </section>
+                    <h3 className="text-xl font-bold leading-snug text-[#182033] dark:text-white mt-2">
+                      {blog.title}
+                    </h3>
+
+                    <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">
+                      {blog.excerpt}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4 flex items-center justify-between text-xs font-semibold text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center gap-2">
+                      <User size={14} className="text-[#FF4D37]" />
+                      <span>{blog.author}</span>
+                    </div>
+                    <span>{blog.date}</span>
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* TAB 3: NEWS & PRESS */}
+        {activeTab === "news" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
+            <div className="grid gap-6 md:grid-cols-3">
+              {newsList.map((news) => (
+                <div
+                  key={news.id}
+                  onClick={() => setActiveModalNews(news)}
+                  className="soft-card rounded-3xl p-7 cursor-pointer bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca] flex flex-col justify-between"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="rounded-lg bg-red-50 dark:bg-slate-800 px-2.5 py-1 text-xs font-bold text-[#FF4D37]">
+                        {news.category}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-400">
+                        {news.date}
+                      </span>
+                    </div>
+
+                    <h3 className="text-lg font-bold text-[#182033] dark:text-white leading-snug mt-2">
+                      {news.title}
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-3 leading-relaxed">
+                      {news.summary}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4 flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#FF4D37] flex items-center gap-1">
+                      Read Press Release <ArrowRight size={14} />
+                    </span>
+                    <span className="text-xs text-gray-400">{news.source}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* TAB 4: EVENTS & WEBINARS */}
+        {activeTab === "events" && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-8"
+          >
+            <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+              {eventsList.map((event) => (
+                <div
+                  key={event.id}
+                  className="soft-card rounded-3xl p-7 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 flex flex-col justify-between hover:shadow-xl transition"
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className={`rounded-xl px-3 py-1 text-xs font-bold ${
+                        event.status === "Upcoming"
+                          ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+                          : "bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400"
+                      }`}>
+                        {event.status}
+                      </span>
+                      <span className="text-xs font-semibold text-[#FF4D37] flex items-center gap-1">
+                        <Video size={14} /> {event.type}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-[#182033] dark:text-white leading-snug">
+                      {event.title}
+                    </h3>
+
+                    <div className="mt-4 space-y-2 text-xs font-semibold text-gray-600 dark:text-gray-300">
+                      <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-[#FF4D37]" />
+                        <span>{event.date} • {event.time}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-[#FF4D37]" />
+                        <span>{event.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User size={14} className="text-[#FF4D37]" />
+                        <span>{event.speaker} ({event.speakerTitle})</span>
+                      </div>
+                    </div>
+
+                    <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                      {event.description}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4">
+                    <button
+                      onClick={() => setActiveModalEvent(event)}
+                      className="brand-button w-full py-3 text-xs font-bold cursor-pointer flex items-center justify-center gap-2 shadow-md"
+                    >
+                      {event.status === "Upcoming" ? "Register for Event" : "Watch Recording"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
       </div>
 
-      {/* 5. Resource Preview & Download Modal */}
+      {/* MODAL 1: RESOURCE DOWNLOAD MODAL */}
       <AnimatePresence>
         {activeModalResource && (
           <div
@@ -435,11 +765,9 @@ const Resources = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
               onClick={(e) => e.stopPropagation()}
               className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col justify-between"
             >
-              {/* Header */}
               <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-5">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-2xl bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37]">
@@ -457,14 +785,12 @@ const Resources = () => {
 
                 <button
                   onClick={() => setActiveModalResource(null)}
-                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 hover:text-gray-700 dark:hover:text-white transition cursor-pointer"
-                  aria-label="Close modal"
+                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Body */}
               <div className="my-6 overflow-y-auto pr-2 space-y-6">
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
@@ -477,7 +803,7 @@ const Resources = () => {
 
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">
-                    Key Insights & Deliverables
+                    Key Deliverables
                   </h4>
                   <div className="space-y-2">
                     {activeModalResource.takeaways.map((takeaway, idx) => (
@@ -492,22 +818,17 @@ const Resources = () => {
                   </div>
                 </div>
 
-                {/* Instant Download / Access Form */}
                 <div className="rounded-2xl border border-[#ffd5ca] dark:border-slate-800 bg-[#FFF5F2] dark:bg-slate-900/80 p-5">
                   <h5 className="text-xs font-bold text-[#182033] dark:text-white mb-1">
-                    Receive Instant Download Link
+                    Instant File Access
                   </h5>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                    Enter your email to receive the direct file download ({activeModalResource.fileFormat}).
-                  </p>
-
                   {downloadSuccess ? (
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl">
                       <CheckCircle2 size={18} />
-                      <span>Download link sent! Check your inbox momentarily.</span>
+                      <span>Download link sent! Check your inbox.</span>
                     </div>
                   ) : (
-                    <form onSubmit={handleDownload} className="flex gap-2">
+                    <form onSubmit={handleDownloadSubmit} className="flex gap-2">
                       <input
                         type="email"
                         required
@@ -526,14 +847,202 @@ const Resources = () => {
                   )}
                 </div>
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
-              {/* Footer */}
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex items-center justify-between">
-                <span className="text-xs font-semibold text-gray-400">
-                  Format: {activeModalResource.fileFormat}
-                </span>
+      {/* MODAL 2: BLOG READER MODAL */}
+      <AnimatePresence>
+        {activeModalBlog && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            onClick={() => setActiveModalBlog(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-3xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col justify-between"
+            >
+              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
+                    {activeModalBlog.tag} • {activeModalBlog.readTime}
+                  </span>
+                  <h3 className="text-2xl font-black text-[#182033] dark:text-white mt-1">
+                    {activeModalBlog.title}
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1">
+                    By {activeModalBlog.author} ({activeModalBlog.role}) • {activeModalBlog.date}
+                  </p>
+                </div>
                 <button
-                  onClick={() => setActiveModalResource(null)}
+                  onClick={() => setActiveModalBlog(null)}
+                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="my-6 overflow-y-auto pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                <p className="font-semibold text-base text-[#182033] dark:text-white">
+                  {activeModalBlog.excerpt}
+                </p>
+                <p>{activeModalBlog.content}</p>
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-end">
+                <button
+                  onClick={() => setActiveModalBlog(null)}
+                  className="brand-button px-6 py-2.5 text-xs font-bold cursor-pointer"
+                >
+                  Close Article
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 3: NEWS MODAL */}
+      <AnimatePresence>
+        {activeModalNews && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            onClick={() => setActiveModalNews(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col justify-between"
+            >
+              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
+                    {activeModalNews.category} • {activeModalNews.date}
+                  </span>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white mt-1">
+                    {activeModalNews.title}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setActiveModalNews(null)}
+                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="my-6 overflow-y-auto pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                <p>{activeModalNews.fullStory}</p>
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+                <span className="text-xs text-gray-400">{activeModalNews.source}</span>
+                <button
+                  onClick={() => setActiveModalNews(null)}
+                  className="brand-button px-6 py-2 text-xs font-bold cursor-pointer"
+                >
+                  Close News
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 4: EVENT REGISTRATION MODAL */}
+      <AnimatePresence>
+        {activeModalEvent && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
+            onClick={() => setActiveModalEvent(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col justify-between"
+            >
+              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
+                <div>
+                  <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
+                    {activeModalEvent.type} • {activeModalEvent.status}
+                  </span>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white mt-1">
+                    {activeModalEvent.title}
+                  </h3>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Speaker: {activeModalEvent.speaker} ({activeModalEvent.speakerTitle})
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveModalEvent(null)}
+                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="my-6 overflow-y-auto pr-2 space-y-5">
+                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
+                  {activeModalEvent.description}
+                </p>
+
+                <div>
+                  <h5 className="text-xs font-bold uppercase text-gray-400 mb-2">
+                    Key Event Topics
+                  </h5>
+                  <div className="space-y-2">
+                    {activeModalEvent.topics.map((topic, i) => (
+                      <div key={i} className="flex items-center gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-slate-900 p-2.5 rounded-xl border border-gray-100 dark:border-slate-800">
+                        <CheckCircle2 size={16} className="text-[#FF4D37]" />
+                        <span>{topic}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {activeModalEvent.status === "Upcoming" && (
+                  <div className="rounded-2xl border border-[#ffd5ca] dark:border-slate-800 bg-[#FFF5F2] dark:bg-slate-900/80 p-5">
+                    <h5 className="text-xs font-bold text-[#182033] dark:text-white mb-1">
+                      Reserve Your Spot
+                    </h5>
+                    {eventRegSuccess ? (
+                      <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl">
+                        <CheckCircle2 size={18} />
+                        <span>Registration confirmed! Calendar invite sent to email.</span>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleEventRegSubmit} className="flex gap-2 mt-2">
+                        <input
+                          type="email"
+                          required
+                          value={emailInput}
+                          onChange={(e) => setEmailInput(e.target.value)}
+                          placeholder="your.email@company.com"
+                          className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold outline-none focus:border-[#FF4D37]"
+                        />
+                        <button
+                          type="submit"
+                          className="brand-button px-5 py-2 text-xs font-bold whitespace-nowrap cursor-pointer"
+                        >
+                          Register Now
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-end">
+                <button
+                  onClick={() => setActiveModalEvent(null)}
                   className="px-5 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Close
