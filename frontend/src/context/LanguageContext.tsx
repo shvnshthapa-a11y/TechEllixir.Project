@@ -14,6 +14,7 @@ const enTranslations = {
     home: "Home",
     about: "About",
     services: "Services",
+    resources: "Resources",
     career: "Career",
     contact: "Contact",
     getStarted: "Get Started"

@@ -45,6 +45,7 @@ const Navbar = () => {
     { title: t("nav.home"), path: "/" },
     { title: t("nav.about"), path: "/about" },
     { title: t("nav.services"), path: "/services" },
+    { title: t("nav.resources"), path: "/resources" },
     { title: t("nav.career"), path: "/career" },
     { title: t("nav.contact"), path: "/contact" },
   ];
