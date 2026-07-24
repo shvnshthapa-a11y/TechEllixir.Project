@@ -15,8 +15,10 @@ import { NavLink } from "react-router-dom";
 const Profile = () => {
   const isAdmin = Boolean(localStorage.getItem("adminToken"));
   const userEmail = localStorage.getItem("userEmail") || (isAdmin ? "admin@techellixir.com" : "user@techellixir.com");
-  const userName = localStorage.getItem("userName") || (isAdmin ? "Administrator" : userEmail.split("@")[0]);
+  const storedName = localStorage.getItem("userName") || (isAdmin ? "Administrator" : userEmail.split("@")[0]);
 
+  const [displayName, setDisplayName] = useState(storedName);
+  const [activeName, setActiveName] = useState(storedName);
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const handleLogout = () => {
@@ -29,8 +31,15 @@ const Profile = () => {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    const updatedName = displayName.trim() || storedName;
+    localStorage.setItem("userName", updatedName);
+    setActiveName(updatedName);
     setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2500);
+
+    setTimeout(() => {
+      setSavedSuccess(false);
+      window.location.reload();
+    }, 1200);
   };
 
   return (
@@ -40,13 +49,13 @@ const Profile = () => {
         {/* Header Hero Banner */}
         <div className="soft-card rounded-3xl p-8 bg-gradient-to-r from-white via-orange-50/50 to-white dark:from-[#161c2a] dark:via-slate-900 dark:to-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md">
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="h-20 w-20 rounded-3xl bg-[#FF4D37] text-white flex items-center justify-center text-3xl font-black shadow-lg shrink-0">
-              {userName.charAt(0).toUpperCase()}
+            <div className="h-20 w-20 rounded-3xl bg-[#FF4D37] text-white flex items-center justify-center text-3xl font-black shadow-lg shrink-0 uppercase">
+              {activeName.charAt(0)}
             </div>
             <div className="text-center sm:text-left space-y-1 min-w-0 flex-1">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-3xl font-black text-[#182033] dark:text-white">
-                  {userName}
+                <h1 className="text-3xl font-black text-[#182033] dark:text-white capitalize">
+                  {activeName}
                 </h1>
                 <span className={`px-3 py-0.5 rounded-full text-xs font-bold ${
                   isAdmin
@@ -86,7 +95,7 @@ const Profile = () => {
         {/* Profile Content Grid */}
         <div className="grid lg:grid-cols-12 gap-8">
           
-          {/* Left Column: Account Details */}
+          {/* Left Column: Account Details Form */}
           <div className="lg:col-span-7 space-y-6">
             <div className="soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
               <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
@@ -97,7 +106,7 @@ const Profile = () => {
 
               {savedSuccess && (
                 <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 p-4 text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                  <CheckCircle2 size={16} /> Profile settings updated successfully!
+                  <CheckCircle2 size={16} /> Display name updated to "{activeName}" successfully!
                 </div>
               )}
 
@@ -110,8 +119,11 @@ const Profile = () => {
                     <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                     <input
                       type="text"
-                      defaultValue={userName}
-                      className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
+                      required
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Enter your name..."
+                      className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
                     />
                   </div>
                 </div>
