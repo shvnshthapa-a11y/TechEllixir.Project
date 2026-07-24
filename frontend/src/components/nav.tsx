@@ -129,37 +129,21 @@ const Navbar = () => {
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            {localStorage.getItem("adminToken") ? (
-              <div className="flex items-center gap-2">
-                <NavLink to="/admin" className="brand-button px-4 py-2 text-xs font-bold whitespace-nowrap">
-                  Admin Portal
-                </NavLink>
-                <button
-                  onClick={() => {
-                    localStorage.removeItem("adminToken");
-                    window.location.href = "/auth";
-                  }}
-                  className="ghost-button px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
+            {localStorage.getItem("adminToken") || localStorage.getItem("userToken") ? (
+              <NavLink to="/profile">
+                <motion.div
+                  className="flex items-center gap-2.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 px-3.5 py-2 text-xs font-black text-gray-800 dark:text-gray-200 shadow-sm hover:border-[#FF4D37] transition cursor-pointer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                 >
-                  Logout
-                </button>
-              </div>
-            ) : localStorage.getItem("userToken") ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden sm:inline-block text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                  Logged In ({localStorage.getItem("userEmail")?.split("@")[0] || "User"})
-                </span>
-                <button
-                  onClick={() => {
-                    localStorage.removeItem("userToken");
-                    localStorage.removeItem("userEmail");
-                    window.location.href = "/auth";
-                  }}
-                  className="ghost-button px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
-                >
-                  Logout
-                </button>
-              </div>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-[#FF4D37] text-white text-xs font-black uppercase shadow-sm">
+                    {(localStorage.getItem("userEmail") || (localStorage.getItem("adminToken") ? "Admin" : "User")).charAt(0)}
+                  </div>
+                  <span className="hidden sm:inline-block font-extrabold text-gray-800 dark:text-gray-200">
+                    Profile ({localStorage.getItem("adminToken") ? "Admin" : (localStorage.getItem("userEmail")?.split("@")[0] || "User")})
+                  </span>
+                </motion.div>
+              </NavLink>
             ) : (
               <NavLink to="/auth">
                 <motion.span
