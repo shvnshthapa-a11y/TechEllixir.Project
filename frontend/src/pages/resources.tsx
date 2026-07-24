@@ -424,15 +424,30 @@ const Resources = () => {
 
   const featuredResource = resourcesList.find((r) => r.featured) || resourcesList[0];
 
-  const handleDownloadSubmit = (e: React.FormEvent) => {
+  const handleDownloadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!emailInput) return;
+
+    try {
+      await fetch("/api/resources/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: emailInput,
+          resourceTitle: activeModalResource?.title || "Enterprise Technical Asset",
+          fileFormat: activeModalResource?.fileFormat || "PDF Blueprint",
+        }),
+      });
+    } catch (err) {
+      console.error("Resource download submission error:", err);
+    }
+
     setDownloadSuccess(true);
     setTimeout(() => {
       setDownloadSuccess(false);
       setEmailInput("");
       setActiveModalResource(null);
-    }, 2200);
+    }, 2500);
   };
 
   const handleEventRegSubmit = (e: React.FormEvent) => {

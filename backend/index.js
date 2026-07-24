@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
@@ -17,9 +18,18 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "techellixir-local-secret";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12;
 
-const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@techellixir.com";
-const resend = RESEND_API_KEY && !RESEND_API_KEY.includes("your_resend") ? new Resend(RESEND_API_KEY) : null;
+function getResendClient() {
+  const apiKey = String(process.env.RESEND_API_KEY || "").trim();
+  if (!apiKey || apiKey.includes("your_resend") || !apiKey.startsWith("re_")) {
+    return null;
+  }
+  try {
+    return new Resend(apiKey);
+  } catch (err) {
+    console.error("Resend init error:", err);
+    return null;
+  }
+}
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
@@ -138,6 +148,7 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    // 1. Contact Form / Demo Request Endpoint
     if (req.method === "POST" && url.pathname === "/api/queries") {
       const body = await readBody(req);
       const normalized = normalizeQuery(body);
@@ -149,12 +160,16 @@ async function handleApi(req, res, url) {
       queries.unshift(normalized.query);
       await writeQueries(queries);
 
-      // Dispatch Resend Email if configured
-      if (resend) {
+      // Safe Resend Email Dispatch
+      let emailStatus = "not_configured";
+      const resendClient = getResendClient();
+
+      if (resendClient) {
         try {
-          await resend.emails.send({
+          const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+          await resendClient.emails.send({
             from: "TechEllixir Leads <onboarding@resend.dev>",
-            to: [ADMIN_EMAIL],
+            to: [adminEmail],
             subject: `[TechEllixir Demo Request] ${normalized.query.subject}`,
             html: `
               <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
@@ -170,12 +185,99 @@ async function handleApi(req, res, url) {
               </div>
             `,
           });
+          emailStatus = "dispatched";
         } catch (err) {
           console.error("Resend email dispatch error:", err);
+          emailStatus = "failed";
         }
       }
 
-      json(res, 201, { query: normalized.query });
+      json(res, 201, { query: normalized.query, emailStatus });
+      return;
+    }
+
+    // 2. Resource Instant Access / Download Email Endpoint
+    if (req.method === "POST" && url.pathname === "/api/resources/download") {
+      const body = await readBody(req);
+      const userEmail = String(body.email || "").trim().toLowerCase();
+      const resourceTitle = String(body.resourceTitle || "Enterprise Technical Asset").trim();
+      const fileFormat = String(body.fileFormat || "PDF Blueprint").trim();
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
+        json(res, 400, { error: "Please enter a valid email address." });
+        return;
+      }
+
+      // Record in queries.json
+      const queries = await readQueries();
+      const newQuery = {
+        id: randomUUID(),
+        fullName: "Resource Subscriber",
+        email: userEmail,
+        subject: `Resource Access: ${resourceTitle}`,
+        message: `User requested instant access to asset "${resourceTitle}" (${fileFormat}).`,
+        status: "new",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      queries.unshift(newQuery);
+      await writeQueries(queries);
+
+      const resendClient = getResendClient();
+      let emailStatus = "not_configured";
+
+      if (resendClient) {
+        const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+
+        // Send to visitor email
+        try {
+          await resendClient.emails.send({
+            from: "TechEllixir Resources <onboarding@resend.dev>",
+            to: [userEmail],
+            subject: `[TechEllixir Access Link] ${resourceTitle}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; padding: 24px; color: #182033; max-width: 600px; margin: 0 auto; border: 1px solid #ffd5ca; border-radius: 16px;">
+                <h2 style="color: #FF4D37; margin-top: 0;">TechEllixir Resource Blueprint Access</h2>
+                <p>Hello,</p>
+                <p>Thank you for requesting instant access to <strong>${resourceTitle}</strong> (${fileFormat}).</p>
+                <div style="background: #FFF5F2; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #ffd5ca;">
+                  <h3 style="margin-top: 0; color: #182033;">${resourceTitle}</h3>
+                  <p style="font-size: 13px; color: #555;">Format: ${fileFormat} • Verified Engineering Asset</p>
+                  <a href="https://techellixir.com/resources" style="display: inline-block; background: #FF4D37; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; margin-top: 10px;">
+                    Access & Download Blueprint
+                  </a>
+                </div>
+                <p style="font-size: 12px; color: #888;">TechEllixir Engineering Team</p>
+              </div>
+            `,
+          });
+          emailStatus = "dispatched";
+        } catch (userErr) {
+          console.error("Resend user email dispatch error:", userErr);
+        }
+
+        // Send notification to Admin email
+        try {
+          await resendClient.emails.send({
+            from: "TechEllixir Leads <onboarding@resend.dev>",
+            to: [adminEmail],
+            subject: `[New Subscriber] Downloaded ${resourceTitle}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+                <h2 style="color: #FF4D37;">New Resource Access Lead</h2>
+                <p><strong>Subscriber Email:</strong> ${userEmail}</p>
+                <p><strong>Resource Title:</strong> ${resourceTitle} (${fileFormat})</p>
+                <p style="font-size: 12px; color: #888;">Time: ${newQuery.createdAt}</p>
+              </div>
+            `,
+          });
+          if (emailStatus === "not_configured") emailStatus = "admin_notified";
+        } catch (adminErr) {
+          console.error("Resend admin notification error:", adminErr);
+        }
+      }
+
+      json(res, 200, { ok: true, message: "Access link sent successfully!", emailStatus });
       return;
     }
 
