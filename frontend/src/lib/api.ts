@@ -40,10 +40,10 @@ export function submitQuery(payload: QueryPayload) {
   });
 }
 
-export function adminLogin(password: string) {
+export function adminLogin(password: string, username = "admin") {
   return request<{ token: string }>("/api/admin/login", {
     method: "POST",
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ username, password }),
   });
 }
 
