@@ -20,6 +20,10 @@ import {
   Video,
   MapPin,
   FileText,
+  Bookmark,
+  Share2,
+  Layers,
+  Star,
 } from "lucide-react";
 
 // Types
@@ -32,8 +36,10 @@ interface ResourceItem {
   categoryLabel: string;
   icon: React.ReactNode;
   tag: string;
+  difficulty: "Beginner" | "Intermediate" | "Advanced";
   readTime: string;
   fileFormat: string;
+  downloadsCount: string;
   description: string;
   summary: string;
   takeaways: string[];
@@ -50,6 +56,7 @@ interface BlogItem {
   date: string;
   readTime: string;
   tag: string;
+  likes: number;
   featured?: boolean;
 }
 
@@ -75,6 +82,7 @@ interface EventItem {
   description: string;
   topics: string[];
   status: "Upcoming" | "Past Recording";
+  seatsLeft?: number;
 }
 
 // 1. Resources Mock Data
@@ -86,8 +94,10 @@ const resourcesList: ResourceItem[] = [
     categoryLabel: "Whitepapers & E-Books",
     icon: <Brain size={24} className="text-[#FF4D37]" />,
     tag: "AI Architecture",
+    difficulty: "Advanced",
     readTime: "15 min read",
     fileFormat: "PDF (3.2 MB)",
+    downloadsCount: "4,820 downloads",
     featured: true,
     description: "A comprehensive executive guide on deploying Retrieval-Augmented Generation (RAG), fine-tuning LLMs, and setting up secure MLOps pipelines inside regulated enterprise cloud infrastructure.",
     summary: "This blueprint bridges the gap between proof-of-concept AI experiments and mission-critical production deployments. It covers vector database selection, latency optimization, data privacy compliance, cost control strategies, and real-world fallback mechanisms.",
@@ -105,8 +115,10 @@ const resourcesList: ResourceItem[] = [
     categoryLabel: "Case Studies",
     icon: <BarChart2 size={24} className="text-[#FF4D37]" />,
     tag: "FinTech & Analytics",
+    difficulty: "Intermediate",
     readTime: "8 min read",
     fileFormat: "Case Study PDF",
+    downloadsCount: "2,410 downloads",
     description: "Discover how TechEllixir transformed a multi-currency fintech platform's legacy batch pipeline into a sub-second SQL analytics dashboard using Power BI and Snowflake.",
     summary: "By migrating legacy ETL jobs to streaming ELT pipelines, the client reduced end-of-month reconciliation times from 48 hours to under 15 minutes while improving data accuracy across 1.2M daily transactions.",
     takeaways: [
@@ -122,8 +134,10 @@ const resourcesList: ResourceItem[] = [
     categoryLabel: "Templates & Code",
     icon: <Code2 size={24} className="text-[#FF4D37]" />,
     tag: "Developer Template",
+    difficulty: "Intermediate",
     readTime: "Code Repo",
     fileFormat: "GitHub Zip",
+    downloadsCount: "6,150 downloads",
     description: "Clean code starter repository featuring React 19, TypeScript, Tailwind CSS v4, Docker Compose, JWT authentication, and structured Express microservices.",
     summary: "Skip weeks of boilerplate configuration. This starter pack includes production-ready Docker containers, ESLint/Prettier rules, automated GitHub Actions CI/CD workflows, and API rate limiting out of the box.",
     takeaways: [
@@ -139,8 +153,10 @@ const resourcesList: ResourceItem[] = [
     categoryLabel: "Developer Guides",
     icon: <Terminal size={24} className="text-[#FF4D37]" />,
     tag: "Workflow Automation",
+    difficulty: "Beginner",
     readTime: "12 min read",
     fileFormat: "Interactive Guide",
+    downloadsCount: "3,190 downloads",
     description: "Learn how to build self-healing business automation workflows connecting CRM systems, Slack, email parsing, and custom AI agents using n8n and Python webhooks.",
     summary: "An end-to-end tutorial for automation engineers looking to automate complex cross-platform business workflows. Includes copy-paste JSON workflow nodes and error handling best practices.",
     takeaways: [
@@ -156,8 +172,10 @@ const resourcesList: ResourceItem[] = [
     categoryLabel: "Templates & Checklists",
     icon: <ShieldCheck size={24} className="text-[#FF4D37]" />,
     tag: "Cyber Security",
+    difficulty: "Advanced",
     readTime: "5 min audit",
     fileFormat: "Interactive Sheet",
+    downloadsCount: "5,300 downloads",
     description: "A 50-point security audit checklist for AWS, GCP, and Azure cloud environments covering IAM policies, network isolation, encryption at rest, and secret management.",
     summary: "Ensure your cloud infrastructure adheres to SOC2, ISO 27001, and HIPAA compliance baselines. Used internally by TechEllixir senior DevOps engineers before production releases.",
     takeaways: [
@@ -173,8 +191,10 @@ const resourcesList: ResourceItem[] = [
     categoryLabel: "Case Studies",
     icon: <Building2 size={24} className="text-[#FF4D37]" />,
     tag: "Healthcare & AI",
+    difficulty: "Intermediate",
     readTime: "10 min read",
     fileFormat: "Case Study PDF",
+    downloadsCount: "1,980 downloads",
     description: "How an automated AI document processing system eliminated manual data entry for 50,000+ patient records and claim forms with 99.4% precision.",
     summary: "Learn how modern OCR models combined with specialized medical LLMs extract structured JSON schemas from handwritten doctor notes, invoices, and diagnostic insurance forms automatically.",
     takeaways: [
@@ -188,7 +208,7 @@ const resourcesList: ResourceItem[] = [
 // 2. Blogs Data
 const blogsList: BlogItem[] = [
   {
-    id: "blog-rag-vs-[#FF4D37]",
+    id: "blog-rag-vs-finetuning",
     title: "Why Fine-Tuning LLMs Fails Without Proper RAG Architecture",
     excerpt: "Many enterprises rush to fine-tune open-weight models on proprietary data, only to suffer from hallucination and high retraining costs. Here is why RAG is the true foundation.",
     content: "When engineering AI applications for businesses, data freshness and factual accuracy are paramount. Fine-tuning alters model weights but does not guarantee memory precision. Retrieval-Augmented Generation (RAG) acts as an external search index that injects exact context into prompts in real time. In this technical deep dive, we compare dense vector embeddings vs hybrid keyword retrieval (BM25 + HNSW) and demonstrate how reranking with Cohere improves accuracy by 34%.",
@@ -196,11 +216,12 @@ const blogsList: BlogItem[] = [
     role: "Lead AI Architect",
     date: "July 18, 2026",
     readTime: "6 min read",
-    tag: "AI & Machine Learning",
+    tag: "AI Architecture",
+    likes: 142,
     featured: true
   },
   {
-    id: "blog-[#FF4D37]-react19",
+    id: "blog-react19-migration",
     title: "Migrating Production Enterprise Apps to React 19 & Tailwind v4",
     excerpt: "A practical walkthrough on upgrading large codebase repositories to React 19, taking advantage of the new React Compiler and CSS-first Tailwind configuration.",
     content: "React 19 brings automatic memoization and server actions out of the box, eliminating manual useMemo and useCallback clutter. Paired with Tailwind v4's CSS-first theme configuration, bundle size decreases significantly while build speeds double. We share real metrics and common pitfalls from migrating client dashboards.",
@@ -208,10 +229,11 @@ const blogsList: BlogItem[] = [
     role: "Senior Frontend Engineer",
     date: "July 10, 2026",
     readTime: "8 min read",
-    tag: "Web Engineering"
+    tag: "Web Engineering",
+    likes: 98
   },
   {
-    id: "blog-n8n-[#FF4D37]",
+    id: "blog-n8n-python",
     title: "Building Resilient AI Workflows With Self-Hosted n8n & Python",
     excerpt: "How to automate multi-step invoice approvals and customer ticket classification using self-hosted n8n nodes and custom Python webhooks.",
     content: "No-code and low-code workflow orchestration engines have matured for enterprise operations. By combining n8n's visual node graph with custom Python microservices, engineers can build fault-tolerant pipelines that gracefully handle API rate limits, retry failed requests, and log events into centralized databases.",
@@ -219,7 +241,8 @@ const blogsList: BlogItem[] = [
     role: "Automation Engineer",
     date: "June 28, 2026",
     readTime: "7 min read",
-    tag: "DevOps & Automation"
+    tag: "DevOps & Automation",
+    likes: 85
   }
 ];
 
@@ -272,7 +295,8 @@ const eventsList: EventItem[] = [
       "Implementing hybrid search (BM25 + Dense embeddings)",
       "Live Q&A session with senior AI engineers"
     ],
-    status: "Upcoming"
+    status: "Upcoming",
+    seatsLeft: 42
   },
   {
     id: "event-n8n-workshop",
@@ -289,7 +313,8 @@ const eventsList: EventItem[] = [
       "Connecting OpenAI Vision API for invoice data extraction",
       "Building webhook alerts and database sync workflows"
     ],
-    status: "Upcoming"
+    status: "Upcoming",
+    seatsLeft: 18
   },
   {
     id: "event-cloud-summit-recording",
@@ -310,15 +335,29 @@ const eventsList: EventItem[] = [
   }
 ];
 
-const Resources = () => {
-  // Main Section Tab state
-  const [activeTab, setActiveTab] = useState<SectionTab>("resources");
+const popularTags = [
+  "All Topics",
+  "AI Architecture",
+  "RAG & LLM",
+  "Web Engineering",
+  "DevOps & Automation",
+  "FinTech & Analytics",
+  "Cyber Security"
+];
 
-  // Filter & Search states
+const Resources = () => {
+  // Navigation & Search States
+  const [activeTab, setActiveTab] = useState<SectionTab>("resources");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [activeTag, setActiveTag] = useState<string>("All Topics");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  // Modal states
+  // Bookmarking / Likes State
+  const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [likedBlogs, setLikedBlogs] = useState<Record<string, number>>({});
+  const [copiedLink, setCopiedLink] = useState<boolean>(false);
+
+  // Modals
   const [activeModalResource, setActiveModalResource] = useState<ResourceItem | null>(null);
   const [activeModalBlog, setActiveModalBlog] = useState<BlogItem | null>(null);
   const [activeModalNews, setActiveModalNews] = useState<NewsItem | null>(null);
@@ -329,22 +368,58 @@ const Resources = () => {
   const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
   const [eventRegSuccess, setEventRegSuccess] = useState<boolean>(false);
 
-  // Categories for resources sub-filter
+  // Sub-categories for Resources
   const categories = [
-    { id: "all", label: "All Resources" },
-    { id: "whitepaper", label: "Whitepapers & E-Books" },
+    { id: "all", label: "All Assets" },
+    { id: "whitepaper", label: "Whitepapers" },
     { id: "casestudy", label: "Case Studies" },
-    { id: "guide", label: "Developer Guides" },
-    { id: "template", label: "Templates & Code" },
+    { id: "guide", label: "Guides" },
+    { id: "template", label: "Templates" },
   ];
 
+  // Toggle Bookmark
+  const toggleBookmark = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setBookmarkedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  // Toggle Like
+  const handleLikeBlog = (id: string, currentLikes: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLikedBlogs((prev) => ({
+      ...prev,
+      [id]: (prev[id] || currentLikes) + 1,
+    }));
+  };
+
+  // Filtered Resources
   const filteredResources = resourcesList.filter((item) => {
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
+    const matchesTag = activeTag === "All Topics" || item.tag.toLowerCase().includes(activeTag.toLowerCase());
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.tag.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    return matchesCategory && matchesTag && matchesSearch;
+  });
+
+  // Filtered Blogs
+  const filteredBlogs = blogsList.filter((blog) => {
+    const matchesTag = activeTag === "All Topics" || blog.tag.toLowerCase().includes(activeTag.toLowerCase());
+    const matchesSearch =
+      blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesTag && matchesSearch;
+  });
+
+  // Filtered Events
+  const filteredEvents = eventsList.filter((event) => {
+    const matchesSearch =
+      event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      event.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesSearch;
   });
 
   const featuredResource = resourcesList.find((r) => r.featured) || resourcesList[0];
@@ -371,10 +446,16 @@ const Resources = () => {
     }, 2200);
   };
 
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  };
+
   return (
     <div className="pt-28 pb-20 bg-[#fffaf7] dark:bg-[#0d111a] min-h-screen text-[#182033] dark:text-gray-100 transition-colors duration-300">
       
-      {/* 1. Header Hero Banner */}
+      {/* 1. Hero Banner */}
       <section className="relative overflow-hidden py-10 lg:py-14">
         <div className="container-shell text-center max-w-4xl mx-auto">
           <motion.div
@@ -383,17 +464,42 @@ const Resources = () => {
             transition={{ duration: 0.6 }}
           >
             <span className="eyebrow justify-center">
-              <Sparkles size={16} /> KNOWLEDGE HUB & COMMUNITY
+              <Sparkles size={16} /> KNOWLEDGE HUB & COMMUNITY ASSETS
             </span>
             <h1 className="section-title mt-4 text-4xl sm:text-5xl lg:text-6xl font-black">
-              TechEllixir <span className="text-[#FF4D37]">Hub</span>
+              TechEllixir <span className="text-[#FF4D37]">Resource Hub</span>
             </h1>
             <p className="section-copy mt-4 text-base sm:text-lg max-w-2xl mx-auto">
-              Discover engineering whitepapers, technical blog posts, official news announcements, and live tech events.
+              Explore enterprise whitepapers, AI implementation blueprints, engineering blogs, company news, and live webinars.
             </p>
           </motion.div>
 
-          {/* 2. Main Pill Tab Navigation (Requested UI Feature) */}
+          {/* 2. Interactive Metrics Counter Strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-3xl mx-auto"
+          >
+            <div className="soft-card p-4 rounded-2xl text-center border border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+              <h4 className="text-xl font-black text-[#FF4D37]">50+</h4>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Tech Blueprints</p>
+            </div>
+            <div className="soft-card p-4 rounded-2xl text-center border border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+              <h4 className="text-xl font-black text-[#FF4D37]">25k+</h4>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Asset Downloads</p>
+            </div>
+            <div className="soft-card p-4 rounded-2xl text-center border border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+              <h4 className="text-xl font-black text-[#FF4D37]">100%</h4>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Free Access</p>
+            </div>
+            <div className="soft-card p-4 rounded-2xl text-center border border-gray-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
+              <h4 className="text-xl font-black text-[#FF4D37]">4.9/5</h4>
+              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">Developer Rating</p>
+            </div>
+          </motion.div>
+
+          {/* 3. Main Pill Tab Navigation (Requested UI Feature) */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -449,7 +555,52 @@ const Resources = () => {
         </div>
       </section>
 
-      <div className="container-shell max-w-7xl mx-auto space-y-12">
+      <div className="container-shell max-w-7xl mx-auto space-y-10">
+
+        {/* 4. Universal Search & Topic Chips */}
+        <div className="soft-card rounded-3xl p-6 bg-white/90 dark:bg-slate-900/90 border border-gray-200 dark:border-slate-800 shadow-md">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Search Input */}
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input
+                type="text"
+                placeholder="Search across blueprints, blogs, events..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-800/80 pl-10 pr-10 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white text-xs font-bold"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+
+            {/* Popular Topics Filter Chips */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-bold text-gray-400 mr-1 flex items-center gap-1">
+                <Layers size={14} /> Topic:
+              </span>
+              {popularTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(tag)}
+                  className={`rounded-xl px-3 py-1.5 text-xs font-bold transition cursor-pointer ${
+                    activeTag === tag
+                      ? "bg-[#FF4D37] text-white shadow-sm"
+                      : "bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-700"
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {/* TAB 1: RESOURCES & BLUEPRINTS */}
         {activeTab === "resources" && (
@@ -457,29 +608,18 @@ const Resources = () => {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="space-y-12"
+            className="space-y-10"
           >
-            {/* Search & Category Sub-Bar */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                <input
-                  type="text"
-                  placeholder="Search whitepapers, templates..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] shadow-sm transition"
-                />
-              </div>
-
-              <div className="flex flex-wrap justify-center gap-2 w-full sm:w-auto">
+            {/* Sub-Category Filter Buttons */}
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-slate-800 pb-4">
+              <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
                       selectedCategory === cat.id
-                        ? "bg-[#FF4D37] text-white shadow-md"
+                        ? "bg-[#182033] dark:bg-white text-white dark:text-[#182033] shadow-md"
                         : "bg-white/80 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-300 hover:border-[#FF4D37]"
                     }`}
                   >
@@ -487,16 +627,23 @@ const Resources = () => {
                   </button>
                 ))}
               </div>
+
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 hidden sm:block">
+                Showing {filteredResources.length} Assets
+              </span>
             </div>
 
-            {/* Featured Resource Spotlight */}
-            {selectedCategory === "all" && !searchQuery && (
+            {/* Featured Resource Banner */}
+            {selectedCategory === "all" && !searchQuery && activeTag === "All Topics" && (
               <div className="relative rounded-3xl overflow-hidden border border-[#ffd5ca] dark:border-slate-800 bg-gradient-to-br from-[#FFF5F2] via-white to-[#FFF0EC] dark:from-[#161c2a] dark:via-[#131924] dark:to-[#1a2234] p-8 lg:p-12 shadow-xl">
                 <div className="grid lg:grid-cols-12 gap-8 items-center">
                   <div className="lg:col-span-8 space-y-4">
                     <div className="flex items-center gap-3">
                       <span className="rounded-full bg-[#FF4D37] text-white px-3 py-1 text-xs font-bold uppercase tracking-wider">
-                        Featured Asset
+                        Featured Blueprint
+                      </span>
+                      <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-3 py-1 text-xs font-bold">
+                        {featuredResource.difficulty} Level
                       </span>
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1">
                         <BookOpen size={14} /> {featuredResource.readTime}
@@ -511,13 +658,17 @@ const Resources = () => {
                       {featuredResource.description}
                     </p>
 
-                    <div className="pt-2 flex flex-wrap gap-4">
+                    <div className="pt-2 flex flex-wrap gap-4 items-center">
                       <button
                         onClick={() => setActiveModalResource(featuredResource)}
                         className="brand-button px-6 py-3.5 text-xs font-bold cursor-pointer flex items-center gap-2 shadow-lg"
                       >
-                        <Download size={16} /> Access Free Blueprint
+                        <Download size={16} /> Download Free Blueprint ({featuredResource.fileFormat})
                       </button>
+
+                      <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                        🔥 {featuredResource.downloadsCount}
+                      </span>
                     </div>
                   </div>
 
@@ -530,7 +681,7 @@ const Resources = () => {
                         Format: {featuredResource.fileFormat}
                       </h4>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Free download • No credit card required
+                        Free instant access • PDF & Code
                       </p>
                     </div>
                   </div>
@@ -545,23 +696,36 @@ const Resources = () => {
                   key={item.id}
                   whileHover={{ y: -6, scale: 1.01 }}
                   onClick={() => setActiveModalResource(item)}
-                  className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between transition-shadow duration-300 hover:shadow-xl hover:border-[#ffd5ca] bg-white dark:bg-[#161c2a]"
+                  className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:border-[#ffd5ca] bg-white dark:bg-[#161c2a] relative group"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <span className="rounded-xl bg-[#FFF1EC] dark:bg-slate-800/80 px-3 py-1 text-xs font-bold text-[#FF4D37]">
-                        {item.tag}
-                      </span>
-                      <span className="text-xs font-semibold text-gray-400">
-                        {item.readTime}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-xl bg-[#FFF1EC] dark:bg-slate-800/80 px-3 py-1 text-xs font-bold text-[#FF4D37]">
+                          {item.tag}
+                        </span>
+                        <span className="rounded-lg bg-gray-100 dark:bg-slate-800 px-2 py-0.5 text-[10px] font-bold text-gray-600 dark:text-gray-400">
+                          {item.difficulty}
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={(e) => toggleBookmark(item.id, e)}
+                        className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-[#FF4D37] transition cursor-pointer"
+                        title="Bookmark Resource"
+                      >
+                        <Bookmark
+                          size={16}
+                          className={bookmarkedIds.includes(item.id) ? "fill-[#FF4D37] text-[#FF4D37]" : ""}
+                        />
+                      </button>
                     </div>
 
                     <div className="flex items-start gap-3.5 mt-2">
-                      <div className="p-3 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shrink-0">
+                      <div className="p-3 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shrink-0 text-[#FF4D37]">
                         {item.icon}
                       </div>
-                      <h3 className="text-xl font-bold leading-snug text-[#182033] dark:text-white">
+                      <h3 className="text-xl font-bold leading-snug text-[#182033] dark:text-white group-hover:text-[#FF4D37] transition">
                         {item.title}
                       </h3>
                     </div>
@@ -573,7 +737,7 @@ const Resources = () => {
 
                   <div className="mt-6 border-t border-gray-100 dark:border-slate-800/80 pt-4 flex items-center justify-between">
                     <span className="text-xs font-semibold text-gray-400">
-                      {item.fileFormat}
+                      {item.downloadsCount}
                     </span>
                     <button
                       type="button"
@@ -583,7 +747,7 @@ const Resources = () => {
                       }}
                       className="inline-flex items-center gap-1.5 font-bold text-[#DF3420] text-xs hover:underline cursor-pointer"
                     >
-                      Get Resource <ArrowRight size={14} />
+                      Download <ArrowRight size={14} />
                     </button>
                   </div>
                 </motion.article>
@@ -601,12 +765,12 @@ const Resources = () => {
             className="space-y-8"
           >
             <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-              {blogsList.map((blog) => (
+              {filteredBlogs.map((blog) => (
                 <motion.article
                   key={blog.id}
                   whileHover={{ y: -6, scale: 1.01 }}
                   onClick={() => setActiveModalBlog(blog)}
-                  className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca]"
+                  className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-2xl hover:border-[#ffd5ca] group"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -618,7 +782,7 @@ const Resources = () => {
                       </span>
                     </div>
 
-                    <h3 className="text-xl font-bold leading-snug text-[#182033] dark:text-white mt-2">
+                    <h3 className="text-xl font-bold leading-snug text-[#182033] dark:text-white mt-2 group-hover:text-[#FF4D37] transition">
                       {blog.title}
                     </h3>
 
@@ -632,7 +796,18 @@ const Resources = () => {
                       <User size={14} className="text-[#FF4D37]" />
                       <span>{blog.author}</span>
                     </div>
-                    <span>{blog.date}</span>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={(e) => handleLikeBlog(blog.id, blog.likes, e)}
+                        className="flex items-center gap-1 hover:text-[#FF4D37] transition cursor-pointer"
+                      >
+                        <Star size={14} className="text-amber-400 fill-amber-400" />
+                        <span>{likedBlogs[blog.id] || blog.likes}</span>
+                      </button>
+
+                      <span>{blog.date}</span>
+                    </div>
                   </div>
                 </motion.article>
               ))}
@@ -653,7 +828,7 @@ const Resources = () => {
                 <div
                   key={news.id}
                   onClick={() => setActiveModalNews(news)}
-                  className="soft-card rounded-3xl p-7 cursor-pointer bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca] flex flex-col justify-between"
+                  className="soft-card rounded-3xl p-7 cursor-pointer bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca] flex flex-col justify-between group"
                 >
                   <div>
                     <div className="flex items-center justify-between mb-3">
@@ -665,7 +840,7 @@ const Resources = () => {
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-[#182033] dark:text-white leading-snug mt-2">
+                    <h3 className="text-lg font-bold text-[#182033] dark:text-white leading-snug mt-2 group-hover:text-[#FF4D37] transition">
                       {news.title}
                     </h3>
 
@@ -695,7 +870,7 @@ const Resources = () => {
             className="space-y-8"
           >
             <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-              {eventsList.map((event) => (
+              {filteredEvents.map((event) => (
                 <div
                   key={event.id}
                   className="soft-card rounded-3xl p-7 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 flex flex-col justify-between hover:shadow-xl transition"
@@ -707,7 +882,7 @@ const Resources = () => {
                           ? "bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
                           : "bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400"
                       }`}>
-                        {event.status}
+                        {event.status} {event.seatsLeft ? `• ${event.seatsLeft} seats left` : ""}
                       </span>
                       <span className="text-xs font-semibold text-[#FF4D37] flex items-center gap-1">
                         <Video size={14} /> {event.type}
@@ -751,6 +926,40 @@ const Resources = () => {
             </div>
           </motion.div>
         )}
+
+        {/* 5. Newsletter / Custom Technical Inquiry Box */}
+        <section className="soft-card rounded-3xl p-8 sm:p-12 text-center bg-gradient-to-r from-[#FFFaf7] via-white to-[#FFF3EF] dark:from-[#131924] dark:via-[#161c2a] dark:to-[#1a2234] border border-[#ffd5ca] dark:border-slate-800">
+          <div className="max-w-2xl mx-auto space-y-4">
+            <span className="eyebrow justify-center">STAY AHEAD OF THE CURVE</span>
+            <h3 className="text-2xl sm:text-3xl font-black text-[#182033] dark:text-white">
+              Need a Custom AI Blueprint or Technical Audit?
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              Our engineering team regularly publishes tech whitepapers and open-source starter repos. Subscribe or contact our architects for custom feasibility reports.
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                alert("Thank you! You have been subscribed to TechEllixir technical updates.");
+              }}
+              className="mt-6 flex flex-col sm:flex-row gap-3 max-w-md mx-auto"
+            >
+              <input
+                type="email"
+                required
+                placeholder="Enter work email..."
+                className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3 text-xs font-semibold outline-none focus:border-[#FF4D37]"
+              />
+              <button
+                type="submit"
+                className="brand-button px-6 py-3 text-xs font-bold whitespace-nowrap cursor-pointer"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </section>
 
       </div>
 
@@ -893,7 +1102,15 @@ const Resources = () => {
                 <p>{activeModalBlog.content}</p>
               </div>
 
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-end">
+              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
+                <button
+                  onClick={copyShareLink}
+                  className="flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[#FF4D37] cursor-pointer"
+                >
+                  <Share2 size={16} />
+                  <span>{copiedLink ? "Link Copied!" : "Share Article"}</span>
+                </button>
+
                 <button
                   onClick={() => setActiveModalBlog(null)}
                   className="brand-button px-6 py-2.5 text-xs font-bold cursor-pointer"
