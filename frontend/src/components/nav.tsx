@@ -16,8 +16,8 @@ const indianLanguages = [
   { code: "ur", name: "Urdu (اردو)" },
   { code: "gu", name: "Gujarati (ગુજરાતી)" },
   { code: "kn", name: "Kannada (ಕನ್ನಡ)" },
-  { code: "ml", name: "Malayalam (മലയാളம்)" },
-  { code: "or", name: "Odia (ଓଡ଼ิଆ)" },
+  { code: "ml", name: "Malayalam (മലയാളം)" },
+  { code: "or", name: "Odia (ଓଡ଼ିଆ)" },
   { code: "pa", name: "Punjabi (ਪੰਜਾਬੀ)" },
   { code: "as", name: "Assamese (অসমীয়া)" },
   { code: "mai", name: "Maithili (मैथिली)" },
@@ -55,27 +55,28 @@ const Navbar = () => {
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         isScrolled
           ? "bg-white/92 dark:bg-[#0d111a]/92 shadow-[0_14px_34px_rgba(24,32,51,0.08)] backdrop-blur-xl py-3"
-          : "bg-white/75 dark:bg-[#0d111a]/75 backdrop-blur-xl py-5"
+          : "bg-white/75 dark:bg-[#0d111a]/75 backdrop-blur-xl py-4 sm:py-5"
       }`}
     >
-      <div className="container-shell">
+      <div className="container-shell max-w-7xl mx-auto px-4 sm:px-6">
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
 
+          {/* Logo & Brand Title */}
           <NavLink
             to="/"
             aria-label="TechEllixir home"
-            className="group flex items-center gap-3"
+            className="group flex items-center gap-2.5 shrink-0"
           >
             <motion.img
               src={Logo}
               alt="TechEllixir Logo"
-              className="h-14 w-14 sm:h-16 sm:w-16 object-contain"
-              whileHover={{ rotate: 15, scale: 1.08 }}
+              className="h-10 w-10 sm:h-11 sm:w-11 object-contain"
+              whileHover={{ rotate: 15, scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}
             />
 
-            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight whitespace-nowrap">
               <span className="text-[#FF4D37]">Tech</span>
               <span className="text-[#182033] group-hover:text-[#111827] dark:text-white transition">
                 Ellixir
@@ -83,13 +84,14 @@ const Navbar = () => {
             </h1>
           </NavLink>
 
-          <nav className="hidden lg:flex items-center gap-2 rounded-2xl border border-[#efe6df] dark:border-slate-800 bg-white/70 dark:bg-slate-900/50 p-1 shadow-sm">
+          {/* Desktop Navigation Links */}
+          <nav className="hidden xl:flex items-center gap-1 sm:gap-1.5 rounded-2xl border border-[#efe6df] dark:border-slate-800 bg-white/70 dark:bg-slate-900/50 p-1 shadow-sm shrink-0">
             {menuItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `rounded-xl px-4 py-2 text-sm font-bold transition duration-200 ${
+                  `rounded-xl px-3 sm:px-3.5 py-2 text-xs sm:text-sm font-bold transition duration-200 whitespace-nowrap ${
                     isActive
                       ? "bg-[#FFF1EC] text-[#DF3420]"
                       : "text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-800 hover:text-[#182033] dark:hover:text-white"
@@ -101,7 +103,8 @@ const Navbar = () => {
             ))}
           </nav>
 
-          <div className="hidden lg:flex items-center gap-4">
+          {/* Right Action Controls */}
+          <div className="hidden lg:flex items-center gap-2.5 sm:gap-3 shrink-0">
             {/* Language Selector */}
             <div className="relative flex items-center rounded-xl border border-[#efe6df] dark:border-slate-800 bg-white/70 dark:bg-slate-900/50 px-2 py-1.5 shadow-sm text-sm font-bold text-gray-700 dark:text-gray-200">
               <select
@@ -128,7 +131,7 @@ const Navbar = () => {
 
             <NavLink to="/contact">
               <motion.span
-                className="brand-button px-6 py-3 cursor-pointer text-sm"
+                className="brand-button px-5 sm:px-6 py-2.5 sm:py-3 cursor-pointer text-xs sm:text-sm whitespace-nowrap"
                 whileHover={{ y: -2, scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 transition={{ type: "spring", stiffness: 400, damping: 15 }}
@@ -139,7 +142,8 @@ const Navbar = () => {
             </NavLink>
           </div>
 
-          <div className="flex lg:hidden items-center gap-2">
+          {/* Mobile Hamburger Controls */}
+          <div className="flex xl:hidden items-center gap-2">
             {/* Language Selector */}
             <div className="flex items-center rounded-xl border border-[#efe6df] dark:border-slate-800 bg-white/70 dark:bg-slate-900/50 px-2 py-1 text-xs font-bold text-gray-700 dark:text-gray-200">
               <select
@@ -185,7 +189,7 @@ const Navbar = () => {
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ type: "spring", stiffness: 260, damping: 26 }}
-            className="lg:hidden overflow-hidden"
+            className="xl:hidden overflow-hidden"
           >
             <div className="mx-4 mb-4 rounded-2xl border border-[#efe6df] dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden">
               <motion.nav
