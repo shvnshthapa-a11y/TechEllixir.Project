@@ -10,8 +10,6 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
-  Shield,
-  UserCheck,
 } from "lucide-react";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
 import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
@@ -33,18 +31,6 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
-
-  const fillCredentials = (type: "admin" | "user") => {
-    setErrorMsg("");
-    setSuccessMsg("");
-    if (type === "admin") {
-      setUsernameOrEmail("admin");
-      setPassword("admin@123");
-    } else {
-      setUsernameOrEmail("user");
-      setPassword("user@123");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,45 +107,6 @@ const Auth = () => {
               Access custom AI solutions, full-stack engineering tools, project tracking dashboards, and 24/7 technical support.
             </p>
 
-            {/* Quick Preset Credentials Card */}
-            <div className="rounded-3xl bg-white/90 dark:bg-slate-900/90 p-5 border border-gray-200 dark:border-slate-800 shadow-md space-y-3">
-              <div className="flex items-center gap-2 text-xs font-black uppercase text-gray-400">
-                <Shield size={14} /> Quick Demo Access Credentials
-              </div>
-              
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-orange-50 dark:bg-slate-800 border border-orange-100 dark:border-slate-700">
-                <div>
-                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Admin Portal Access</p>
-                  <p className="text-[11px] text-gray-500">
-                    Username: <code className="font-bold text-[#FF4D37]">admin</code> | Pass: <code className="font-bold text-[#FF4D37]">admin@123</code>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => fillCredentials("admin")}
-                  className="px-3 py-1.5 rounded-xl bg-[#FF4D37] text-white text-[11px] font-bold hover:bg-[#e03d27] transition cursor-pointer"
-                >
-                  Auto Fill
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700">
-                <div>
-                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Normal User Access</p>
-                  <p className="text-[11px] text-gray-500">
-                    Username: <code className="font-bold text-blue-600">user</code> | Pass: <code className="font-bold text-blue-600">user@123</code>
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => fillCredentials("user")}
-                  className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition cursor-pointer"
-                >
-                  Auto Fill
-                </button>
-              </div>
-            </div>
-
             <div className="pt-2 text-xs font-semibold text-gray-400">
               Need assistance? <NavLink to="/contact" className="text-[#FF4D37] hover:underline">Contact our team</NavLink>
             </div>
@@ -214,27 +161,6 @@ const Auth = () => {
                     : "Fill in your details below to get started with our engineering team."}
                 </p>
               </div>
-
-              {/* Quick Fill Preset Buttons (Mobile & Desktop) */}
-              {mode === "login" && (
-                <div className="flex flex-wrap gap-2 mb-6 p-3 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800">
-                  <span className="text-[11px] font-bold text-gray-400 self-center uppercase">Fill Demo:</span>
-                  <button
-                    type="button"
-                    onClick={() => fillCredentials("admin")}
-                    className="px-3 py-1.5 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-[#FF4D37] text-xs font-extrabold border border-orange-200 dark:border-orange-900 hover:bg-orange-200 transition cursor-pointer flex items-center gap-1"
-                  >
-                    <Shield size={13} /> Admin (admin / admin@123)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => fillCredentials("user")}
-                    className="px-3 py-1.5 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 text-xs font-extrabold border border-blue-200 dark:border-blue-900 hover:bg-blue-200 transition cursor-pointer flex items-center gap-1"
-                  >
-                    <UserCheck size={13} /> User (user / user@123)
-                  </button>
-                </div>
-              )}
 
               {/* Social Login Buttons */}
               <div className="grid grid-cols-2 gap-3 mb-6">
