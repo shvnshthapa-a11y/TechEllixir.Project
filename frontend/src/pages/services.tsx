@@ -167,35 +167,30 @@ const OurServices = () => {
       {/* Detail Modal */}
       <AnimatePresence>
         {selectedIndustry && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedIndustry(null)}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md"
+            onClick={() => setSelectedIndustry(null)}
+          >
             {/* Modal Box */}
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              initial={{ scale: 0.95, opacity: 0, y: 25 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ type: "spring", duration: 0.4 }}
-              className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-white dark:bg-[#161c2a] p-8 shadow-2xl border border-gray-100 dark:border-slate-800 z-10"
+              exit={{ scale: 0.95, opacity: 0, y: 25 }}
+              transition={{ type: "spring", stiffness: 320, damping: 26 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative w-full max-w-xl overflow-hidden rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-slate-800 z-10"
             >
               {/* Close button */}
               <button
                 onClick={() => setSelectedIndustry(null)}
-                className="absolute right-6 top-6 rounded-xl border border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-2 text-gray-500 hover:bg-gray-50 dark:hover:bg-slate-800 transition duration-200 cursor-pointer"
+                className="absolute right-6 top-6 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white transition duration-200 cursor-pointer"
                 aria-label="Close modal"
               >
                 <X size={18} />
               </button>
 
-              <div className="flex gap-4 items-center mb-6">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFF1EC] to-[#FFF8F4] dark:from-[#2c1a16] dark:to-[#1c1512] text-[#FF4D37] border border-[#FF4D37]/10 dark:border-[#FF4D37]/20 shrink-0">
+              <div className="flex gap-4 items-center mb-6 border-b border-gray-100 dark:border-slate-800 pb-5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFF1EC] to-[#FFF8F4] dark:from-[#2c1a16] dark:to-[#1c1512] text-[#FF4D37] border border-[#FF4D37]/15 shrink-0">
                   {selectedIndustry.icon}
                 </div>
                 <div>
@@ -205,15 +200,31 @@ const OurServices = () => {
               </div>
 
               <div className="space-y-4">
-                <p className="section-copy text-sm leading-relaxed">
+                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-medium">
                   {selectedIndustry.detailedDesc}
                 </p>
+
+                <div className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/70 dark:bg-slate-900/60 p-4 space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+                    Tailored Industry Outcomes
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
+                    <div className="flex items-center gap-2">
+                      <Rocket size={14} className="text-[#FF4D37]" />
+                      <span>Accelerated Time-to-Market</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users size={14} className="text-[#FF4D37]" />
+                      <span>Custom Workflow Integration</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800 flex gap-3">
                 <button
                   onClick={() => setSelectedIndustry(null)}
-                  className="ghost-button flex-1 px-6 py-3 cursor-pointer text-sm"
+                  className="ghost-button flex-1 px-6 py-3 cursor-pointer text-xs font-bold"
                 >
                   {t("industries.closeBtn")}
                 </button>
@@ -225,7 +236,7 @@ const OurServices = () => {
                     window.dispatchEvent(event);
                     setSelectedIndustry(null);
                   }}
-                  className="brand-button flex-1 px-6 py-3 cursor-pointer text-sm"
+                  className="brand-button flex-1 px-6 py-3 cursor-pointer text-xs font-bold shadow-lg"
                 >
                   {t("industries.inquireBtn")}
                 </button>
