@@ -14,7 +14,6 @@ import {
   BarChart3,
   ShieldCheck,
   Server,
-  Activity,
   Send,
   UserCheck,
   Sparkles,
@@ -245,15 +244,6 @@ export default function Admin() {
                 {authLoading ? "Authenticating..." : "Sign In to Dashboard"}
               </button>
             </form>
-
-            <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4 text-center space-y-1">
-              <p className="text-xs text-gray-400 font-semibold">
-                Admin Username: <code className="bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-[#FF4D37]">admin</code>
-              </p>
-              <p className="text-xs text-gray-400 font-semibold">
-                Admin Password: <code className="bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-[#FF4D37]">admin@123</code>
-              </p>
-            </div>
           </div>
         </div>
       </main>
@@ -269,9 +259,6 @@ export default function Admin() {
           <div>
             <div className="flex items-center gap-2">
               <span className="eyebrow">ADMIN DASHBOARD</span>
-              <span className="rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-3 py-0.5 text-xs font-bold flex items-center gap-1 border border-emerald-200 dark:border-emerald-800">
-                <Activity size={12} /> Server Online (Port 8080)
-              </span>
             </div>
             <h1 className="section-title mt-2 text-3xl sm:text-4xl font-black">
               Lead & System Control Center
