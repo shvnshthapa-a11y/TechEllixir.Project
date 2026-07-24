@@ -206,13 +206,26 @@ export default function Admin() {
             <form onSubmit={handleLogin} className="mt-8 space-y-4">
               <div>
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1.5">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  required
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3.5 text-sm font-bold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
+                  placeholder="admin"
+                  defaultValue="admin"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1.5">
                   Admin Password
                 </label>
                 <input
                   type="password"
                   required
                   className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3.5 text-sm font-bold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
-                  placeholder="Enter admin password..."
+                  placeholder="admin@123"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -233,9 +246,12 @@ export default function Admin() {
               </button>
             </form>
 
-            <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4 text-center">
+            <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4 text-center space-y-1">
               <p className="text-xs text-gray-400 font-semibold">
-                Default password: <code className="bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-[#FF4D37]">admin123</code>
+                Admin Username: <code className="bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-[#FF4D37]">admin</code>
+              </p>
+              <p className="text-xs text-gray-400 font-semibold">
+                Admin Password: <code className="bg-gray-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono text-[#FF4D37]">admin@123</code>
               </p>
             </div>
           </div>

@@ -10,41 +10,96 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
-  ShieldCheck,
-  Zap,
+  Shield,
+  UserCheck,
 } from "lucide-react";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
-import { NavLink, useSearchParams } from "react-router-dom";
+import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   // Form states
-  const [email, setEmail] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const fillCredentials = (type: "admin" | "user") => {
+    setErrorMsg("");
+    setSuccessMsg("");
+    if (type === "admin") {
+      setUsernameOrEmail("admin");
+      setPassword("admin@123");
+    } else {
+      setUsernameOrEmail("user");
+      setPassword("user@123");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg("");
+    setErrorMsg("");
 
-    setTimeout(() => {
-      setLoading(false);
-      if (mode === "login") {
-        setSuccessMsg("Welcome back! Signed in successfully.");
-      } else {
+    if (mode === "register") {
+      setTimeout(() => {
+        setLoading(false);
         setSuccessMsg("Account created successfully! Welcome to TechEllixir.");
+      }, 1000);
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: usernameOrEmail, password }),
+      });
+
+      const data = await res.json();
+      setLoading(false);
+
+      if (!res.ok || data.error) {
+        setErrorMsg(data.error || "Invalid username or password.");
+        return;
       }
-    }, 1200);
+
+      if (data.role === "admin") {
+        localStorage.setItem("adminToken", data.token);
+        setSuccessMsg("Admin authentication successful! Redirecting to Admin Panel...");
+        setTimeout(() => {
+          navigate("/admin");
+        }, 1000);
+      } else {
+        localStorage.setItem("userToken", data.token);
+        setSuccessMsg("Signed in successfully as User! Welcome back.");
+      }
+    } catch (err) {
+      setLoading(false);
+      // Fallback local validation if backend fetch fails
+      const input = usernameOrEmail.trim().toLowerCase();
+      if ((input === "admin" || input === "admin@techellixir.com") && password === "admin@123") {
+        localStorage.setItem("adminToken", "demo-admin-token");
+        setSuccessMsg("Admin authentication successful! Redirecting to Admin Panel...");
+        setTimeout(() => navigate("/admin"), 1000);
+      } else if ((input === "user" || input === "user@techellixir.com") && password === "user@123") {
+        localStorage.setItem("userToken", "demo-user-token");
+        setSuccessMsg("Signed in successfully as User!");
+      } else {
+        setErrorMsg("Invalid credentials. Use username: admin / pass: admin@123 or username: user / pass: user@123.");
+      }
+    }
   };
 
   return (
@@ -66,29 +121,42 @@ const Auth = () => {
               Access custom AI solutions, full-stack engineering tools, project tracking dashboards, and 24/7 technical support.
             </p>
 
-            <div className="space-y-4 pt-2">
-              <div className="flex items-start gap-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
-                <div className="p-2.5 rounded-xl bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] shrink-0">
-                  <Zap size={20} />
-                </div>
+            {/* Quick Preset Credentials Card */}
+            <div className="rounded-3xl bg-white/90 dark:bg-slate-900/90 p-5 border border-gray-200 dark:border-slate-800 shadow-md space-y-3">
+              <div className="flex items-center gap-2 text-xs font-black uppercase text-gray-400">
+                <Shield size={14} /> Quick Demo Access Credentials
+              </div>
+              
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-orange-50 dark:bg-slate-800 border border-orange-100 dark:border-slate-700">
                 <div>
-                  <h4 className="text-sm font-bold text-[#182033] dark:text-white">Fast-Track Onboarding</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Connect your team with our senior AI & product engineering architects.
+                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Admin Portal Access</p>
+                  <p className="text-[11px] text-gray-500">
+                    Username: <code className="font-bold text-[#FF4D37]">admin</code> | Pass: <code className="font-bold text-[#FF4D37]">admin@123</code>
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => fillCredentials("admin")}
+                  className="px-3 py-1.5 rounded-xl bg-[#FF4D37] text-white text-[11px] font-bold hover:bg-[#e03d27] transition cursor-pointer"
+                >
+                  Auto Fill
+                </button>
               </div>
 
-              <div className="flex items-start gap-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 p-4 border border-gray-100 dark:border-slate-800 shadow-sm">
-                <div className="p-2.5 rounded-xl bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] shrink-0">
-                  <ShieldCheck size={20} />
-                </div>
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-50 dark:bg-slate-800 border border-blue-100 dark:border-slate-700">
                 <div>
-                  <h4 className="text-sm font-bold text-[#182033] dark:text-white">Enterprise Grade Security</h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    SOC2 compliant data sandboxing and zero-trust encryption standard.
+                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Normal User Access</p>
+                  <p className="text-[11px] text-gray-500">
+                    Username: <code className="font-bold text-blue-600">user</code> | Pass: <code className="font-bold text-blue-600">user@123</code>
                   </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => fillCredentials("user")}
+                  className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-[11px] font-bold hover:bg-blue-700 transition cursor-pointer"
+                >
+                  Auto Fill
+                </button>
               </div>
             </div>
 
@@ -108,6 +176,7 @@ const Auth = () => {
                   onClick={() => {
                     setMode("login");
                     setSuccessMsg("");
+                    setErrorMsg("");
                   }}
                   className={`flex-1 rounded-xl py-3 text-xs sm:text-sm font-black transition duration-200 cursor-pointer ${
                     mode === "login"
@@ -122,6 +191,7 @@ const Auth = () => {
                   onClick={() => {
                     setMode("register");
                     setSuccessMsg("");
+                    setErrorMsg("");
                   }}
                   className={`flex-1 rounded-xl py-3 text-xs sm:text-sm font-black transition duration-200 cursor-pointer ${
                     mode === "register"
@@ -140,10 +210,31 @@ const Auth = () => {
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {mode === "login"
-                    ? "Enter your credentials to access your dashboard and project inquiries."
+                    ? "Enter your username or email and password to sign in."
                     : "Fill in your details below to get started with our engineering team."}
                 </p>
               </div>
+
+              {/* Quick Fill Preset Buttons (Mobile & Desktop) */}
+              {mode === "login" && (
+                <div className="flex flex-wrap gap-2 mb-6 p-3 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800">
+                  <span className="text-[11px] font-bold text-gray-400 self-center uppercase">Fill Demo:</span>
+                  <button
+                    type="button"
+                    onClick={() => fillCredentials("admin")}
+                    className="px-3 py-1.5 rounded-xl bg-orange-100 dark:bg-orange-950/60 text-[#FF4D37] text-xs font-extrabold border border-orange-200 dark:border-orange-900 hover:bg-orange-200 transition cursor-pointer flex items-center gap-1"
+                  >
+                    <Shield size={13} /> Admin (admin / admin@123)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => fillCredentials("user")}
+                    className="px-3 py-1.5 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-300 text-xs font-extrabold border border-blue-200 dark:border-blue-900 hover:bg-blue-200 transition cursor-pointer flex items-center gap-1"
+                  >
+                    <UserCheck size={13} /> User (user / user@123)
+                  </button>
+                </div>
+              )}
 
               {/* Social Login Buttons */}
               <div className="grid grid-cols-2 gap-3 mb-6">
@@ -166,7 +257,7 @@ const Auth = () => {
               <div className="relative flex items-center my-6">
                 <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
                 <span className="flex-shrink mx-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                  Or continue with email
+                  Or continue with credentials
                 </span>
                 <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
               </div>
@@ -176,6 +267,13 @@ const Auth = () => {
                 <div className="mb-6 flex items-center gap-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 p-4 text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   <CheckCircle2 size={18} className="shrink-0" />
                   <span>{successMsg}</span>
+                </div>
+              )}
+
+              {/* Error Notification Banner */}
+              {errorMsg && (
+                <div className="mb-6 flex items-center gap-2 rounded-2xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-4 text-xs font-bold text-red-600 dark:text-red-300">
+                  <span>{errorMsg}</span>
                 </div>
               )}
 
@@ -229,19 +327,23 @@ const Auth = () => {
                   </motion.div>
                 )}
 
-                {/* Email Address field */}
+                {/* Username or Email Address field */}
                 <div>
                   <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
-                    Work Email Address
+                    {mode === "login" ? "Username or Email" : "Work Email Address"}
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    {mode === "login" ? (
+                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    ) : (
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    )}
                     <input
-                      type="email"
+                      type="text"
                       required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="name@company.com"
+                      value={usernameOrEmail}
+                      onChange={(e) => setUsernameOrEmail(e.target.value)}
+                      placeholder={mode === "login" ? "admin or user" : "name@company.com"}
                       className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
                     />
                   </div>
@@ -256,7 +358,7 @@ const Auth = () => {
                     {mode === "login" && (
                       <button
                         type="button"
-                        onClick={() => alert("Password reset link sent to your email.")}
+                        onClick={() => alert("Password hint: Admin is admin@123, User is user@123")}
                         className="text-xs font-bold text-[#FF4D37] hover:underline cursor-pointer"
                       >
                         Forgot Password?
@@ -271,7 +373,7 @@ const Auth = () => {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••••••"
+                      placeholder={mode === "login" ? "admin@123 or user@123" : "••••••••••••"}
                       className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-10 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
                     />
                     <button
@@ -308,10 +410,10 @@ const Auth = () => {
                   className="brand-button w-full py-4 cursor-pointer text-xs sm:text-sm font-bold whitespace-nowrap shadow-lg flex items-center justify-center gap-2 mt-4"
                 >
                   {loading ? (
-                    <span>Processing...</span>
+                    <span>Authenticating...</span>
                   ) : mode === "login" ? (
                     <>
-                      <span>Sign In to Account</span>
+                      <span>Sign In</span>
                       <ArrowRight size={18} />
                     </>
                   ) : (

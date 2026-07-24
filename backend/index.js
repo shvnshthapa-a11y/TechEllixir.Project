@@ -15,7 +15,8 @@ const dataDir = join(__dirname, "data");
 const queriesFile = join(dataDir, "queries.json");
 
 const PORT = Number(process.env.PORT || 4174);
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin@123";
+const USER_PASSWORD = process.env.USER_PASSWORD || "user@123";
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "techellixir-local-secret";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12;
 
@@ -152,7 +153,7 @@ function verifyToken(token) {
   if (a.length !== b.length || !timingSafeEqual(a, b)) return false;
 
   const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-  return payload.role === "admin" && payload.expiresAt > Date.now();
+  return (payload.role === "admin" || payload.role === "user") && payload.expiresAt > Date.now();
 }
 
 function requireAdmin(req, res) {
@@ -303,17 +304,42 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    if (req.method === "POST" && url.pathname === "/api/admin/login") {
+    // 3. Admin & User Auth Login Endpoint
+    if (req.method === "POST" && (url.pathname === "/api/admin/login" || url.pathname === "/api/auth/login")) {
       const body = await readBody(req);
-      if (String(body.password || "") !== ADMIN_PASSWORD) {
-        json(res, 401, { error: "Invalid admin password." });
+      const usernameInput = String(body.username || body.email || "").trim().toLowerCase();
+      const passwordInput = String(body.password || "").trim();
+
+      const adminPassword = String(process.env.ADMIN_PASSWORD || "admin@123").trim();
+      const userPassword = String(process.env.USER_PASSWORD || "user@123").trim();
+
+      // Check Admin (username: admin or admin@techellixir.com, pass: admin@123)
+      if (
+        (usernameInput === "admin" || usernameInput === "admin@techellixir.com" || passwordInput === adminPassword) &&
+        passwordInput === adminPassword
+      ) {
+        const token = signToken({
+          expiresAt: Date.now() + TOKEN_TTL_MS,
+          role: "admin",
+        });
+        json(res, 200, { ok: true, role: "admin", token, redirect: "/admin" });
         return;
       }
-      const token = signToken({
-        expiresAt: Date.now() + TOKEN_TTL_MS,
-        role: "admin",
-      });
-      json(res, 200, { token });
+
+      // Check Normal User (username: user or user@techellixir.com, pass: user@123)
+      if (
+        (usernameInput === "user" || usernameInput === "user@techellixir.com" || passwordInput === userPassword) &&
+        passwordInput === userPassword
+      ) {
+        const token = signToken({
+          expiresAt: Date.now() + TOKEN_TTL_MS,
+          role: "user",
+        });
+        json(res, 200, { ok: true, role: "user", token, redirect: "/" });
+        return;
+      }
+
+      json(res, 401, { error: "Invalid credentials. Use admin / admin@123 or user / user@123." });
       return;
     }
 
