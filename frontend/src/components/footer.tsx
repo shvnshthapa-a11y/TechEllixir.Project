@@ -35,6 +35,7 @@ const Footer = () => {
     [t("nav.services"), "/services"],
     [t("nav.career"), "/career"],
     [t("nav.contact"), "/contact"],
+    ["Admin Portal", "/admin"],
   ];
 
   const servicesList = [
