@@ -145,8 +145,10 @@ export default function Admin() {
 
   const handleLogout = () => {
     localStorage.removeItem("adminToken");
-    setToken("");
-    setQueries([]);
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userName");
+    window.location.href = "/auth";
   };
 
   const handleStatusChange = async (id: string, status: QueryStatus) => {
