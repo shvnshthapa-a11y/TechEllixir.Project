@@ -67,15 +67,15 @@ const Auth = () => {
         localStorage.setItem("adminToken", data.token);
         setSuccessMsg("Admin authentication successful! Redirecting to Admin Panel...");
         setTimeout(() => {
-          navigate("/admin");
-        }, 1000);
+          window.location.href = "/admin";
+        }, 800);
       } else {
         localStorage.setItem("userToken", data.token);
         localStorage.setItem("userEmail", input || "user@techellixir.com");
         setSuccessMsg("Signed in successfully! Redirecting to Home Page...");
         setTimeout(() => {
-          navigate("/");
-        }, 1000);
+          window.location.href = "/";
+        }, 800);
       }
     } catch (err) {
       setLoading(false);
@@ -83,12 +83,12 @@ const Auth = () => {
       if ((input === "admin" || input === "admin@techellixir.com") && password === "admin@123") {
         localStorage.setItem("adminToken", "demo-admin-token");
         setSuccessMsg("Admin authentication successful! Redirecting to Admin Panel...");
-        setTimeout(() => navigate("/admin"), 1000);
+        setTimeout(() => { window.location.href = "/admin"; }, 800);
       } else if ((input === "user" || input === "user@techellixir.com" || input.length > 0) && (password === "user@123" || password.length > 0)) {
         localStorage.setItem("userToken", "demo-user-token");
         localStorage.setItem("userEmail", input || "user@techellixir.com");
         setSuccessMsg("Signed in successfully! Redirecting to Home Page...");
-        setTimeout(() => navigate("/"), 1000);
+        setTimeout(() => { window.location.href = "/"; }, 800);
       } else {
         setErrorMsg("Invalid credentials. Use admin / admin@123 or user / user@123.");
       }

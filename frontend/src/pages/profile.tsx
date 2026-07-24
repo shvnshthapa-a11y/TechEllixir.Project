@@ -10,10 +10,9 @@ import {
   Award,
   ArrowRight,
 } from "lucide-react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const Profile = () => {
-  const navigate = useNavigate();
   const isAdmin = Boolean(localStorage.getItem("adminToken"));
   const userEmail = localStorage.getItem("userEmail") || (isAdmin ? "admin@techellixir.com" : "user@techellixir.com");
   const userName = localStorage.getItem("userName") || (isAdmin ? "Administrator" : userEmail.split("@")[0]);
@@ -25,7 +24,7 @@ const Profile = () => {
     localStorage.removeItem("userToken");
     localStorage.removeItem("userEmail");
     localStorage.removeItem("userName");
-    navigate("/auth");
+    window.location.href = "/auth";
   };
 
   const handleSaveProfile = (e: React.FormEvent) => {
