@@ -4,6 +4,7 @@ import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Resend } from "resend";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const projectRoot = resolve(__dirname, "..");
@@ -15,6 +16,10 @@ const PORT = Number(process.env.PORT || 4174);
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "techellixir-local-secret";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12;
+
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@techellixir.com";
+const resend = RESEND_API_KEY && !RESEND_API_KEY.includes("your_resend") ? new Resend(RESEND_API_KEY) : null;
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
@@ -143,6 +148,33 @@ async function handleApi(req, res, url) {
       const queries = await readQueries();
       queries.unshift(normalized.query);
       await writeQueries(queries);
+
+      // Dispatch Resend Email if configured
+      if (resend) {
+        try {
+          await resend.emails.send({
+            from: "TechEllixir Leads <onboarding@resend.dev>",
+            to: [ADMIN_EMAIL],
+            subject: `[TechEllixir Demo Request] ${normalized.query.subject}`,
+            html: `
+              <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+                <h2 style="color: #FF4D37;">New Lead / Demo Request</h2>
+                <p><strong>Full Name:</strong> ${normalized.query.fullName}</p>
+                <p><strong>Email:</strong> ${normalized.query.email}</p>
+                <p><strong>Subject:</strong> ${normalized.query.subject}</p>
+                <p><strong>Message:</strong></p>
+                <blockquote style="background: #f9f9f9; padding: 15px; border-left: 4px solid #FF4D37; margin: 10px 0;">
+                  ${normalized.query.message}
+                </blockquote>
+                <p style="font-size: 12px; color: #888;">Submitted at: ${normalized.query.createdAt}</p>
+              </div>
+            `,
+          });
+        } catch (err) {
+          console.error("Resend email dispatch error:", err);
+        }
+      }
+
       json(res, 201, { query: normalized.query });
       return;
     }
@@ -177,7 +209,7 @@ async function handleApi(req, res, url) {
       if (!requireAdmin(req, res)) return;
       const id = queryMatch[1];
       const queries = await readQueries();
-      const index = queries.findIndex((query) => query.id === id);
+      const index = queries.findIndex((q) => q.id === id);
       if (index === -1) {
         notFound(res);
         return;
@@ -185,14 +217,15 @@ async function handleApi(req, res, url) {
 
       if (req.method === "PATCH") {
         const body = await readBody(req);
-        const allowed = new Set(["new", "in-progress", "resolved", "archived"]);
-        if (!allowed.has(body.status)) {
-          json(res, 400, { error: "Invalid status." });
+        const validStatuses = ["new", "in_progress", "resolved"];
+        if (body.status && !validStatuses.includes(body.status)) {
+          json(res, 400, { error: "Invalid status value." });
           return;
         }
+
         queries[index] = {
           ...queries[index],
-          status: body.status,
+          ...(body.status ? { status: body.status } : {}),
           updatedAt: new Date().toISOString(),
         };
         await writeQueries(queries);
@@ -201,56 +234,60 @@ async function handleApi(req, res, url) {
       }
 
       if (req.method === "DELETE") {
-        const [deleted] = queries.splice(index, 1);
+        const deleted = queries.splice(index, 1)[0];
         await writeQueries(queries);
         json(res, 200, { query: deleted });
         return;
       }
+
+      notFound(res);
+      return;
     }
 
     notFound(res);
   } catch (error) {
-    json(res, 500, { error: error instanceof Error ? error.message : "Server error" });
+    console.error("API error:", error);
+    json(res, 500, { error: "Internal server error." });
   }
 }
 
-async function serveStatic(req, res, url) {
-  const requestedPath = url.pathname === "/" ? "/index.html" : url.pathname;
-  const cleanPath = requestedPath.replace(/^\/+/, "");
-  const filePath = resolve(distDir, cleanPath);
-  const isInsideDist = filePath.startsWith(distDir);
-
+async function serveStatic(res, filePath) {
   try {
-    if (!isInsideDist) throw new Error("Invalid path");
     const fileStat = await stat(filePath);
-    if (!fileStat.isFile()) throw new Error("Not a file");
-    res.writeHead(200, {
-      "content-type": mimeTypes[extname(filePath)] || "application/octet-stream",
-    });
+    if (!fileStat.isFile()) {
+      notFound(res);
+      return;
+    }
+    const ext = extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || "application/octet-stream";
+    res.writeHead(200, { "content-type": contentType });
     createReadStream(filePath).pipe(res);
   } catch {
-    const fallback = join(distDir, "index.html");
+    const fallbackPath = join(distDir, "index.html");
     try {
-      await stat(fallback);
       res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      createReadStream(fallback).pipe(res);
+      createReadStream(fallbackPath).pipe(res);
     } catch {
-      json(res, 404, {
-        error: "Frontend build not found. Run npm run build before starting the backend.",
-      });
+      notFound(res);
     }
   }
 }
 
 const server = createServer(async (req, res) => {
-  const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  try {
+    const url = new URL(req.url || "/", `http://${req.headers.host}`);
+    if (url.pathname.startsWith("/api/")) {
+      await handleApi(req, res, url);
+      return;
+    }
 
-  if (url.pathname.startsWith("/api/")) {
-    await handleApi(req, res, url);
-    return;
+    const relativePath = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
+    const targetPath = join(distDir, relativePath);
+    await serveStatic(res, targetPath);
+  } catch (error) {
+    console.error("Server error:", error);
+    json(res, 500, { error: "Internal server error." });
   }
-
-  await serveStatic(req, res, url);
 });
 
 server.listen(PORT, () => {
