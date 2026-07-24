@@ -69,7 +69,11 @@ const Auth = () => {
         }, 1000);
       } else {
         localStorage.setItem("userToken", data.token);
-        setSuccessMsg("Signed in successfully as User! Welcome back.");
+        localStorage.setItem("userEmail", usernameOrEmail);
+        setSuccessMsg("Signed in successfully! Redirecting to Home Page...");
+        setTimeout(() => {
+          navigate("/");
+        }, 1000);
       }
     } catch (err) {
       setLoading(false);
@@ -81,7 +85,9 @@ const Auth = () => {
         setTimeout(() => navigate("/admin"), 1000);
       } else if ((input === "user" || input === "user@techellixir.com") && password === "user@123") {
         localStorage.setItem("userToken", "demo-user-token");
-        setSuccessMsg("Signed in successfully as User!");
+        localStorage.setItem("userEmail", "user@techellixir.com");
+        setSuccessMsg("Signed in successfully! Redirecting to Home Page...");
+        setTimeout(() => navigate("/"), 1000);
       } else {
         setErrorMsg("Invalid credentials. Use username: admin / pass: admin@123 or username: user / pass: user@123.");
       }
