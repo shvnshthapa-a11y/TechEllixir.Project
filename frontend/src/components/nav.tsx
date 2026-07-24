@@ -129,7 +129,7 @@ const Navbar = () => {
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            <NavLink to="/contact">
+            <NavLink to="/auth">
               <motion.span
                 className="brand-button px-5 sm:px-6 py-2.5 sm:py-3 cursor-pointer text-xs sm:text-sm whitespace-nowrap"
                 whileHover={{ y: -2, scale: 1.02 }}

@@ -10,6 +10,7 @@ import Resources from "./pages/resources";
 import Contact from "./pages/contact";
 import Career from "./pages/career";
 import Admin from "./pages/admin";
+import Auth from "./pages/auth";
 
 function App() {
   return (
@@ -24,7 +25,9 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career/>}/>
         <Route path="/admin" element={<Admin />} />
-  
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/register" element={<Auth />} />
       </Routes>
 
       <Footer />
