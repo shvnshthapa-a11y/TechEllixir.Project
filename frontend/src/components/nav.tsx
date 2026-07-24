@@ -129,17 +129,50 @@ const Navbar = () => {
               {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
             </button>
 
-            <NavLink to="/auth">
-              <motion.span
-                className="brand-button px-5 sm:px-6 py-2.5 sm:py-3 cursor-pointer text-xs sm:text-sm whitespace-nowrap"
-                whileHover={{ y: -2, scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                transition={{ type: "spring", stiffness: 400, damping: 15 }}
-              >
-                {t("nav.getStarted")}
-                <ArrowRight size={18} />
-              </motion.span>
-            </NavLink>
+            {localStorage.getItem("adminToken") ? (
+              <div className="flex items-center gap-2">
+                <NavLink to="/admin" className="brand-button px-4 py-2 text-xs font-bold whitespace-nowrap">
+                  Admin Portal
+                </NavLink>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("adminToken");
+                    window.location.href = "/auth";
+                  }}
+                  className="ghost-button px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : localStorage.getItem("userToken") ? (
+              <div className="flex items-center gap-2">
+                <span className="hidden sm:inline-block text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                  Logged In ({localStorage.getItem("userEmail")?.split("@")[0] || "User"})
+                </span>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem("userToken");
+                    localStorage.removeItem("userEmail");
+                    window.location.href = "/auth";
+                  }}
+                  className="ghost-button px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <NavLink to="/auth">
+                <motion.span
+                  className="brand-button px-5 sm:px-6 py-2.5 sm:py-3 cursor-pointer text-xs sm:text-sm whitespace-nowrap"
+                  whileHover={{ y: -2, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                >
+                  {t("nav.getStarted")}
+                  <ArrowRight size={18} />
+                </motion.span>
+              </NavLink>
+            )}
           </div>
 
           {/* Mobile Hamburger Controls */}

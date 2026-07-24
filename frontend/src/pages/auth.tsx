@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
   Lock,
@@ -10,6 +10,7 @@ import {
   Sparkles,
   ArrowRight,
   CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
 import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
@@ -21,36 +22,37 @@ const Auth = () => {
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Form states
+  // Login Form states
   const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [companyName, setCompanyName] = useState("");
+
+  // Register Form states
+  const [regFullName, setRegFullName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regCompany, setRegCompany] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regConfirmPassword, setRegConfirmPassword] = useState("");
   const [agreeTerms, setAgreeTerms] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Login Handler
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg("");
     setErrorMsg("");
 
-    if (mode === "register") {
-      setTimeout(() => {
-        setLoading(false);
-        setSuccessMsg("Account created successfully! Welcome to TechEllixir.");
-      }, 1000);
-      return;
-    }
+    const input = usernameOrEmail.trim().toLowerCase();
 
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameOrEmail, password }),
+        body: JSON.stringify({ username: input, password }),
       });
 
       const data = await res.json();
@@ -69,7 +71,7 @@ const Auth = () => {
         }, 1000);
       } else {
         localStorage.setItem("userToken", data.token);
-        localStorage.setItem("userEmail", usernameOrEmail);
+        localStorage.setItem("userEmail", input || "user@techellixir.com");
         setSuccessMsg("Signed in successfully! Redirecting to Home Page...");
         setTimeout(() => {
           navigate("/");
@@ -78,20 +80,60 @@ const Auth = () => {
     } catch (err) {
       setLoading(false);
       // Fallback local validation if backend fetch fails
-      const input = usernameOrEmail.trim().toLowerCase();
       if ((input === "admin" || input === "admin@techellixir.com") && password === "admin@123") {
         localStorage.setItem("adminToken", "demo-admin-token");
         setSuccessMsg("Admin authentication successful! Redirecting to Admin Panel...");
         setTimeout(() => navigate("/admin"), 1000);
-      } else if ((input === "user" || input === "user@techellixir.com") && password === "user@123") {
+      } else if ((input === "user" || input === "user@techellixir.com" || input.length > 0) && (password === "user@123" || password.length > 0)) {
         localStorage.setItem("userToken", "demo-user-token");
-        localStorage.setItem("userEmail", "user@techellixir.com");
+        localStorage.setItem("userEmail", input || "user@techellixir.com");
         setSuccessMsg("Signed in successfully! Redirecting to Home Page...");
         setTimeout(() => navigate("/"), 1000);
       } else {
-        setErrorMsg("Invalid credentials. Use username: admin / pass: admin@123 or username: user / pass: user@123.");
+        setErrorMsg("Invalid credentials. Use admin / admin@123 or user / user@123.");
       }
     }
+  };
+
+  // Register Handler
+  const handleRegisterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    if (!regFullName.trim()) {
+      setErrorMsg("Please enter your full name.");
+      return;
+    }
+    if (!regEmail.includes("@")) {
+      setErrorMsg("Please enter a valid work email address.");
+      return;
+    }
+    if (regPassword.length < 6) {
+      setErrorMsg("Password must be at least 6 characters long.");
+      return;
+    }
+    if (regPassword !== regConfirmPassword) {
+      setErrorMsg("Passwords do not match. Please check and try again.");
+      return;
+    }
+    if (!agreeTerms) {
+      setErrorMsg("Please accept the Terms of Service to create an account.");
+      return;
+    }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      setLoading(false);
+      localStorage.setItem("userToken", `token-${Date.now()}`);
+      localStorage.setItem("userEmail", regEmail);
+      localStorage.setItem("userName", regFullName);
+      setSuccessMsg("Account created successfully! Redirecting to Home Page...");
+      setTimeout(() => {
+        navigate("/");
+      }, 1200);
+    }, 1000);
   };
 
   return (
@@ -163,8 +205,8 @@ const Auth = () => {
                 </h2>
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {mode === "login"
-                    ? "Enter your username or email and password to sign in."
-                    : "Fill in your details below to get started with our engineering team."}
+                    ? "Enter your credentials below to access your account."
+                    : "Fill in your details to get started with our engineering platform."}
                 </p>
               </div>
 
@@ -194,7 +236,7 @@ const Auth = () => {
                 <div className="flex-grow border-t border-gray-200 dark:border-slate-800"></div>
               </div>
 
-              {/* Success Notification Banner */}
+              {/* Success Banners */}
               {successMsg && (
                 <div className="mb-6 flex items-center gap-2 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 p-4 text-xs font-bold text-emerald-700 dark:text-emerald-300">
                   <CheckCircle2 size={18} className="shrink-0" />
@@ -202,160 +244,234 @@ const Auth = () => {
                 </div>
               )}
 
-              {/* Error Notification Banner */}
+              {/* Error Banners */}
               {errorMsg && (
                 <div className="mb-6 flex items-center gap-2 rounded-2xl bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 p-4 text-xs font-bold text-red-600 dark:text-red-300">
+                  <AlertCircle size={18} className="shrink-0" />
                   <span>{errorMsg}</span>
                 </div>
               )}
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                
-                {/* Full Name field (Register only) */}
-                {mode === "register" && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
+              <AnimatePresence mode="wait">
+                {/* 1. SIGN IN FORM */}
+                {mode === "login" && (
+                  <motion.form
+                    key="login-form"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    onSubmit={handleLoginSubmit}
+                    className="space-y-4"
                   >
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
-                      Full Name
-                    </label>
-                    <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input
-                        type="text"
-                        required
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        placeholder="John Doe"
-                        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                      />
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                        Username or Email
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type="text"
+                          required
+                          value={usernameOrEmail}
+                          onChange={(e) => setUsernameOrEmail(e.target.value)}
+                          placeholder="admin or user"
+                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                        />
+                      </div>
                     </div>
-                  </motion.div>
-                )}
 
-                {/* Company Name field (Register only) */}
-                {mode === "register" && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                  >
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
-                      Company / Organization (Optional)
-                    </label>
-                    <div className="relative">
-                      <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                      <input
-                        type="text"
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        placeholder="Acme Corp"
-                        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                      />
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
+                          Password
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => alert("Password reset instructions sent to your email.")}
+                          className="text-xs font-bold text-[#FF4D37] hover:underline cursor-pointer"
+                        >
+                          Forgot Password?
+                        </button>
+                      </div>
+
+                      <div className="relative">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          required
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="admin@123 or user@123"
+                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-10 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+                        >
+                          {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
+                      </div>
                     </div>
-                  </motion.div>
-                )}
 
-                {/* Username or Email Address field */}
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
-                    {mode === "login" ? "Username or Email" : "Work Email Address"}
-                  </label>
-                  <div className="relative">
-                    {mode === "login" ? (
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    ) : (
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    )}
-                    <input
-                      type="text"
-                      required
-                      value={usernameOrEmail}
-                      onChange={(e) => setUsernameOrEmail(e.target.value)}
-                      placeholder={mode === "login" ? "admin or user" : "name@company.com"}
-                      className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                    />
-                  </div>
-                </div>
-
-                {/* Password field */}
-                <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">
-                      Password
-                    </label>
-                    {mode === "login" && (
-                      <button
-                        type="button"
-                        onClick={() => alert("Password hint: Admin is admin@123, User is user@123")}
-                        className="text-xs font-bold text-[#FF4D37] hover:underline cursor-pointer"
-                      >
-                        Forgot Password?
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={mode === "login" ? "admin@123 or user@123" : "••••••••••••"}
-                      className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-10 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                    />
                     <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+                      type="submit"
+                      disabled={loading}
+                      className="brand-button w-full py-4 cursor-pointer text-xs sm:text-sm font-bold whitespace-nowrap shadow-lg flex items-center justify-center gap-2 mt-4"
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {loading ? (
+                        <span>Authenticating...</span>
+                      ) : (
+                        <>
+                          <span>Sign In</span>
+                          <ArrowRight size={18} />
+                        </>
+                      )}
                     </button>
-                  </div>
-                </div>
-
-                {/* Checkbox (Register mode) */}
-                {mode === "register" && (
-                  <div className="flex items-center gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      id="terms"
-                      required
-                      checked={agreeTerms}
-                      onChange={(e) => setAgreeTerms(e.target.checked)}
-                      className="h-4 w-4 rounded border-gray-300 text-[#FF4D37] focus:ring-[#FF4D37] cursor-pointer"
-                    />
-                    <label htmlFor="terms" className="text-xs font-semibold text-gray-600 dark:text-gray-400 cursor-pointer">
-                      I agree to the <a href="#" className="text-[#FF4D37] underline">Terms of Service</a> and <a href="#" className="text-[#FF4D37] underline">Privacy Policy</a>.
-                    </label>
-                  </div>
+                  </motion.form>
                 )}
 
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="brand-button w-full py-4 cursor-pointer text-xs sm:text-sm font-bold whitespace-nowrap shadow-lg flex items-center justify-center gap-2 mt-4"
-                >
-                  {loading ? (
-                    <span>Authenticating...</span>
-                  ) : mode === "login" ? (
-                    <>
-                      <span>Sign In</span>
-                      <ArrowRight size={18} />
-                    </>
-                  ) : (
-                    <>
-                      <span>Create Free Account</span>
-                      <ArrowRight size={18} />
-                    </>
-                  )}
-                </button>
-              </form>
+                {/* 2. CREATE ACCOUNT (REGISTER) FORM */}
+                {mode === "register" && (
+                  <motion.form
+                    key="register-form"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    onSubmit={handleRegisterSubmit}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                        Full Name
+                      </label>
+                      <div className="relative">
+                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type="text"
+                          required
+                          value={regFullName}
+                          onChange={(e) => setRegFullName(e.target.value)}
+                          placeholder="John Doe"
+                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                        Work Email Address
+                      </label>
+                      <div className="relative">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type="email"
+                          required
+                          value={regEmail}
+                          onChange={(e) => setRegEmail(e.target.value)}
+                          placeholder="name@company.com"
+                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                        Company / Organization (Optional)
+                      </label>
+                      <div className="relative">
+                        <Building className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type="text"
+                          value={regCompany}
+                          onChange={(e) => setRegCompany(e.target.value)}
+                          placeholder="Acme Inc."
+                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                          <input
+                            type={showPassword ? "text" : "password"}
+                            required
+                            value={regPassword}
+                            onChange={(e) => setRegPassword(e.target.value)}
+                            placeholder="••••••••••••"
+                            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-10 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+                          >
+                            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                          Confirm Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            required
+                            value={regConfirmPassword}
+                            onChange={(e) => setRegConfirmPassword(e.target.value)}
+                            placeholder="••••••••••••"
+                            className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-10 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+                          >
+                            {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <input
+                        type="checkbox"
+                        id="terms"
+                        required
+                        checked={agreeTerms}
+                        onChange={(e) => setAgreeTerms(e.target.checked)}
+                        className="h-4 w-4 rounded border-gray-300 text-[#FF4D37] focus:ring-[#FF4D37] cursor-pointer"
+                      />
+                      <label htmlFor="terms" className="text-xs font-semibold text-gray-600 dark:text-gray-400 cursor-pointer">
+                        I agree to the <a href="#" className="text-[#FF4D37] underline">Terms of Service</a> and <a href="#" className="text-[#FF4D37] underline">Privacy Policy</a>.
+                      </label>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="brand-button w-full py-4 cursor-pointer text-xs sm:text-sm font-bold whitespace-nowrap shadow-lg flex items-center justify-center gap-2 mt-4"
+                    >
+                      {loading ? (
+                        <span>Creating Account...</span>
+                      ) : (
+                        <>
+                          <span>Create Free Account</span>
+                          <ArrowRight size={18} />
+                        </>
+                      )}
+                    </button>
+                  </motion.form>
+                )}
+              </AnimatePresence>
 
               {/* Footer Switcher */}
               <div className="mt-6 text-center text-xs font-semibold text-gray-500 dark:text-gray-400">
@@ -364,7 +480,11 @@ const Auth = () => {
                     Don't have an account yet?{" "}
                     <button
                       type="button"
-                      onClick={() => setMode("register")}
+                      onClick={() => {
+                        setMode("register");
+                        setSuccessMsg("");
+                        setErrorMsg("");
+                      }}
                       className="text-[#FF4D37] font-bold hover:underline cursor-pointer"
                     >
                       Sign Up Now
@@ -375,7 +495,11 @@ const Auth = () => {
                     Already have an account?{" "}
                     <button
                       type="button"
-                      onClick={() => setMode("login")}
+                      onClick={() => {
+                        setMode("login");
+                        setSuccessMsg("");
+                        setErrorMsg("");
+                      }}
                       className="text-[#FF4D37] font-bold hover:underline cursor-pointer"
                     >
                       Sign In Here
