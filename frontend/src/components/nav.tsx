@@ -70,12 +70,12 @@ const Navbar = () => {
             <motion.img
               src={Logo}
               alt="TechEllixir Logo"
-              className="h-10 w-10 sm:h-12 sm:w-12 object-contain"
-              whileHover={{ rotate: 15, scale: 1.05 }}
+              className="h-14 w-14 sm:h-16 sm:w-16 object-contain"
+              whileHover={{ rotate: 15, scale: 1.08 }}
               transition={{ type: "spring", stiffness: 300, damping: 15 }}
             />
 
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
               <span className="text-[#FF4D37]">Tech</span>
               <span className="text-[#182033] group-hover:text-[#111827] dark:text-white transition">
                 Ellixir
