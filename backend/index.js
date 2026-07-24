@@ -6,6 +6,7 @@ import { createServer } from "node:http";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const projectRoot = resolve(__dirname, "..");
@@ -29,6 +30,58 @@ function getResendClient() {
     console.error("Resend init error:", err);
     return null;
   }
+}
+
+function getNodemailerTransporter() {
+  const user = String(process.env.GMAIL_USER || "").trim();
+  const pass = String(process.env.GMAIL_APP_PASSWORD || "").trim();
+  if (!user || !pass || user.includes("your_email")) return null;
+  try {
+    return nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
+    });
+  } catch (err) {
+    console.error("Nodemailer init error:", err);
+    return null;
+  }
+}
+
+async function dispatchEmail({ to, subject, html }) {
+  // 1. Try Nodemailer Gmail SMTP if configured
+  const transporter = getNodemailerTransporter();
+  if (transporter) {
+    try {
+      const sender = String(process.env.GMAIL_USER || "").trim();
+      await transporter.sendMail({
+        from: `TechEllixir Platform <${sender}>`,
+        to: Array.isArray(to) ? to.join(", ") : to,
+        subject,
+        html,
+      });
+      return "gmail_smtp_dispatched";
+    } catch (err) {
+      console.error("Gmail SMTP dispatch error:", err);
+    }
+  }
+
+  // 2. Try Resend API
+  const resendClient = getResendClient();
+  if (resendClient) {
+    try {
+      await resendClient.emails.send({
+        from: "TechEllixir Leads <onboarding@resend.dev>",
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html,
+      });
+      return "resend_dispatched";
+    } catch (err) {
+      console.error("Resend API dispatch error:", err);
+    }
+  }
+
+  return "not_configured";
 }
 
 const mimeTypes = {
@@ -160,37 +213,24 @@ async function handleApi(req, res, url) {
       queries.unshift(normalized.query);
       await writeQueries(queries);
 
-      // Safe Resend Email Dispatch
-      let emailStatus = "not_configured";
-      const resendClient = getResendClient();
-
-      if (resendClient) {
-        try {
-          const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
-          await resendClient.emails.send({
-            from: "TechEllixir Leads <onboarding@resend.dev>",
-            to: [adminEmail],
-            subject: `[TechEllixir Demo Request] ${normalized.query.subject}`,
-            html: `
-              <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
-                <h2 style="color: #FF4D37;">New Lead / Demo Request</h2>
-                <p><strong>Full Name:</strong> ${normalized.query.fullName}</p>
-                <p><strong>Email:</strong> ${normalized.query.email}</p>
-                <p><strong>Subject:</strong> ${normalized.query.subject}</p>
-                <p><strong>Message:</strong></p>
-                <blockquote style="background: #f9f9f9; padding: 15px; border-left: 4px solid #FF4D37; margin: 10px 0;">
-                  ${normalized.query.message}
-                </blockquote>
-                <p style="font-size: 12px; color: #888;">Submitted at: ${normalized.query.createdAt}</p>
-              </div>
-            `,
-          });
-          emailStatus = "dispatched";
-        } catch (err) {
-          console.error("Resend email dispatch error:", err);
-          emailStatus = "failed";
-        }
-      }
+      const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      const emailStatus = await dispatchEmail({
+        to: adminEmail,
+        subject: `[TechEllixir Demo Request] ${normalized.query.subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">New Lead / Demo Request</h2>
+            <p><strong>Full Name:</strong> ${normalized.query.fullName}</p>
+            <p><strong>Email:</strong> ${normalized.query.email}</p>
+            <p><strong>Subject:</strong> ${normalized.query.subject}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="background: #f9f9f9; padding: 15px; border-left: 4px solid #FF4D37; margin: 10px 0;">
+              ${normalized.query.message}
+            </blockquote>
+            <p style="font-size: 12px; color: #888;">Submitted at: ${normalized.query.createdAt}</p>
+          </div>
+        `,
+      });
 
       json(res, 201, { query: normalized.query, emailStatus });
       return;
@@ -223,61 +263,43 @@ async function handleApi(req, res, url) {
       queries.unshift(newQuery);
       await writeQueries(queries);
 
-      const resendClient = getResendClient();
-      let emailStatus = "not_configured";
+      // Send download link directly to user email
+      const userEmailStatus = await dispatchEmail({
+        to: userEmail,
+        subject: `[TechEllixir Access Link] ${resourceTitle}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 24px; color: #182033; max-width: 600px; margin: 0 auto; border: 1px solid #ffd5ca; border-radius: 16px;">
+            <h2 style="color: #FF4D37; margin-top: 0;">TechEllixir Resource Blueprint Access</h2>
+            <p>Hello,</p>
+            <p>Thank you for requesting instant access to <strong>${resourceTitle}</strong> (${fileFormat}).</p>
+            <div style="background: #FFF5F2; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #ffd5ca;">
+              <h3 style="margin-top: 0; color: #182033;">${resourceTitle}</h3>
+              <p style="font-size: 13px; color: #555;">Format: ${fileFormat} • Verified Engineering Asset</p>
+              <a href="https://techellixir.com/resources" style="display: inline-block; background: #FF4D37; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; margin-top: 10px;">
+                Access & Download Blueprint
+              </a>
+            </div>
+            <p style="font-size: 12px; color: #888;">TechEllixir Engineering Team</p>
+          </div>
+        `,
+      });
 
-      if (resendClient) {
-        const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      // Send lead notification to Admin email
+      const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      await dispatchEmail({
+        to: adminEmail,
+        subject: `[New Subscriber] Downloaded ${resourceTitle}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">New Resource Access Lead</h2>
+            <p><strong>Subscriber Email:</strong> ${userEmail}</p>
+            <p><strong>Resource Title:</strong> ${resourceTitle} (${fileFormat})</p>
+            <p style="font-size: 12px; color: #888;">Time: ${newQuery.createdAt}</p>
+          </div>
+        `,
+      });
 
-        // Send to visitor email
-        try {
-          await resendClient.emails.send({
-            from: "TechEllixir Resources <onboarding@resend.dev>",
-            to: [userEmail],
-            subject: `[TechEllixir Access Link] ${resourceTitle}`,
-            html: `
-              <div style="font-family: Arial, sans-serif; padding: 24px; color: #182033; max-width: 600px; margin: 0 auto; border: 1px solid #ffd5ca; border-radius: 16px;">
-                <h2 style="color: #FF4D37; margin-top: 0;">TechEllixir Resource Blueprint Access</h2>
-                <p>Hello,</p>
-                <p>Thank you for requesting instant access to <strong>${resourceTitle}</strong> (${fileFormat}).</p>
-                <div style="background: #FFF5F2; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #ffd5ca;">
-                  <h3 style="margin-top: 0; color: #182033;">${resourceTitle}</h3>
-                  <p style="font-size: 13px; color: #555;">Format: ${fileFormat} • Verified Engineering Asset</p>
-                  <a href="https://techellixir.com/resources" style="display: inline-block; background: #FF4D37; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; margin-top: 10px;">
-                    Access & Download Blueprint
-                  </a>
-                </div>
-                <p style="font-size: 12px; color: #888;">TechEllixir Engineering Team</p>
-              </div>
-            `,
-          });
-          emailStatus = "dispatched";
-        } catch (userErr) {
-          console.error("Resend user email dispatch error:", userErr);
-        }
-
-        // Send notification to Admin email
-        try {
-          await resendClient.emails.send({
-            from: "TechEllixir Leads <onboarding@resend.dev>",
-            to: [adminEmail],
-            subject: `[New Subscriber] Downloaded ${resourceTitle}`,
-            html: `
-              <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
-                <h2 style="color: #FF4D37;">New Resource Access Lead</h2>
-                <p><strong>Subscriber Email:</strong> ${userEmail}</p>
-                <p><strong>Resource Title:</strong> ${resourceTitle} (${fileFormat})</p>
-                <p style="font-size: 12px; color: #888;">Time: ${newQuery.createdAt}</p>
-              </div>
-            `,
-          });
-          if (emailStatus === "not_configured") emailStatus = "admin_notified";
-        } catch (adminErr) {
-          console.error("Resend admin notification error:", adminErr);
-        }
-      }
-
-      json(res, 200, { ok: true, message: "Access link sent successfully!", emailStatus });
+      json(res, 200, { ok: true, message: "Access link sent successfully!", emailStatus: userEmailStatus });
       return;
     }
 
