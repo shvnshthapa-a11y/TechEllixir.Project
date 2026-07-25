@@ -711,14 +711,26 @@ const Resources = () => {
                     <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">
                       {item.description}
                     </p>
+
+                    {/* Detailed Highlights */}
+                    <div className="mt-4 pt-3 border-t border-gray-100 dark:border-slate-800/80 space-y-1 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center gap-1.5 text-gray-700 dark:text-gray-300 font-bold">
+                        <Terminal size={13} className="text-[#FF4D37]" />
+                        <span>Format: {item.fileFormat}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-gray-400">
+                        <span>⏱️ Read/Setup: {item.readTime}</span>
+                        <span>🔥 {item.downloadsCount}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-5 flex items-center justify-between">
+                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4 flex items-center justify-between">
                     <span className="text-xs font-bold text-[#FF4D37] flex items-center gap-1">
-                      Download Asset <ArrowRight size={14} />
+                      Explore Technical Asset <ArrowRight size={14} />
                     </span>
                     <span className="text-xs font-semibold text-gray-400">
-                      {item.fileFormat}
+                      {item.categoryLabel}
                     </span>
                   </div>
                 </motion.article>

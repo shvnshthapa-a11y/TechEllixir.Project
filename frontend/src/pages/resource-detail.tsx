@@ -13,6 +13,10 @@ import {
   Send,
   Calendar,
   MapPin,
+  Terminal,
+  Cpu,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 
 interface ResourceData {
@@ -27,6 +31,10 @@ interface ResourceData {
   publishDate: string;
   author: string;
   image: string;
+  techStack: string[];
+  prerequisites: string[];
+  deliverables: string[];
+  executionSteps: { step: string; title: string; description: string }[];
   content: string[];
   eventInfo?: {
     date: string;
@@ -37,7 +45,6 @@ interface ResourceData {
 }
 
 const resourceCatalog: Record<string, ResourceData> = {
-  // 1. Blueprints & Resources
   "rag-blueprint": {
     id: "rag-blueprint",
     title: "The 2026 Enterprise AI & LLM Implementation Blueprint",
@@ -50,6 +57,24 @@ const resourceCatalog: Record<string, ResourceData> = {
     publishDate: "July 24, 2026",
     author: "Dr. Aris Thorne (Head of AI Engineering)",
     image: "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1200",
+    techStack: ["Python 3.12", "FastAPI", "Qdrant Vector DB", "OpenAI API", "Cohere Re-ranker", "Docker"],
+    prerequisites: [
+      "Docker & Docker Compose v24+ installed locally",
+      "Python 3.11+ environment with Pipenv or Poetry",
+      "Valid OpenAI API key and Qdrant Cloud or self-hosted vector instance"
+    ],
+    deliverables: [
+      "42-Page Enterprise Architecture Specification (PDF Report)",
+      "Production-ready Docker Compose & Qdrant vector store YAML files",
+      "FastAPI Hybrid Search Webhook Middleware with BM25 re-ranking",
+      "Ragas automated accuracy benchmark validation script"
+    ],
+    executionSteps: [
+      { step: "01", title: "Vector Database Initialization", description: "Spin up Qdrant vector database via Docker Compose with HNSW indexing enabled." },
+      { step: "02", title: "Document Chunking & Token Overlap", description: "Execute Python ingestion pipeline partitioning documents into 512-token chunks with 50-token overlap." },
+      { step: "03", title: "Hybrid Retrieval & Cohere Re-ranking", description: "Configure sparse BM25 keyword matching combined with bge-large-en dense embeddings." },
+      { step: "04", title: "Security Guardrails & Deployment", description: "Apply zero-trust PII masking and prompt injection filtering before serving queries." }
+    ],
     content: [
       "Executive Summary: Enterprise adoption of Large Language Models (LLMs) requires robust Retrieval-Augmented Generation (RAG) frameworks to eliminate hallucinations and enforce strict data privacy boundaries.",
       "1. Vector Database Architecture: Comparing Qdrant, Milvus, and Pinecone for multi-million vector indexing under sub-50ms query constraints.",
@@ -70,6 +95,24 @@ const resourceCatalog: Record<string, ResourceData> = {
     publishDate: "July 18, 2026",
     author: "Marcus Vance (Principal Cloud Architect)",
     image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
+    techStack: ["Kubernetes 1.30", "Istio Ambient", "HashiCorp Vault", "Helm", "Terraform", "GitHub Actions"],
+    prerequisites: [
+      "Running Kubernetes cluster (minikube, EKS, or GKE)",
+      "Helm 3.x cli installed with cluster-admin access",
+      "Basic understanding of mTLS and X.509 certificate chains"
+    ],
+    deliverables: [
+      "Complete Terraform manifests for EKS/GKE VPC isolation",
+      "Istio Ambient Mesh configuration files with mutual TLS enforcement",
+      "HashiCorp Vault dynamic secret injection pod templates",
+      "Trivy vulnerability scanning GitHub Actions workflow"
+    ],
+    executionSteps: [
+      { step: "01", title: "Cluster Provisioning with Terraform", description: "Deploy private VPC subnets with NAT gateways and strict ingress security rules." },
+      { step: "02", title: "Istio Service Mesh Installation", description: "Install Istio ambient mesh to enable automatic pod-to-pod mTLS without heavy sidecars." },
+      { step: "03", title: "Vault Dynamic Secrets Integration", description: "Connect HashiCorp Vault Agent Injector for zero-trust database credential generation." },
+      { step: "04", title: "Continuous Compliance Auditing", description: "Run automated Kube-bench and Trivy vulnerability scans in CI/CD pipelines." }
+    ],
     content: [
       "Executive Summary: Microservice security cannot rely solely on perimeter firewalls. A zero-trust network model requires cryptographic identity verification for every inter-service HTTP/gRPC invocation.",
       "1. Service Mesh Integration: Deploying Istio ambient mesh for automatic mTLS sidecar-less encryption and traffic management across multi-region Kubernetes clusters.",
@@ -89,6 +132,24 @@ const resourceCatalog: Record<string, ResourceData> = {
     publishDate: "July 20, 2026",
     author: "Elena Rostova (Lead Frontend Architect)",
     image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200",
+    techStack: ["React 19", "Next.js 15", "TypeScript 5.5", "Tailwind CSS v4", "Vite 6"],
+    prerequisites: [
+      "Node.js 20 LTS or Node.js 22+",
+      "Familiarity with React Server Components (RSC) paradigm",
+      "Existing React 18 codebase targeted for migration"
+    ],
+    deliverables: [
+      "React 19 Migration Checklist & Codemod scripts",
+      "Reusable useActionState & useOptimistic custom hook templates",
+      "Tailwind v4 CSS @theme design token configuration file",
+      "Webpack/Vite compiler optimization config for zero-bundle hooks"
+    ],
+    executionSteps: [
+      { step: "01", title: "Dependencies & Codemod Upgrade", description: "Run automated React 19 codemod scripts to update ref props and context providers." },
+      { step: "02", title: "React Compiler Enablement", description: "Configure the Babel / Vite React Compiler plugin to automate component memoization." },
+      { step: "03", title: "Form Server Actions Refactoring", description: "Replace legacy Redux / Axios form handlers with native Server Actions & useActionState." },
+      { step: "04", title: "Tailwind v4 CSS Directives", description: "Migrate tailwind.config.js to CSS-first @theme variables for faster HMR." }
+    ],
     content: [
       "Executive Summary: React 19 redefines web application architecture by shifting component execution to the server by default. This eliminates heavy client-side JavaScript bundles and simplifies data mutation.",
       "1. Server Actions vs Client Fetching: How to write server-side mutation functions directly alongside UI components without boilerplate REST or GraphQL client code.",
@@ -96,231 +157,27 @@ const resourceCatalog: Record<string, ResourceData> = {
       "3. Asset Loading & Preloading Optimization: Leveraging React 19's native stylesheet and script preloading hooks to eliminate layout shifts (CLS)."
     ],
   },
-  "fintech-security": {
-    id: "fintech-security",
-    title: "Architecting PCI-DSS & HIPAA Compliant Cloud Systems",
-    category: "Case Study",
-    tag: "FinTech",
-    description: "How TechEllixir modernized a global payment gateway to achieve sub-50ms transaction latency while maintaining 100% compliance audit readiness.",
-    fileFormat: "PDF Whitepaper (3.8 MB)",
-    difficulty: "Advanced",
-    readTime: "15 min read",
-    publishDate: "July 12, 2026",
-    author: "Sarah Jenkins (Security & Compliance Director)",
-    image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1200",
-    content: [
-      "Executive Summary: Modernizing financial software requires balancing strict regulatory compliance (PCI-DSS 4.0) with real-time transaction processing speeds.",
-      "1. Tokenization & Vault Architecture: Isolating primary account numbers (PAN) inside specialized HSM-backed vaults while exposing safe token identifiers to application services.",
-      "2. Immutable Audit Logging: Streaming transaction audit logs into write-once-read-many (WORM) storage with cryptographic hash verification.",
-      "3. 99.999% Availability Setup: Multi-region active-active database replication using Amazon Aurora Global Databases."
-    ],
-  },
-
-  // 2. Blogs & Articles
-  "blog-rag-vs-finetuning": {
-    id: "blog-rag-vs-finetuning",
-    title: "Why Fine-Tuning LLMs Fails Without Proper RAG Architecture",
-    category: "Blog Article",
-    tag: "AI Architecture",
-    description: "Many enterprises rush to fine-tune open-weight models on proprietary data, only to suffer from hallucination and high retraining costs. Here is why RAG is the true foundation.",
-    fileFormat: "Article & Code Snippets",
-    difficulty: "Intermediate",
-    readTime: "6 min read",
-    publishDate: "July 18, 2026",
-    author: "Avneesh Singh (Lead AI Architect)",
-    image: "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1200",
-    content: [
-      "When engineering AI applications for businesses, data freshness and factual accuracy are paramount. Fine-tuning alters model weights but does not guarantee memory precision. Retrieval-Augmented Generation (RAG) acts as an external search index that injects exact context into prompts in real time.",
-      "1. Memory vs Knowledge Indexing: Fine-tuning stores information implicitly across billions of weights, making updates expensive. RAG stores information in external vector indices (Qdrant, Pinecone) where document updates take milliseconds.",
-      "2. Hybrid Search Benchmarks: By combining dense vector embeddings (BGE-large) with sparse BM25 keyword matching and Cohere re-ranking, domain context precision reaches 98.4% without model retraining.",
-      "Conclusion: Use RAG for factual data retrieval and reserve fine-tuning for altering tone, domain terminology, or specialized JSON output formatting."
-    ],
-  },
-  "blog-react19-migration": {
-    id: "blog-react19-migration",
-    title: "Migrating Production Enterprise Apps to React 19 & Tailwind v4",
-    category: "Blog Article",
-    tag: "Web Engineering",
-    description: "A practical walkthrough on upgrading large codebase repositories to React 19, taking advantage of the new React Compiler and CSS-first Tailwind configuration.",
-    fileFormat: "Technical Article",
-    difficulty: "Intermediate",
-    readTime: "8 min read",
-    publishDate: "July 10, 2026",
-    author: "Rudra Pratap Singh (Senior Frontend Engineer)",
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200",
-    content: [
-      "React 19 brings automatic memoization and server actions out of the box, eliminating manual useMemo and useCallback clutter. Paired with Tailwind v4's CSS-first theme configuration, bundle size decreases significantly while build speeds double.",
-      "1. Removing Boilerplate Hooks: React 19 Compiler automatically optimizes component render trees, reducing unnecessary re-renders without developer intervention.",
-      "2. CSS-First Theme Tokens with Tailwind v4: Switching from javascript tailwind.config.js to pure CSS @theme rules streamlines CSS parsing and speeds up Vite dev server HMR time by 45%.",
-      "3. Transition Hooks & Async State: Handling form pending states with useActionState cleanly decouples server submissions from local UI component state."
-    ],
-  },
-  "blog-n8n-python": {
-    id: "blog-n8n-python",
-    title: "Building Resilient AI Workflows With Self-Hosted n8n & Python",
-    category: "Blog Article",
-    tag: "DevOps & Automation",
-    description: "How to automate multi-step invoice approvals and customer ticket classification using self-hosted n8n nodes and custom Python webhooks.",
-    fileFormat: "Automation Blueprint",
-    difficulty: "Intermediate",
-    readTime: "7 min read",
-    publishDate: "June 28, 2026",
-    author: "Priya Sharma (Automation Engineer)",
-    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1200",
-    content: [
-      "No-code and low-code workflow orchestration engines have matured for enterprise operations. By combining n8n's visual node graph with custom Python microservices, engineers can build fault-tolerant pipelines.",
-      "1. Orchestration vs Execution: Let n8n handle cron triggers, webhooks, and third-party integrations (Slack, Gmail, HubSpot) while Python microservices handle heavy ML data transformation.",
-      "2. Handling Rate Limits & Retries: Implementing exponential backoff on n8n HTTP Request nodes to ensure 100% message delivery during high traffic bursts."
-    ],
-  },
-
-  // 3. News & Press
-  "news-ai-partner": {
-    id: "news-ai-partner",
-    title: "TechEllixir Recognized as Top AI Solutions Provider 2026",
-    category: "Press Release",
-    tag: "Company Milestone",
-    description: "TechEllixir has been honored as one of the leading enterprise AI and data automation solution partners for delivering custom LLM and RAG platforms across APAC.",
-    fileFormat: "Official Announcement",
-    difficulty: "General",
-    readTime: "4 min read",
-    publishDate: "July 15, 2026",
-    author: "TechEllixir Corporate Communications",
-    image: "https://images.unsplash.com/photo-1504868584819-f8e8b4b6d7e3?q=80&w=1200",
-    content: [
-      "NOIDA, INDIA — TechEllixir today announced its inclusion in the 2026 Global AI & Data Excellence list. Recognized for its practical engineering approach and high client satisfaction rates across healthcare, fintech, and retail industries, TechEllixir continues to empower businesses with cutting-edge software solutions.",
-      "TechEllixir's AI engineering lab has successfully delivered over 45 enterprise RAG pipelines, sub-second predictive analytics models, and cloud modernization projects in the past 12 months.",
-      "Managing Director Statement: 'This recognition highlights our team's relentless focus on technical precision, rapid delivery, and tangible business outcomes for our global enterprise partners.'"
-    ],
-  },
-  "news-v2-framework": {
-    id: "news-v2-framework",
-    title: "TechEllixir Unveils Enterprise AI Agent Framework v2.0",
-    category: "Press Release",
-    tag: "Product Launch",
-    description: "The upgraded AI Agent Framework v2.0 introduces multi-modal document processing, automated fallback routing, and zero-trust data encryption for cloud workloads.",
-    fileFormat: "Product Release Note",
-    difficulty: "General",
-    readTime: "5 min read",
-    publishDate: "June 30, 2026",
-    author: "TechEllixir AI Research Division",
-    image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200",
-    content: [
-      "TechEllixir's AI engineering team has released version 2.0 of its internal AI Agent Framework. The release features native support for multi-vector retrieval, automated sub-agent task delegation, and built-in token optimization controls.",
-      "Key Upgrades in v2.0:",
-      "• Multi-Modal Document Parsing: Process scanned PDFs, hand-signed forms, and complex multi-column invoices automatically.",
-      "• Zero-Trust Encryption: All vector embeddings and prompt payloads are encrypted at rest with AES-256 and HMAC authorization."
-    ],
-  },
-  "news-regional-expansion": {
-    id: "news-regional-expansion",
-    title: "TechEllixir Expands Regional R&D Hub in Noida Tech Sector",
-    category: "Press Release",
-    tag: "Expansion",
-    description: "To support growing demand for custom AI software and data engineering services, TechEllixir opens a state-of-the-art R&D center in Noida, Uttar Pradesh.",
-    fileFormat: "Corporate Release",
-    difficulty: "General",
-    readTime: "3 min read",
-    publishDate: "June 12, 2026",
-    author: "TechEllixir Public Relations",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200",
-    content: [
-      "TechEllixir's expansion in Noida doubles its dedicated engineering space, establishing specialized labs for Generative AI prototyping, high-concurrency cloud benchmarking, and client co-creation workshops.",
-      "The new facility will house 80+ senior full-stack developers, AI researchers, and cloud security architects dedicated to enterprise product delivery."
-    ],
-  },
-
-  // 4. Events & Webinars
-  "event-llm-masterclass": {
-    id: "event-llm-masterclass",
-    title: "Live Masterclass: Building & Scaling Enterprise RAG Applications",
-    category: "Virtual Summit & Webinar",
-    tag: "Webinar",
-    description: "Join our live 90-minute hands-on masterclass as we code a production-ready RAG application live, from document chunking strategies to vector indexing and Cohere reranking.",
-    fileFormat: "Live Stream & Recording",
-    difficulty: "Intermediate to Advanced",
-    readTime: "90 min live webinar",
-    publishDate: "August 12, 2026",
-    author: "Avneesh Singh (Head of AI Architecture)",
-    image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=1200",
-    eventInfo: {
-      date: "August 12, 2026",
-      time: "4:00 PM - 5:30 PM IST",
-      location: "Online (Zoom & YouTube Live)",
-      speaker: "Avneesh Singh (Head of AI Architecture)",
-    },
-    content: [
-      "Agenda & Key Highlights:",
-      "1. Chunking Strategies: Fixed-size vs Semantic vs Markdown header parsing for multi-page PDF documents.",
-      "2. Vector Database Benchmarks: Comparing Pinecone, Qdrant, and pgvector performance under 100+ QPS query load.",
-      "3. Implementing Hybrid Search: Combining BM25 sparse keyword matching with dense neural vector embeddings.",
-      "4. Live Interactive Q&A: Direct Q&A with senior AI engineers and cloud architects."
-    ],
-  },
-  "event-n8n-workshop": {
-    id: "event-n8n-workshop",
-    title: "Hands-on Workshop: Automating Business Ops with n8n & OpenAI",
-    category: "Virtual Workshop",
-    tag: "Hands-on Lab",
-    description: "An interactive technical workshop designed for IT leads and developers wanting to automate document processing, lead qualification, and CRM synchronization without custom servers.",
-    fileFormat: "Virtual Interactive Lab",
-    difficulty: "Intermediate",
-    readTime: "120 min workshop",
-    publishDate: "August 26, 2026",
-    author: "Priya Sharma (Senior Automation Specialist)",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200",
-    eventInfo: {
-      date: "August 26, 2026",
-      time: "3:00 PM - 5:00 PM IST",
-      location: "Online Virtual Lab",
-      speaker: "Priya Sharma (Senior Automation Specialist)",
-    },
-    content: [
-      "Hands-on Lab Agenda:",
-      "1. Setting up self-hosted n8n instances on Docker in under 10 minutes.",
-      "2. Connecting OpenAI Vision API to extract structured JSON data from invoice attachments.",
-      "3. Building automatic Slack alert triggers and PostgreSQL sync workflows."
-    ],
-  },
-  "event-cloud-summit-recording": {
-    id: "event-cloud-summit-recording",
-    title: "Keynote: Zero-Trust Security Patterns for Cloud-Native AI Apps",
-    category: "Conference Keynote",
-    tag: "Recorded Video",
-    description: "Watch the recorded keynote from the Global Cloud Security Summit detailing PII isolation protocols, API gateway rate limiting, and encrypted vector database storage.",
-    fileFormat: "On-Demand Video (HD)",
-    difficulty: "Advanced",
-    readTime: "45 min video",
-    publishDate: "July 04, 2026",
-    author: "TechEllixir Cyber Security Lab",
-    image: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=1200",
-    eventInfo: {
-      date: "July 04, 2026 (Recorded)",
-      time: "On-Demand Stream",
-      location: "TechEllixir Engineering Video Hub",
-      speaker: "TechEllixir Security Engineering Team",
-    },
-    content: [
-      "Keynote Topics:",
-      "1. PII Masking & Tokenization Protocols for AI Prompt Guardrails.",
-      "2. API Gateway Hardening & Automated Rate Limiting with Redis.",
-      "3. Encrypted Vector Database Storage at Rest and in Transit."
-    ],
-  },
 };
 
 const defaultResource: ResourceData = {
   id: "default-resource",
-  title: "TechEllixir Enterprise Engineering & AI Blueprint",
-  category: "Blueprint Asset",
+  title: "TechEllixir Enterprise Architecture Asset",
+  category: "Technical Blueprint",
   tag: "Architecture",
   description: "Comprehensive technical asset containing architectural blueprints, performance benchmarks, and deployment guidelines for enterprise software systems.",
   fileFormat: "PDF Asset (5.0 MB)",
   difficulty: "All Levels",
   readTime: "15 min read",
   publishDate: "July 2026",
-  author: "TechEllixir Technical Editorial Team",
+  author: "TechEllixir Technical Editorial Board",
   image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
+  techStack: ["TypeScript", "Docker", "Kubernetes", "PostgreSQL"],
+  prerequisites: ["Standard cloud deployment environment", "Basic CLI experience"],
+  deliverables: ["Comprehensive PDF Whitepaper", "Production deployment configuration files"],
+  executionSteps: [
+    { step: "01", title: "System Setup", description: "Prepare cluster and configure environment parameters." },
+    { step: "02", title: "Deployment", description: "Deploy microservices and verify service health." }
+  ],
   content: [
     "Executive Summary: Modern software systems require continuous architectural evolution to handle real-time AI workloads, cloud scaling, and strict security compliance.",
     "1. Architectural Fundamentals: Decoupling frontend presentation from backend microservices using event-driven message brokers.",
@@ -337,7 +194,6 @@ const ResourceDetailPage = () => {
 
   const resource = resourceCatalog[resourceId] || defaultResource;
 
-  // Download Form State
   const [emailInput, setEmailInput] = useState("");
   const [downloading, setDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -385,18 +241,18 @@ const ResourceDetailPage = () => {
         <div className="flex items-center gap-2 text-xs font-bold text-gray-500 dark:text-gray-400">
           <NavLink to="/" className="hover:text-[#FF4D37] transition">Home</NavLink>
           <ChevronRight size={14} />
-          <NavLink to="/resources" className="hover:text-[#FF4D37] transition">Resources</NavLink>
+          <NavLink to="/resources" className="hover:text-[#FF4D37] transition">Resources Hub</NavLink>
           <ChevronRight size={14} />
           <span className="text-[#FF4D37] font-black">{resource.category}</span>
         </div>
 
-        {/* Back Link & Actions */}
+        {/* Back Button & Actions */}
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
             className="ghost-button px-4 py-2 text-xs font-bold flex items-center gap-2 cursor-pointer"
           >
-            <ArrowLeft size={16} /> Back to Resources
+            <ArrowLeft size={16} /> Back to Knowledge Hub
           </button>
 
           <div className="flex items-center gap-2">
@@ -424,10 +280,10 @@ const ResourceDetailPage = () => {
         <div className="soft-card rounded-3xl overflow-hidden bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-xl">
           <div className="grid lg:grid-cols-12">
             
-            {/* Left Header info */}
+            {/* Left Header Info */}
             <div className="lg:col-span-7 p-8 sm:p-10 space-y-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1 rounded-full bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] text-xs font-extrabold border border-orange-200 dark:border-slate-700">
+                <span className="px-3.5 py-1 rounded-full bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] text-xs font-extrabold border border-orange-200 dark:border-slate-700">
                   {resource.category}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs font-bold">
@@ -442,7 +298,7 @@ const ResourceDetailPage = () => {
                 {resource.title}
               </h1>
 
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed font-medium">
                 {resource.description}
               </p>
 
@@ -461,7 +317,7 @@ const ResourceDetailPage = () => {
                 </div>
               )}
 
-              {/* Author & Meta */}
+              {/* Author & Meta Bar */}
               <div className="pt-3 border-t border-gray-100 dark:border-slate-800 flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1.5 text-gray-800 dark:text-gray-200 font-bold">
                   <User size={14} className="text-[#FF4D37]" /> {resource.author}
@@ -488,18 +344,105 @@ const ResourceDetailPage = () => {
           </div>
         </div>
 
-        {/* Content & Instant Access Box Grid */}
+        {/* Technology Stack & Deliverables Badges */}
+        <div className="grid md:grid-cols-2 gap-6">
+          
+          {/* Tech Stack */}
+          <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 space-y-3">
+            <h3 className="text-xs font-black uppercase text-[#FF4D37] tracking-wider flex items-center gap-2">
+              <Cpu size={16} /> Technology Stack & Tools
+            </h3>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {resource.techStack.map((tech, idx) => (
+                <span
+                  key={idx}
+                  className="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-gray-200 text-xs font-bold border border-gray-200 dark:border-slate-700"
+                >
+                  ⚡ {tech}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* System Prerequisites */}
+          <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 space-y-3">
+            <h3 className="text-xs font-black uppercase text-[#FF4D37] tracking-wider flex items-center gap-2">
+              <Terminal size={16} /> System Prerequisites
+            </h3>
+            <ul className="space-y-1.5 text-xs font-semibold text-gray-600 dark:text-gray-300">
+              {resource.prerequisites.map((pre, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-[#FF4D37] font-black">•</span>
+                  <span>{pre}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+        </div>
+
+        {/* Implementation Pipeline Stepper */}
+        {resource.executionSteps && resource.executionSteps.length > 0 && (
+          <div className="soft-card rounded-3xl p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-6">
+            <div className="flex items-center gap-2 text-sm font-black text-[#FF4D37] uppercase tracking-wider">
+              <Layers size={18} /> Implementation Pipeline & Execution Steps
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {resource.executionSteps.map((step, idx) => (
+                <div
+                  key={idx}
+                  className="p-5 rounded-2xl bg-gray-50/80 dark:bg-slate-900/80 border border-gray-100 dark:border-slate-800 space-y-2 flex flex-col justify-between"
+                >
+                  <div>
+                    <span className="text-xl font-black text-[#FF4D37] block">
+                      {step.step}
+                    </span>
+                    <h4 className="text-xs font-bold text-[#182033] dark:text-white mt-1">
+                      {step.title}
+                    </h4>
+                    <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                      {step.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Content Breakdown & Access Sidebar Grid */}
         <div className="grid lg:grid-cols-12 gap-8">
           
           {/* Main Content Article Body */}
           <div className="lg:col-span-8 space-y-6">
-            <div className="soft-card rounded-3xl p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
-              
+            
+            {/* Key Deliverables Card */}
+            <div className="soft-card rounded-3xl p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-5">
               <div className="flex items-center gap-2 text-sm font-black text-[#FF4D37] uppercase tracking-wider">
-                <FileText size={18} /> Detailed Content Breakdown
+                <Sparkles size={18} /> Included Asset Deliverables
               </div>
 
-              <div className="space-y-5 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+              <div className="space-y-3">
+                {resource.deliverables.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/50 text-xs font-extrabold text-emerald-900 dark:text-emerald-300"
+                  >
+                    <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Detailed Chapters */}
+            <div className="soft-card rounded-3xl p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+              <div className="flex items-center gap-2 text-sm font-black text-[#FF4D37] uppercase tracking-wider">
+                <FileText size={18} /> Detailed Content Chapters
+              </div>
+
+              <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 {resource.content.map((paragraph, index) => (
                   <div
                     key={index}
@@ -509,8 +452,8 @@ const ResourceDetailPage = () => {
                   </div>
                 ))}
               </div>
-
             </div>
+
           </div>
 
           {/* Right Sidebar: Instant Download / Access Box */}
@@ -518,7 +461,7 @@ const ResourceDetailPage = () => {
             
             <div className="soft-card rounded-3xl p-6 bg-gradient-to-br from-orange-50/80 to-white dark:from-[#161c2a] dark:to-slate-900 border border-orange-200 dark:border-slate-800 shadow-lg space-y-4">
               <div className="flex items-center gap-2 text-xs font-black uppercase text-[#FF4D37]">
-                <Download size={16} /> Instant Access & Registration
+                <Download size={16} /> Instant Asset Download
               </div>
 
               <h3 className="text-xl font-black text-[#182033] dark:text-white">
