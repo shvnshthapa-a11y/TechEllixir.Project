@@ -459,53 +459,56 @@ const BlogDetailPage = () => {
             {/* Article Content Sections */}
             <div className="soft-card rounded-3xl p-8 sm:p-10 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-8">
               
-              {blog.contentSections.map((section, idx) => (
-                <div key={idx} className="space-y-4">
-                  <h2 className="text-xl sm:text-2xl font-black text-[#182033] dark:text-white">
-                    {section.heading}
-                  </h2>
-                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-normal">
-                    {section.body}
-                  </p>
+              {blog.contentSections.map((section, idx) => {
+                const sectionId = `section-${idx}`;
+                return (
+                  <div key={idx} id={sectionId} className="space-y-4 scroll-mt-32">
+                    <h2 className="text-xl sm:text-2xl font-black text-[#182033] dark:text-white">
+                      {section.heading}
+                    </h2>
+                    <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed font-normal">
+                      {section.body}
+                    </p>
 
-                  {section.quote && (
-                    <blockquote className="p-6 rounded-2xl bg-gradient-to-r from-orange-50 to-white dark:from-slate-900 dark:to-slate-900/60 border-l-4 border-[#FF4D37] text-sm font-bold text-gray-800 dark:text-gray-200 italic my-4">
-                      "{section.quote}"
-                    </blockquote>
-                  )}
+                    {section.quote && (
+                      <blockquote className="p-6 rounded-2xl bg-gradient-to-r from-orange-50 to-white dark:from-slate-900 dark:to-slate-900/60 border-l-4 border-[#FF4D37] text-sm font-bold text-gray-800 dark:text-gray-200 italic my-4">
+                        "{section.quote}"
+                      </blockquote>
+                    )}
 
-                  {section.codeSnippet && (
-                    <div className="rounded-2xl bg-[#0d111a] border border-slate-800 overflow-hidden shadow-xl my-4">
-                      {/* Code Header Bar */}
-                      <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800 text-xs font-mono text-gray-400">
-                        <span className="flex items-center gap-2">
-                          <Code2 size={14} className="text-[#FF4D37]" />
-                          <span>{section.codeFileName || "snippet.ts"}</span>
-                        </span>
-                        <button
-                          onClick={() => handleCopyCode(section.codeSnippet || "", idx)}
-                          className="flex items-center gap-1 text-gray-400 hover:text-white transition cursor-pointer text-[11px]"
-                        >
-                          {codeCopiedIndex === idx ? (
-                            <span className="text-emerald-400 flex items-center gap-1 font-bold">
-                              <Check size={13} /> Copied!
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <Copy size={13} /> Copy Code
-                            </span>
-                          )}
-                        </button>
+                    {section.codeSnippet && (
+                      <div className="rounded-2xl bg-[#0d111a] border border-slate-800 overflow-hidden shadow-xl my-4">
+                        {/* Code Header Bar */}
+                        <div className="flex items-center justify-between px-4 py-2.5 bg-slate-900 border-b border-slate-800 text-xs font-mono text-gray-400">
+                          <span className="flex items-center gap-2">
+                            <Code2 size={14} className="text-[#FF4D37]" />
+                            <span>{section.codeFileName || "snippet.ts"}</span>
+                          </span>
+                          <button
+                            onClick={() => handleCopyCode(section.codeSnippet || "", idx)}
+                            className="flex items-center gap-1 text-gray-400 hover:text-white transition cursor-pointer text-[11px]"
+                          >
+                            {codeCopiedIndex === idx ? (
+                              <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                                <Check size={13} /> Copied!
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1">
+                                <Copy size={13} /> Copy Code
+                              </span>
+                            )}
+                          </button>
+                        </div>
+
+                        {/* Code Block */}
+                        <div className="p-5 text-emerald-400 font-mono text-xs overflow-x-auto">
+                          <pre><code>{section.codeSnippet}</code></pre>
+                        </div>
                       </div>
-
-                      {/* Code Block */}
-                      <div className="p-5 text-emerald-400 font-mono text-xs overflow-x-auto">
-                        <pre><code>{section.codeSnippet}</code></pre>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
 
               {/* Author Card Footer */}
               <div className="pt-8 border-t border-gray-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 bg-gray-50 dark:bg-slate-900/60 p-6 rounded-3xl">
@@ -594,12 +597,24 @@ const BlogDetailPage = () => {
                 <BookOpen size={18} className="text-[#FF4D37]" /> Table of Contents
               </h3>
               <ul className="space-y-2.5 text-xs font-semibold text-gray-600 dark:text-gray-400">
-                {blog.contentSections.map((sec, i) => (
-                  <li key={i} className="hover:text-[#FF4D37] transition cursor-pointer flex items-start gap-2">
-                    <span className="text-[#FF4D37] font-black shrink-0">•</span>
-                    <span>{sec.heading}</span>
-                  </li>
-                ))}
+                {blog.contentSections.map((sec, i) => {
+                  const sectionId = `section-${i}`;
+                  return (
+                    <li
+                      key={i}
+                      onClick={() => {
+                        const elem = document.getElementById(sectionId);
+                        if (elem) {
+                          elem.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }
+                      }}
+                      className="hover:text-[#FF4D37] transition cursor-pointer flex items-start gap-2 text-gray-700 dark:text-gray-300 hover:font-bold"
+                    >
+                      <span className="text-[#FF4D37] font-black shrink-0">•</span>
+                      <span>{sec.heading}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
