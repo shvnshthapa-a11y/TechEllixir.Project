@@ -207,6 +207,19 @@ const resourcesList: ResourceItem[] = [
 // 2. Blogs Data
 const blogsList: BlogItem[] = [
   {
+    id: "seo-services-in-dehradun-2026-trends-growth-guide",
+    title: "SEO Services in Dehradun 2026: Trends, Growth Strategies & Business Scaling Guide",
+    excerpt: "Discover the top Search Engine Optimization (SEO) strategies for 2026. Learn how businesses in Dehradun and across India leverage AI search optimization (GEO), technical site audits, and local Google My Business growth.",
+    content: "Search Engine Optimization has transformed dramatically with AI Search Engines like Perplexity, Gemini, and Search Generative Experience (SGE). For local enterprises and growing startups in Dehradun and Uttarakhand, ranking #1 on Google requires a dual approach: high-authority localized signals combined with structured Schema.org JSON-LD markup.",
+    author: "Shivansh Thapa",
+    role: "Head of Growth & SEO Strategy",
+    date: "July 25, 2026",
+    readTime: "11 min read",
+    tag: "Digital Marketing & SEO",
+    likes: 215,
+    featured: true
+  },
+  {
     id: "blog-rag-vs-finetuning",
     title: "Why Fine-Tuning LLMs Fails Without Proper RAG Architecture",
     excerpt: "Many enterprises rush to fine-tune open-weight models on proprietary data, only to suffer from hallucination and high retraining costs. Here is why RAG is the true foundation.",
@@ -216,8 +229,7 @@ const blogsList: BlogItem[] = [
     date: "July 18, 2026",
     readTime: "6 min read",
     tag: "AI Architecture",
-    likes: 142,
-    featured: true
+    likes: 142
   },
   {
     id: "blog-react19-migration",
