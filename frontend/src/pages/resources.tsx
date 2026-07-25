@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   BookOpen,
   Code2,
@@ -8,8 +8,6 @@ import {
   Search,
   Sparkles,
   ArrowRight,
-  CheckCircle2,
-  X,
   Terminal,
   BarChart2,
   ShieldCheck,
@@ -21,7 +19,6 @@ import {
   MapPin,
   FileText,
   Bookmark,
-  Share2,
   Layers,
   Star,
   Plus,
@@ -360,18 +357,6 @@ const Resources = () => {
   // Bookmarking / Likes State
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [likedBlogs, setLikedBlogs] = useState<Record<string, number>>({});
-  const [copiedLink, setCopiedLink] = useState<boolean>(false);
-
-  // Modals
-  const [activeModalResource, setActiveModalResource] = useState<ResourceItem | null>(null);
-  const [activeModalBlog, setActiveModalBlog] = useState<BlogItem | null>(null);
-  const [activeModalNews, setActiveModalNews] = useState<NewsItem | null>(null);
-  const [activeModalEvent, setActiveModalEvent] = useState<EventItem | null>(null);
-
-  // Form states
-  const [emailInput, setEmailInput] = useState<string>("");
-  const [downloadSuccess, setDownloadSuccess] = useState<boolean>(false);
-  const [eventRegSuccess, setEventRegSuccess] = useState<boolean>(false);
 
   // Sub-categories for Resources
   const categories = [
@@ -428,49 +413,6 @@ const Resources = () => {
   });
 
   const featuredResource = resourcesList.find((r) => r.featured) || resourcesList[0];
-
-  const handleDownloadSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput) return;
-
-    try {
-      await fetch("/api/resources/download", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: emailInput,
-          resourceTitle: activeModalResource?.title || "Enterprise Technical Asset",
-          fileFormat: activeModalResource?.fileFormat || "PDF Blueprint",
-        }),
-      });
-    } catch (err) {
-      console.error("Resource download submission error:", err);
-    }
-
-    setDownloadSuccess(true);
-    setTimeout(() => {
-      setDownloadSuccess(false);
-      setEmailInput("");
-      setActiveModalResource(null);
-    }, 2500);
-  };
-
-  const handleEventRegSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!emailInput) return;
-    setEventRegSuccess(true);
-    setTimeout(() => {
-      setEventRegSuccess(false);
-      setEmailInput("");
-      setActiveModalEvent(null);
-    }, 2200);
-  };
-
-  const copyShareLink = () => {
-    navigator.clipboard.writeText(window.location.href);
-    setCopiedLink(true);
-    setTimeout(() => setCopiedLink(false), 2000);
-  };
 
   return (
     <div className="pt-28 pb-20 bg-[#fffaf7] dark:bg-[#0d111a] min-h-screen text-[#182033] dark:text-gray-100 transition-colors duration-300">
@@ -701,7 +643,7 @@ const Resources = () => {
                     <div className="pt-2 flex flex-wrap gap-4 items-center">
                       <button
                         onClick={() => {
-                          window.location.href = `/resources/detail?id=${featuredResource.id}`;
+                          window.location.href = `/resources/${featuredResource.id}`;
                         }}
                         className="brand-button px-6 py-3.5 text-xs font-bold cursor-pointer flex items-center gap-2 shadow-lg"
                       >
@@ -738,7 +680,7 @@ const Resources = () => {
                   key={item.id}
                   whileHover={{ y: -6, scale: 1.01 }}
                   onClick={() => {
-                    window.location.href = `/resources/detail?id=${item.id}`;
+                    window.location.href = `/resources/${item.id}`;
                   }}
                   className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:border-[#ffd5ca] bg-white dark:bg-[#161c2a] relative group"
                 >
@@ -758,41 +700,26 @@ const Resources = () => {
                         className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-[#FF4D37] transition cursor-pointer"
                         title="Bookmark Resource"
                       >
-                        <Bookmark
-                          size={16}
-                          className={bookmarkedIds.includes(item.id) ? "fill-[#FF4D37] text-[#FF4D37]" : ""}
-                        />
+                        <Bookmark size={16} className={bookmarkedIds.includes(item.id) ? "text-[#FF4D37] fill-current" : ""} />
                       </button>
                     </div>
 
-                    <div className="flex items-start gap-3.5 mt-2">
-                      <div className="p-3 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 shrink-0 text-[#FF4D37]">
-                        {item.icon}
-                      </div>
-                      <h3 className="text-xl font-bold leading-snug text-[#182033] dark:text-white group-hover:text-[#FF4D37] transition">
-                        {item.title}
-                      </h3>
-                    </div>
+                    <h3 className="text-xl font-bold text-[#182033] dark:text-white leading-snug group-hover:text-[#FF4D37] transition">
+                      {item.title}
+                    </h3>
 
-                    <p className="mt-4 text-xs sm:text-sm text-gray-600 dark:text-gray-300 line-clamp-3 leading-relaxed">
+                    <p className="mt-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-relaxed line-clamp-3">
                       {item.description}
                     </p>
                   </div>
 
-                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800/80 pt-4 flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-400">
-                      {item.downloadsCount}
+                  <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-5 flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#FF4D37] flex items-center gap-1">
+                      Download Asset <ArrowRight size={14} />
                     </span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveModalResource(item);
-                      }}
-                      className="inline-flex items-center gap-1.5 font-bold text-[#DF3420] text-xs hover:underline cursor-pointer"
-                    >
-                      Download <ArrowRight size={14} />
-                    </button>
+                    <span className="text-xs font-semibold text-gray-400">
+                      {item.fileFormat}
+                    </span>
                   </div>
                 </motion.article>
               ))}
@@ -814,7 +741,7 @@ const Resources = () => {
                   key={blog.id}
                   whileHover={{ y: -6, scale: 1.01 }}
                   onClick={() => {
-                    window.location.href = `/resources/detail?id=${blog.id}`;
+                    window.location.href = `/blogs/${blog.id}`;
                   }}
                   className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-2xl hover:border-[#ffd5ca] group"
                 >
@@ -874,7 +801,7 @@ const Resources = () => {
                 <div
                   key={news.id}
                   onClick={() => {
-                    window.location.href = `/resources/detail?id=${news.id}`;
+                    window.location.href = `/news/${news.id}`;
                   }}
                   className="soft-card rounded-3xl p-7 cursor-pointer bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca] flex flex-col justify-between group"
                 >
@@ -964,7 +891,7 @@ const Resources = () => {
                   <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4">
                     <button
                       onClick={() => {
-                        window.location.href = `/resources/detail?id=${event.id}`;
+                        window.location.href = `/events/${event.id}`;
                       }}
                       className="brand-button w-full py-3 text-xs font-bold cursor-pointer flex items-center justify-center gap-2 shadow-md"
                     >
@@ -1012,314 +939,6 @@ const Resources = () => {
         </section>
 
       </div>
-
-      {/* MODAL 1: RESOURCE DOWNLOAD MODAL */}
-      <AnimatePresence>
-        {activeModalResource && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-            onClick={() => setActiveModalResource(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl overflow-hidden max-h-[90vh] flex flex-col justify-between"
-            >
-              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-5">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-2xl bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37]">
-                    {activeModalResource.icon}
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
-                      {activeModalResource.categoryLabel}
-                    </span>
-                    <h3 className="text-xl font-black text-[#182033] dark:text-white mt-0.5">
-                      {activeModalResource.title}
-                    </h3>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setActiveModalResource(null)}
-                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="my-6 overflow-y-auto pr-2 space-y-6">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">
-                    Executive Summary
-                  </h4>
-                  <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-medium">
-                    {activeModalResource.summary}
-                  </p>
-                </div>
-
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">
-                    Key Deliverables
-                  </h4>
-                  <div className="space-y-2">
-                    {activeModalResource.takeaways.map((takeaway, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-start gap-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/70 dark:bg-slate-900/60 p-3 text-xs font-semibold text-gray-800 dark:text-gray-200"
-                      >
-                        <CheckCircle2 size={16} className="text-[#FF4D37] shrink-0 mt-0.5" />
-                        <span>{takeaway}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-[#ffd5ca] dark:border-slate-800 bg-[#FFF5F2] dark:bg-slate-900/80 p-5">
-                  <h5 className="text-xs font-bold text-[#182033] dark:text-white mb-1">
-                    Instant File Access
-                  </h5>
-                  {downloadSuccess ? (
-                    <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl">
-                      <CheckCircle2 size={18} />
-                      <span>Download link sent! Check your inbox.</span>
-                    </div>
-                  ) : (
-                    <form onSubmit={handleDownloadSubmit} className="flex gap-2">
-                      <input
-                        type="email"
-                        required
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        placeholder="your.email@company.com"
-                        className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold outline-none focus:border-[#FF4D37]"
-                      />
-                      <button
-                        type="submit"
-                        className="brand-button px-5 py-2 text-xs font-bold whitespace-nowrap cursor-pointer"
-                      >
-                        Get Link
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* MODAL 2: BLOG READER MODAL */}
-      <AnimatePresence>
-        {activeModalBlog && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-            onClick={() => setActiveModalBlog(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-3xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col justify-between"
-            >
-              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div>
-                  <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
-                    {activeModalBlog.tag} • {activeModalBlog.readTime}
-                  </span>
-                  <h3 className="text-2xl font-black text-[#182033] dark:text-white mt-1">
-                    {activeModalBlog.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-1">
-                    By {activeModalBlog.author} ({activeModalBlog.role}) • {activeModalBlog.date}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveModalBlog(null)}
-                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="my-6 overflow-y-auto pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                <p className="font-semibold text-base text-[#182033] dark:text-white">
-                  {activeModalBlog.excerpt}
-                </p>
-                <p>{activeModalBlog.content}</p>
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
-                <button
-                  onClick={copyShareLink}
-                  className="flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-[#FF4D37] cursor-pointer"
-                >
-                  <Share2 size={16} />
-                  <span>{copiedLink ? "Link Copied!" : "Share Article"}</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveModalBlog(null)}
-                  className="brand-button px-6 py-2.5 text-xs font-bold cursor-pointer"
-                >
-                  Close Article
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* MODAL 3: NEWS MODAL */}
-      <AnimatePresence>
-        {activeModalNews && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-            onClick={() => setActiveModalNews(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col justify-between"
-            >
-              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div>
-                  <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
-                    {activeModalNews.category} • {activeModalNews.date}
-                  </span>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white mt-1">
-                    {activeModalNews.title}
-                  </h3>
-                </div>
-                <button
-                  onClick={() => setActiveModalNews(null)}
-                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="my-6 overflow-y-auto pr-2 space-y-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-                <p>{activeModalNews.fullStory}</p>
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-between items-center">
-                <span className="text-xs text-gray-400">{activeModalNews.source}</span>
-                <button
-                  onClick={() => setActiveModalNews(null)}
-                  className="brand-button px-6 py-2 text-xs font-bold cursor-pointer"
-                >
-                  Close News
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      {/* MODAL 4: EVENT REGISTRATION MODAL */}
-      <AnimatePresence>
-        {activeModalEvent && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md"
-            onClick={() => setActiveModalEvent(null)}
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col justify-between"
-            >
-              <div className="flex items-start justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
-                <div>
-                  <span className="text-xs font-bold text-[#FF4D37] tracking-wider uppercase">
-                    {activeModalEvent.type} • {activeModalEvent.status}
-                  </span>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white mt-1">
-                    {activeModalEvent.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Speaker: {activeModalEvent.speaker} ({activeModalEvent.speakerTitle})
-                  </p>
-                </div>
-                <button
-                  onClick={() => setActiveModalEvent(null)}
-                  className="rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="my-6 overflow-y-auto pr-2 space-y-5">
-                <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
-                  {activeModalEvent.description}
-                </p>
-
-                <div>
-                  <h5 className="text-xs font-bold uppercase text-gray-400 mb-2">
-                    Key Event Topics
-                  </h5>
-                  <div className="space-y-2">
-                    {activeModalEvent.topics.map((topic, i) => (
-                      <div key={i} className="flex items-center gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-slate-900 p-2.5 rounded-xl border border-gray-100 dark:border-slate-800">
-                        <CheckCircle2 size={16} className="text-[#FF4D37]" />
-                        <span>{topic}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {activeModalEvent.status === "Upcoming" && (
-                  <div className="rounded-2xl border border-[#ffd5ca] dark:border-slate-800 bg-[#FFF5F2] dark:bg-slate-900/80 p-5">
-                    <h5 className="text-xs font-bold text-[#182033] dark:text-white mb-1">
-                      Reserve Your Spot
-                    </h5>
-                    {eventRegSuccess ? (
-                      <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl">
-                        <CheckCircle2 size={18} />
-                        <span>Registration confirmed! Calendar invite sent to email.</span>
-                      </div>
-                    ) : (
-                      <form onSubmit={handleEventRegSubmit} className="flex gap-2 mt-2">
-                        <input
-                          type="email"
-                          required
-                          value={emailInput}
-                          onChange={(e) => setEmailInput(e.target.value)}
-                          placeholder="your.email@company.com"
-                          className="w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs font-semibold outline-none focus:border-[#FF4D37]"
-                        />
-                        <button
-                          type="submit"
-                          className="brand-button px-5 py-2 text-xs font-bold whitespace-nowrap cursor-pointer"
-                        >
-                          Register Now
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-4 flex justify-end">
-                <button
-                  onClick={() => setActiveModalEvent(null)}
-                  className="px-5 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  Close
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
     </div>
   );
 };

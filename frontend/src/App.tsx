@@ -29,6 +29,11 @@ function App() {
         <Route path="/resources" element={<Resources />} />
         <Route path="/resources/detail" element={<ResourceDetail />} />
         <Route path="/resources/:id" element={<ResourceDetail />} />
+        <Route path="/blogs/:id" element={<ResourceDetail />} />
+        <Route path="/blog/:id" element={<ResourceDetail />} />
+        <Route path="/news/:id" element={<ResourceDetail />} />
+        <Route path="/events/:id" element={<ResourceDetail />} />
+        <Route path="/event/:id" element={<ResourceDetail />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career/>}/>
         <Route path="/admin" element={<Admin />} />

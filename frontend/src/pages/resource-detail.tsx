@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSearchParams, NavLink, useNavigate } from "react-router-dom";
+import { useSearchParams, useParams, NavLink, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ChevronRight,
@@ -331,8 +331,9 @@ const defaultResource: ResourceData = {
 
 const ResourceDetailPage = () => {
   const [searchParams] = useSearchParams();
+  const params = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const resourceId = searchParams.get("id") || "rag-blueprint";
+  const resourceId = params.id || searchParams.get("id") || "rag-blueprint";
 
   const resource = resourceCatalog[resourceId] || defaultResource;
 
