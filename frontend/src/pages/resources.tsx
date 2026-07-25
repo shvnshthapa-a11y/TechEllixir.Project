@@ -24,6 +24,8 @@ import {
   Share2,
   Layers,
   Star,
+  Plus,
+  Minus,
 } from "lucide-react";
 
 // Types
@@ -342,7 +344,9 @@ const popularTags = [
   "Web Engineering",
   "DevOps & Automation",
   "FinTech & Analytics",
-  "Cyber Security"
+  "Cyber Security",
+  "Healthcare & AI",
+  "Mobile Engineering"
 ];
 
 const Resources = () => {
@@ -351,6 +355,7 @@ const Resources = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [activeTag, setActiveTag] = useState<string>("All Topics");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [showAllTags, setShowAllTags] = useState<boolean>(false);
 
   // Bookmarking / Likes State
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
@@ -600,7 +605,7 @@ const Resources = () => {
               <span className="text-xs font-bold text-gray-400 mr-1 flex items-center gap-1">
                 <Layers size={14} /> Topic:
               </span>
-              {popularTags.map((tag) => (
+              {(showAllTags ? popularTags : popularTags.slice(0, 4)).map((tag) => (
                 <button
                   key={tag}
                   onClick={() => setActiveTag(tag)}
@@ -613,6 +618,26 @@ const Resources = () => {
                   {tag}
                 </button>
               ))}
+
+              {!showAllTags ? (
+                <button
+                  onClick={() => setShowAllTags(true)}
+                  className="rounded-xl px-3 py-1.5 text-xs font-black bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 hover:bg-[#ffe5dc] transition cursor-pointer flex items-center gap-1 shadow-sm"
+                  title="Show all topics"
+                >
+                  <Plus size={14} />
+                  <span>+{popularTags.length - 4} More</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowAllTags(false)}
+                  className="rounded-xl px-3 py-1.5 text-xs font-bold bg-gray-200 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 transition cursor-pointer flex items-center gap-1"
+                  title="Collapse topics"
+                >
+                  <Minus size={14} />
+                  <span>Less</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
