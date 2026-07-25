@@ -5,6 +5,7 @@ import {
   Lock,
   User,
   Building,
+  Phone,
   Eye,
   EyeOff,
   Sparkles,
@@ -13,11 +14,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { FaGoogle, FaGithub } from "react-icons/fa6";
-import { NavLink, useSearchParams, useNavigate } from "react-router-dom";
+import { NavLink, useSearchParams } from "react-router-dom";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const initialMode = searchParams.get("mode") === "register" ? "register" : "login";
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
@@ -34,6 +34,7 @@ const Auth = () => {
   // Register Form states
   const [regFullName, setRegFullName] = useState("");
   const [regEmail, setRegEmail] = useState("");
+  const [regPhone, setRegPhone] = useState("");
   const [regCompany, setRegCompany] = useState("");
   const [regPassword, setRegPassword] = useState("");
   const [regConfirmPassword, setRegConfirmPassword] = useState("");
@@ -109,6 +110,10 @@ const Auth = () => {
       setErrorMsg("Please enter a valid work email address.");
       return;
     }
+    if (!regPhone.trim() || regPhone.replace(/\D/g, "").length < 7) {
+      setErrorMsg("Mobile number is mandatory. Please enter a valid mobile number.");
+      return;
+    }
     if (regPassword.length < 6) {
       setErrorMsg("Password must be at least 6 characters long.");
       return;
@@ -129,11 +134,12 @@ const Auth = () => {
       localStorage.setItem("userToken", `token-${Date.now()}`);
       localStorage.setItem("userEmail", regEmail);
       localStorage.setItem("userName", regFullName);
+      localStorage.setItem("userPhone", regPhone);
       setSuccessMsg("Account created successfully! Redirecting to Home Page...");
       setTimeout(() => {
-        navigate("/");
-      }, 1200);
-    }, 1000);
+        window.location.href = "/";
+      }, 1000);
+    }, 800);
   };
 
   return (
@@ -370,6 +376,23 @@ const Auth = () => {
                           value={regEmail}
                           onChange={(e) => setRegEmail(e.target.value)}
                           placeholder="name@company.com"
+                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block mb-1">
+                        Mobile Number <span className="text-[#FF4D37] font-black">*</span>
+                      </label>
+                      <div className="relative">
+                        <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <input
+                          type="tel"
+                          required
+                          value={regPhone}
+                          onChange={(e) => setRegPhone(e.target.value)}
+                          placeholder="+91 98765 43210"
                           className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 pl-10 pr-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
                         />
                       </div>
