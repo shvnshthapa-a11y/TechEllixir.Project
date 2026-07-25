@@ -14,6 +14,7 @@ import Auth from "./pages/auth";
 import Profile from "./pages/profile";
 import ServiceDetail from "./pages/service-detail";
 import ResourceDetail from "./pages/resource-detail";
+import BlogDetail from "./pages/blog-detail";
 
 function App() {
   return (
@@ -29,8 +30,8 @@ function App() {
         <Route path="/resources" element={<Resources />} />
         <Route path="/resources/detail" element={<ResourceDetail />} />
         <Route path="/resources/:id" element={<ResourceDetail />} />
-        <Route path="/blogs/:id" element={<ResourceDetail />} />
-        <Route path="/blog/:id" element={<ResourceDetail />} />
+        <Route path="/blogs/:id" element={<BlogDetail />} />
+        <Route path="/blog/:id" element={<BlogDetail />} />
         <Route path="/news/:id" element={<ResourceDetail />} />
         <Route path="/events/:id" element={<ResourceDetail />} />
         <Route path="/event/:id" element={<ResourceDetail />} />
