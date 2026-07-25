@@ -12,6 +12,8 @@ import Career from "./pages/career";
 import Admin from "./pages/admin";
 import Auth from "./pages/auth";
 import Profile from "./pages/profile";
+import ServiceDetail from "./pages/service-detail";
+import ResourceDetail from "./pages/resource-detail";
 
 function App() {
   return (
@@ -22,7 +24,11 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/services/detail" element={<ServiceDetail />} />
+        <Route path="/services/:id" element={<ServiceDetail />} />
         <Route path="/resources" element={<Resources />} />
+        <Route path="/resources/detail" element={<ResourceDetail />} />
+        <Route path="/resources/:id" element={<ResourceDetail />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career/>}/>
         <Route path="/admin" element={<Admin />} />

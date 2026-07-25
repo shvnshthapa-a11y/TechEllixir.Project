@@ -675,7 +675,9 @@ const Resources = () => {
 
                     <div className="pt-2 flex flex-wrap gap-4 items-center">
                       <button
-                        onClick={() => setActiveModalResource(featuredResource)}
+                        onClick={() => {
+                          window.location.href = `/resources/detail?id=${featuredResource.id}`;
+                        }}
                         className="brand-button px-6 py-3.5 text-xs font-bold cursor-pointer flex items-center gap-2 shadow-lg"
                       >
                         <Download size={16} /> Download Free Blueprint ({featuredResource.fileFormat})
@@ -710,7 +712,9 @@ const Resources = () => {
                 <motion.article
                   key={item.id}
                   whileHover={{ y: -6, scale: 1.01 }}
-                  onClick={() => setActiveModalResource(item)}
+                  onClick={() => {
+                    window.location.href = `/resources/detail?id=${item.id}`;
+                  }}
                   className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between transition-all duration-300 hover:shadow-2xl hover:border-[#ffd5ca] bg-white dark:bg-[#161c2a] relative group"
                 >
                   <div>

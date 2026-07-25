@@ -42,7 +42,7 @@ export interface ServiceDetail {
 }
 
 // 1. Core Engineering & Product Development Services
-const coreServicesData: ServiceDetail[] = [
+export const coreServicesData: ServiceDetail[] = [
   {
     title: "Web Development",
     icon: <Code2 size={28} />,
@@ -232,7 +232,7 @@ const coreServicesData: ServiceDetail[] = [
 ];
 
 // 2. AI & Data Services
-const aiDataServicesData: ServiceDetail[] = [
+export const aiDataServicesData: ServiceDetail[] = [
   {
     title: "Artificial Intelligence Solutions",
     icon: <Brain size={28} />,
@@ -623,8 +623,8 @@ const Services = ({ detailed = false }: ServicesProps) => {
               variants={cardVariants}
               whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => {
-                setSelectedService(service);
-                setModalTab("overview");
+                const slug = service.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                window.location.href = `/services/detail?id=${slug}`;
               }}
               className="soft-card group rounded-3xl p-8 cursor-pointer flex flex-col justify-between transition-shadow transition-colors duration-300 hover:shadow-xl hover:border-[#ffd5ca]"
             >
@@ -665,8 +665,8 @@ const Services = ({ detailed = false }: ServicesProps) => {
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedService(service);
-                    setModalTab("overview");
+                    const slug = service.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                    window.location.href = `/services/detail?id=${slug}#demo-form`;
                   }}
                   className="inline-flex items-center gap-2 font-bold text-[#DF3420] text-sm hover:underline cursor-pointer"
                 >
