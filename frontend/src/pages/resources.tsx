@@ -788,7 +788,9 @@ const Resources = () => {
                 <motion.article
                   key={blog.id}
                   whileHover={{ y: -6, scale: 1.01 }}
-                  onClick={() => setActiveModalBlog(blog)}
+                  onClick={() => {
+                    window.location.href = `/resources/detail?id=${blog.id}`;
+                  }}
                   className="soft-card rounded-3xl p-7 cursor-pointer flex flex-col justify-between bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-2xl hover:border-[#ffd5ca] group"
                 >
                   <div>
@@ -846,7 +848,9 @@ const Resources = () => {
               {newsList.map((news) => (
                 <div
                   key={news.id}
-                  onClick={() => setActiveModalNews(news)}
+                  onClick={() => {
+                    window.location.href = `/resources/detail?id=${news.id}`;
+                  }}
                   className="soft-card rounded-3xl p-7 cursor-pointer bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 hover:shadow-xl hover:border-[#ffd5ca] flex flex-col justify-between group"
                 >
                   <div>
@@ -934,7 +938,9 @@ const Resources = () => {
 
                   <div className="mt-6 border-t border-gray-100 dark:border-slate-800 pt-4">
                     <button
-                      onClick={() => setActiveModalEvent(event)}
+                      onClick={() => {
+                        window.location.href = `/resources/detail?id=${event.id}`;
+                      }}
                       className="brand-button w-full py-3 text-xs font-bold cursor-pointer flex items-center justify-center gap-2 shadow-md"
                     >
                       {event.status === "Upcoming" ? "Register for Event" : "Watch Recording"}
