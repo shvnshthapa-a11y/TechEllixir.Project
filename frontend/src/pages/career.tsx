@@ -38,6 +38,7 @@ import {
 const domains = [
   {
     title: "Artificial Intelligence",
+    category: "ai",
     badge: "🔥 #1 Most Popular",
     icon: <BrainCircuit size={30} />,
     description:
@@ -45,6 +46,7 @@ const domains = [
   },
   {
     title: "Full Stack Development",
+    category: "web",
     badge: "🚀 High Demand",
     icon: <Code2 size={30} />,
     description:
@@ -52,6 +54,7 @@ const domains = [
   },
   {
     title: "Frontend Development",
+    category: "web",
     badge: "⚡ Trending 2026",
     icon: <Globe size={30} />,
     description:
@@ -59,6 +62,7 @@ const domains = [
   },
   {
     title: "Backend Development",
+    category: "web",
     badge: "⚡ High Demand",
     icon: <Database size={30} />,
     description:
@@ -66,6 +70,7 @@ const domains = [
   },
   {
     title: "Mobile App Development",
+    category: "mobile",
     badge: "⭐ Top Choice",
     icon: <Smartphone size={30} />,
     description:
@@ -73,6 +78,7 @@ const domains = [
   },
   {
     title: "Cloud Computing & DevOps",
+    category: "cloud",
     badge: "🚀 2026 Hot Skill",
     icon: <Cloud size={30} />,
     description:
@@ -80,6 +86,7 @@ const domains = [
   },
   {
     title: "Machine Learning",
+    category: "ai",
     badge: "🔥 High Demand",
     icon: <Bot size={30} />,
     description:
@@ -87,6 +94,7 @@ const domains = [
   },
   {
     title: "Cyber Security",
+    category: "cloud",
     badge: "🛡️ High Demand",
     icon: <Shield size={30} />,
     description:
@@ -329,6 +337,14 @@ const domains = [
 ];
 
 export default function Career() {
+  const [filterTag, setFilterTag] = useState<string>("all");
+
+  const filteredDomains = domains.filter((d) => {
+    if (filterTag === "all") return true;
+    if (filterTag === "trending") return !!d.badge;
+    return d.category === filterTag;
+  });
+
   return (
     <main className="bg-[#fffaf7] dark:bg-[#0d111a] text-[#182033] dark:text-gray-100 transition-colors duration-300">
       <section className="relative overflow-hidden pt-32 pb-20 sm:pt-36">
@@ -364,20 +380,84 @@ export default function Career() {
 
       <section className="section-shell pt-8">
         <div className="container-shell">
-          <div className="mx-auto mb-14 max-w-3xl text-center">
+          <div className="mx-auto mb-10 max-w-3xl text-center">
             <p className="eyebrow justify-center">Internship Domains</p>
             <h2 className="section-title mt-3 text-4xl text-[#182033] dark:text-white">
               Choose your area of interest
             </h2>
           </div>
 
+          {/* Trend Filter Pills Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+            <button
+              onClick={() => setFilterTag("all")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                filterTag === "all"
+                  ? "bg-[#FF4D37] text-white shadow-md"
+                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+              }`}
+            >
+              ⚡ All Domains ({domains.length})
+            </button>
+            <button
+              onClick={() => setFilterTag("trending")}
+              className={`rounded-xl px-4 py-2 text-xs font-black transition cursor-pointer flex items-center gap-1 ${
+                filterTag === "trending"
+                  ? "bg-[#FF4D37] text-white shadow-md"
+                  : "bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 hover:bg-[#ffe5dc]"
+              }`}
+            >
+              🔥 Top Trending 2026 ({domains.filter(d => !!d.badge).length})
+            </button>
+            <button
+              onClick={() => setFilterTag("ai")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                filterTag === "ai"
+                  ? "bg-[#FF4D37] text-white shadow-md"
+                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+              }`}
+            >
+              🤖 AI & Data Science
+            </button>
+            <button
+              onClick={() => setFilterTag("web")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                filterTag === "web"
+                  ? "bg-[#FF4D37] text-white shadow-md"
+                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+              }`}
+            >
+              💻 Web & Full Stack
+            </button>
+            <button
+              onClick={() => setFilterTag("mobile")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                filterTag === "mobile"
+                  ? "bg-[#FF4D37] text-white shadow-md"
+                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+              }`}
+            >
+              📱 Mobile Apps
+            </button>
+            <button
+              onClick={() => setFilterTag("cloud")}
+              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                filterTag === "cloud"
+                  ? "bg-[#FF4D37] text-white shadow-md"
+                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+              }`}
+            >
+              ☁️ Cloud & Security
+            </button>
+          </div>
+
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {domains.map((domain, index) => (
+            {filteredDomains.map((domain, index) => (
               <motion.article
                 key={domain.title}
                 initial={{ opacity: 0, y: 35 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.06 }}
+                transition={{ duration: 0.4, delay: index * 0.04 }}
                 viewport={{ once: true }}
                 whileHover={{ y: -7 }}
                 className="soft-card rounded-3xl p-7 flex flex-col bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition"
