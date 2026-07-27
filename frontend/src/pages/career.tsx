@@ -37,52 +37,60 @@ import {
 
 const domains = [
   {
-    title: "Frontend Development",
-    icon: <Globe size={30} />,
+    title: "Artificial Intelligence",
+    badge: "🔥 #1 Most Popular",
+    icon: <BrainCircuit size={30} />,
     description:
-      "Learn React, HTML, CSS, Tailwind CSS, TypeScript, and modern frontend development.",
-  },
-  {
-    title: "Backend Development",
-    icon: <Database size={30} />,
-    description:
-      "Build scalable APIs using Node.js, Express, MongoDB, and REST architecture.",
+      "Build intelligent applications using AI, LLMs, prompt engineering, and automation tools.",
   },
   {
     title: "Full Stack Development",
+    badge: "🚀 High Demand",
     icon: <Code2 size={30} />,
     description:
-      "Work across frontend and backend systems while understanding real product delivery.",
+      "Work across frontend and backend systems using MERN / Python while understanding real product delivery.",
+  },
+  {
+    title: "Frontend Development",
+    badge: "⚡ Trending 2026",
+    icon: <Globe size={30} />,
+    description:
+      "Learn React 19, HTML, CSS, Tailwind CSS, TypeScript, and modern high-performance frontend development.",
+  },
+  {
+    title: "Backend Development",
+    badge: "⚡ High Demand",
+    icon: <Database size={30} />,
+    description:
+      "Build scalable APIs using Node.js, Express, Python, PostgreSQL, and REST/GraphQL architecture.",
   },
   {
     title: "Mobile App Development",
+    badge: "⭐ Top Choice",
     icon: <Smartphone size={30} />,
     description:
-      "Develop Android and iOS applications using Flutter and React Native.",
+      "Develop Android and iOS applications using Flutter, React Native, and cross-platform tools.",
   },
   {
-    title: "Artificial Intelligence",
-    icon: <BrainCircuit size={30} />,
+    title: "Cloud Computing & DevOps",
+    badge: "🚀 2026 Hot Skill",
+    icon: <Cloud size={30} />,
     description:
-      "Build intelligent applications using AI, LLMs, and automation tools.",
+      "Deploy scalable applications using AWS, Azure, Docker, Kubernetes, and CI/CD pipelines.",
   },
   {
     title: "Machine Learning",
+    badge: "🔥 High Demand",
     icon: <Bot size={30} />,
     description:
-      "Learn supervised learning, deep learning, model deployment, and AI workflows.",
+      "Learn supervised learning, deep learning, neural networks, model deployment, and AI workflows.",
   },
   {
     title: "Cyber Security",
+    badge: "🛡️ High Demand",
     icon: <Shield size={30} />,
     description:
-      "Learn ethical hacking, network security, penetration testing, and secure development.",
-  },
-  {
-    title: "Cloud Computing",
-    icon: <Cloud size={30} />,
-    description:
-      "Deploy applications using AWS, Azure, Docker, and Kubernetes.",
+      "Learn ethical hacking, network security, penetration testing, zero-trust, and secure development.",
   },
   {
     title: "UI / UX Design",
@@ -374,6 +382,15 @@ export default function Career() {
                 whileHover={{ y: -7 }}
                 className="soft-card rounded-3xl p-7 flex flex-col bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition"
               >
+                {/* Trend Badge if present */}
+                {domain.badge && (
+                  <div className="mb-3">
+                    <span className="px-2.5 py-1 rounded-full text-[11px] font-black bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 inline-block">
+                      {domain.badge}
+                    </span>
+                  </div>
+                )}
+
                 {/* Icon Left - Title Right */}
                 <div className="flex items-center gap-4">
                   <div className="icon-tile flex h-14 w-14 items-center justify-center flex-shrink-0 bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] rounded-2xl">
