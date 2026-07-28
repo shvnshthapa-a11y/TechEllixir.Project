@@ -76,8 +76,10 @@ interface ServiceCmsItem {
   title: string;
   category: string;
   description: string;
-  note: string;
-  highlights: string;
+  note?: string;
+  detailedOverview?: string;
+  highlights?: string;
+  subServices?: any;
 }
 
 interface ResourceCmsItem {
@@ -85,7 +87,10 @@ interface ResourceCmsItem {
   title: string;
   category: string;
   readTime: string;
+  fileFormat?: string;
   description: string;
+  summary?: string;
+  takeaways?: string;
   date?: string;
 }
 
@@ -95,6 +100,8 @@ interface CareerCmsItem {
   category: string;
   badge: string;
   duration: string;
+  stipend?: string;
+  mode?: string;
   desc: string;
 }
 
@@ -1558,16 +1565,49 @@ export default function Admin() {
       
       {/* Service CMS Modal */}
       {editingService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
-            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingService.id ? "Edit Service" : "Add New Service"}</h3>
-            <form onSubmit={handleSaveServiceCms} className="space-y-3 text-xs">
-              <input type="text" required placeholder="Service Title" value={editingService.title || ""} onChange={(e) => setEditingService({ ...editingService, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" placeholder="Category" value={editingService.category || ""} onChange={(e) => setEditingService({ ...editingService, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <textarea rows={3} placeholder="Service Description" value={editingService.description || ""} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setEditingService(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Service</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md overflow-y-auto">
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-black text-[#182033] dark:text-white">{editingService.id ? "Edit Service Details" : "Add New Technical Service"}</h3>
+            <form onSubmit={handleSaveServiceCms} className="space-y-4 text-xs">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Service Title</label>
+                  <input type="text" required placeholder="e.g. Web Development" value={editingService.title || ""} onChange={(e) => setEditingService({ ...editingService, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Category</label>
+                  <input type="text" placeholder="e.g. Core Engineering" value={editingService.category || ""} onChange={(e) => setEditingService({ ...editingService, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Card Summary</label>
+                <textarea rows={2} placeholder="Brief summary displayed on main service card..." value={editingService.description || ""} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Sub-note / Banner Highlight</label>
+                <input type="text" placeholder="e.g. High-performance architecture with 99.9% SLA..." value={editingService.note || ""} onChange={(e) => setEditingService({ ...editingService, note: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Detailed Overview (Full Click Page View)</label>
+                <textarea rows={3} placeholder="Full in-depth technical overview when user clicks..." value={editingService.detailedOverview || ""} onChange={(e) => setEditingService({ ...editingService, detailedOverview: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Key Highlights (Comma-separated)</label>
+                <input type="text" placeholder="React 19 & Next.js, Node.js & APIs, Scalable Web Apps" value={editingService.highlights || ""} onChange={(e) => setEditingService({ ...editingService, highlights: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Sub-Services Offered (Comma-separated)</label>
+                <textarea rows={2} placeholder="Custom Web Apps, RESTful APIs, E-Commerce, PWA, SEO Optimization" value={Array.isArray(editingService.subServices) ? editingService.subServices.join(", ") : (editingService.subServices || "")} onChange={(e) => setEditingService({ ...editingService, subServices: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
+                <button type="button" onClick={() => setEditingService(null)} className="px-5 py-2.5 rounded-xl text-gray-500 font-bold">Cancel</button>
+                <button type="submit" className="brand-button px-6 py-2.5 text-xs font-black">Save Service Details</button>
               </div>
             </form>
           </motion.div>
@@ -1576,16 +1616,50 @@ export default function Admin() {
 
       {/* Resource CMS Modal */}
       {editingResource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
-            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingResource.id ? "Edit Article" : "Add New Article"}</h3>
-            <form onSubmit={handleSaveResourceCms} className="space-y-3 text-xs">
-              <input type="text" required placeholder="Article Title" value={editingResource.title || ""} onChange={(e) => setEditingResource({ ...editingResource, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" placeholder="Category (e.g. Blogs & Articles)" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <textarea rows={3} placeholder="Article Overview" value={editingResource.description || ""} onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setEditingResource(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Publish Article</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md overflow-y-auto">
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-black text-[#182033] dark:text-white">{editingResource.id ? "Edit Resource Article" : "Publish New Resource / Whitepaper"}</h3>
+            <form onSubmit={handleSaveResourceCms} className="space-y-4 text-xs">
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-2">
+                  <label className="block font-extrabold text-gray-500 mb-1">Article Title</label>
+                  <input type="text" required placeholder="e.g. SEO Services in Dehradun: 2026 Trends" value={editingResource.title || ""} onChange={(e) => setEditingResource({ ...editingResource, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Category</label>
+                  <input type="text" placeholder="Blogs & Articles / Whitepaper" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Read Time</label>
+                  <input type="text" placeholder="e.g. 5 min read" value={editingResource.readTime || ""} onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Asset Format</label>
+                  <input type="text" placeholder="PDF Blueprint / Interactive Guide" value={editingResource.fileFormat || ""} onChange={(e) => setEditingResource({ ...editingResource, fileFormat: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Short Excerpt / Teaser</label>
+                <textarea rows={2} placeholder="Brief summary displayed on main article cards..." value={editingResource.description || ""} onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Full Article Content / Summary (Click View)</label>
+                <textarea rows={4} placeholder="Full content displayed when user clicks to read..." value={editingResource.summary || ""} onChange={(e) => setEditingResource({ ...editingResource, summary: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Key Takeaways (Comma-separated)</label>
+                <input type="text" placeholder="Chunking strategies, Qdrant indexing, Hybrid search" value={editingResource.takeaways || ""} onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold" />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
+                <button type="button" onClick={() => setEditingResource(null)} className="px-5 py-2.5 rounded-xl text-gray-500 font-bold">Cancel</button>
+                <button type="submit" className="brand-button px-6 py-2.5 text-xs font-black">Publish Resource Article</button>
               </div>
             </form>
           </motion.div>
@@ -1594,16 +1668,49 @@ export default function Admin() {
 
       {/* Career CMS Modal */}
       {editingCareer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
-            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingCareer.id ? "Edit Domain" : "Add Internship Domain"}</h3>
-            <form onSubmit={handleSaveCareerCms} className="space-y-3 text-xs">
-              <input type="text" required placeholder="Domain Title (e.g. Artificial Intelligence)" value={editingCareer.title || ""} onChange={(e) => setEditingCareer({ ...editingCareer, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" placeholder="Badge (e.g. 🔥 #1 Most Popular)" value={editingCareer.badge || ""} onChange={(e) => setEditingCareer({ ...editingCareer, badge: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <textarea rows={3} placeholder="Domain Description & Curriculum" value={editingCareer.desc || ""} onChange={(e) => setEditingCareer({ ...editingCareer, desc: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setEditingCareer(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Domain</button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md overflow-y-auto">
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-black text-[#182033] dark:text-white">{editingCareer.id ? "Edit Internship Domain Details" : "Add New Internship Training Domain"}</h3>
+            <form onSubmit={handleSaveCareerCms} className="space-y-4 text-xs">
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Domain Title</label>
+                  <input type="text" required placeholder="e.g. Artificial Intelligence" value={editingCareer.title || ""} onChange={(e) => setEditingCareer({ ...editingCareer, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Category (e.g. ai, web, mobile)</label>
+                  <input type="text" placeholder="ai / web / mobile / cloud" value={editingCareer.category || ""} onChange={(e) => setEditingCareer({ ...editingCareer, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Trend Badge</label>
+                  <input type="text" placeholder="🔥 #1 Most Popular" value={editingCareer.badge || ""} onChange={(e) => setEditingCareer({ ...editingCareer, badge: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Duration</label>
+                  <input type="text" placeholder="2 - 6 Months" value={editingCareer.duration || ""} onChange={(e) => setEditingCareer({ ...editingCareer, duration: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+                <div>
+                  <label className="block font-extrabold text-gray-500 mb-1">Work Mode</label>
+                  <input type="text" placeholder="Online / Hybrid" value={editingCareer.mode || "Online / Hybrid"} onChange={(e) => setEditingCareer({ ...editingCareer, mode: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Stipend Policy</label>
+                <input type="text" placeholder="Performance Based / Performance Stipend" value={editingCareer.stipend || "Performance Based"} onChange={(e) => setEditingCareer({ ...editingCareer, stipend: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              </div>
+
+              <div>
+                <label className="block font-extrabold text-gray-500 mb-1">Domain Description & Curriculum Overview</label>
+                <textarea rows={4} placeholder="Detailed curriculum overview (e.g. Machine Learning, LLM Fine-Tuning, RAG Pipelines, Python & PyTorch)..." value={editingCareer.desc || ""} onChange={(e) => setEditingCareer({ ...editingCareer, desc: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
+                <button type="button" onClick={() => setEditingCareer(null)} className="px-5 py-2.5 rounded-xl text-gray-500 font-bold">Cancel</button>
+                <button type="submit" className="brand-button px-6 py-2.5 text-xs font-black">Save Internship Domain</button>
               </div>
             </form>
           </motion.div>
