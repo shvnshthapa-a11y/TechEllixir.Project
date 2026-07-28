@@ -62,7 +62,7 @@ interface PortalUser {
   name: string;
   email: string;
   role: "user" | "admin";
-  status: "active" | "suspended";
+  status: "active" | "suspended" | "inactive";
   createdAt: string;
 }
 
@@ -440,6 +440,60 @@ export default function Admin() {
       setError(err.message || "Failed to send reply email.");
     } finally {
       setIsSendingReply(false);
+    }
+  };
+
+  // User Handlers
+  const handleToggleUserRole = async (userItem: PortalUser) => {
+    const newRole = userItem.role === "admin" ? "user" : "admin";
+    try {
+      const res = await fetch(`/api/admin/users/${userItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ role: newRole }),
+      });
+      if (res.ok) {
+        setUsers((prev) => prev.map((u) => u.id === userItem.id ? { ...u, role: newRole } : u));
+        setSuccessMsg(`User role updated to ${newRole}`);
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to update user role");
+    }
+  };
+
+  const handleToggleUserStatus = async (userItem: PortalUser) => {
+    const newStatus = userItem.status === "active" ? "inactive" : "active";
+    try {
+      const res = await fetch(`/api/admin/users/${userItem.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        setUsers((prev) => prev.map((u) => u.id === userItem.id ? { ...u, status: newStatus } : u));
+        setSuccessMsg(`User status updated to ${newStatus}`);
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to update user status");
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    if (!window.confirm("Are you sure you want to remove this user account?")) return;
+    try {
+      const res = await fetch(`/api/admin/users/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setUsers((prev) => prev.filter((u) => u.id !== id));
+        setSuccessMsg("User removed successfully");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to delete user");
     }
   };
 
@@ -1167,6 +1221,225 @@ export default function Admin() {
                           </td>
                         </tr>
                       ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: INTERNSHIP APPLICATIONS */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "internships" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                    <Briefcase size={22} className="text-[#FF4D37]" /> Manage Internship Applications
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Review student candidate registrations, applied domain choices, and resume profiles.
+                  </p>
+                </div>
+                <div className="relative max-w-xs w-full">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search candidate or domain..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
+                  />
+                </div>
+              </div>
+
+              <div className="soft-card rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 text-[11px] font-black uppercase text-gray-400">
+                        <th className="p-4 pl-6">Candidate Name</th>
+                        <th className="p-4">Contact Email & Phone</th>
+                        <th className="p-4">Applied Training Domain</th>
+                        <th className="p-4">Submission Date</th>
+                        <th className="p-4">Application Status</th>
+                        <th className="p-4 text-right pr-6">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                      {internshipApplications.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="p-12 text-center text-gray-400 font-bold">
+                            No internship applications found yet. Candidate registrations will appear here.
+                          </td>
+                        </tr>
+                      ) : (
+                        internshipApplications
+                          .filter((app) =>
+                            searchTerm
+                              ? app.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                app.subject.toLowerCase().includes(searchTerm.toLowerCase())
+                              : true
+                          )
+                          .map((app) => (
+                            <tr key={app.id} className="hover:bg-orange-50/30 dark:hover:bg-slate-900/40 transition">
+                              <td className="p-4 pl-6 font-black text-[#182033] dark:text-white">
+                                {app.fullName}
+                              </td>
+                              <td className="p-4">
+                                <p className="font-bold text-gray-800 dark:text-gray-200">{app.email}</p>
+                                {app.phone && <p className="text-[11px] text-gray-400">{app.phone}</p>}
+                              </td>
+                              <td className="p-4">
+                                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 dark:bg-slate-800 text-[#FF4D37] inline-block">
+                                  {app.subject.replace("Internship Registration:", "").trim()}
+                                </span>
+                              </td>
+                              <td className="p-4 text-gray-500 font-semibold text-[11px]">
+                                {new Date(app.createdAt).toLocaleDateString()}
+                              </td>
+                              <td className="p-4">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusClass[app.status]}`}>
+                                  {statusLabels[app.status]}
+                                </span>
+                              </td>
+                              <td className="p-4 pr-6 text-right space-x-2">
+                                <button
+                                  onClick={() => setReplyRecipient(app)}
+                                  className="p-2 rounded-xl bg-orange-50 dark:bg-slate-800 text-[#FF4D37] hover:bg-[#FF4D37] hover:text-white transition cursor-pointer font-bold text-[11px] inline-flex items-center gap-1"
+                                >
+                                  <Send size={13} /> Reply Candidate
+                                </button>
+                                <button
+                                  onClick={() => handleStatusChange(app.id, app.status === "resolved" ? "new" : "resolved")}
+                                  className="p-2 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white transition cursor-pointer font-bold text-[11px]"
+                                >
+                                  {app.status === "resolved" ? "Mark Pending" : "Shortlist"}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteQuery(app.id)}
+                                  className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: PORTAL USER DIRECTORY */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "users" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                    <Users size={22} className="text-[#FF4D37]" /> Registered Portal Users Directory
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Manage administrative roles, access privileges, and user account statuses.
+                  </p>
+                </div>
+                <div className="relative max-w-xs w-full">
+                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search by user name or email..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
+                  />
+                </div>
+              </div>
+
+              <div className="soft-card rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 text-[11px] font-black uppercase text-gray-400">
+                        <th className="p-4 pl-6">User Account</th>
+                        <th className="p-4">Email Address</th>
+                        <th className="p-4">Access Role</th>
+                        <th className="p-4">Account Status</th>
+                        <th className="p-4 text-right pr-6">Management Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
+                      {users.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-12 text-center text-gray-400 font-bold">
+                            No registered users found.
+                          </td>
+                        </tr>
+                      ) : (
+                        users
+                          .filter((u) =>
+                            searchTerm
+                              ? u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                u.email.toLowerCase().includes(searchTerm.toLowerCase())
+                              : true
+                          )
+                          .map((u) => (
+                            <tr key={u.id} className="hover:bg-orange-50/30 dark:hover:bg-slate-900/40 transition">
+                              <td className="p-4 pl-6 font-black text-[#182033] dark:text-white flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF4D37] to-amber-500 text-white font-black flex items-center justify-center text-xs">
+                                  {u.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span>{u.name}</span>
+                              </td>
+                              <td className="p-4 font-bold text-gray-700 dark:text-gray-300">
+                                {u.email}
+                              </td>
+                              <td className="p-4">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                                  u.role === "admin"
+                                    ? "bg-purple-100 dark:bg-slate-800 text-purple-600 dark:text-purple-400"
+                                    : "bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400"
+                                }`}>
+                                  {u.role || "User"}
+                                </span>
+                              </td>
+                              <td className="p-4">
+                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
+                                  u.status === "active"
+                                    ? "bg-emerald-100 dark:bg-slate-800 text-emerald-600 dark:text-emerald-400"
+                                    : "bg-rose-100 dark:bg-slate-800 text-rose-600 dark:text-rose-400"
+                                }`}>
+                                  {u.status || "Active"}
+                                </span>
+                              </td>
+                              <td className="p-4 pr-6 text-right space-x-2">
+                                <button
+                                  onClick={() => handleToggleUserRole(u)}
+                                  className="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-slate-700 hover:text-[#FF4D37] transition cursor-pointer font-bold text-[11px]"
+                                >
+                                  Make {u.role === "admin" ? "User" : "Admin"}
+                                </button>
+                                <button
+                                  onClick={() => handleToggleUserStatus(u)}
+                                  className="px-3 py-1.5 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-orange-50 dark:hover:bg-slate-700 hover:text-[#FF4D37] transition cursor-pointer font-bold text-[11px]"
+                                >
+                                  {u.status === "active" ? "Deactivate" : "Activate"}
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteUser(u.id)}
+                                  className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                                >
+                                  <Trash2 size={15} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                      )}
                     </tbody>
                   </table>
                 </div>
