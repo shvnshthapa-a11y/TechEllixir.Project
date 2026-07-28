@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   BrainCircuit,
@@ -390,119 +390,87 @@ export default function Career() {
 
           {/* Trend Filter Pills Bar */}
           <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-            <button
-              onClick={() => setFilterTag("all")}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                filterTag === "all"
-                  ? "bg-[#FF4D37] text-white shadow-md"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              ⚡ All Domains ({domains.length})
-            </button>
-            <button
-              onClick={() => setFilterTag("trending")}
-              className={`rounded-xl px-4 py-2 text-xs font-black transition cursor-pointer flex items-center gap-1 ${
-                filterTag === "trending"
-                  ? "bg-[#FF4D37] text-white shadow-md"
-                  : "bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 hover:bg-[#ffe5dc]"
-              }`}
-            >
-              🔥 Top Trending 2026 ({domains.filter(d => !!d.badge).length})
-            </button>
-            <button
-              onClick={() => setFilterTag("ai")}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                filterTag === "ai"
-                  ? "bg-[#FF4D37] text-white shadow-md"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              🤖 AI & Data Science
-            </button>
-            <button
-              onClick={() => setFilterTag("web")}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                filterTag === "web"
-                  ? "bg-[#FF4D37] text-white shadow-md"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              💻 Web & Full Stack
-            </button>
-            <button
-              onClick={() => setFilterTag("mobile")}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                filterTag === "mobile"
-                  ? "bg-[#FF4D37] text-white shadow-md"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              📱 Mobile Apps
-            </button>
-            <button
-              onClick={() => setFilterTag("cloud")}
-              className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
-                filterTag === "cloud"
-                  ? "bg-[#FF4D37] text-white shadow-md"
-                  : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              ☁️ Cloud & Security
-            </button>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {filteredDomains.map((domain, index) => (
-              <motion.article
-                key={domain.title}
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.04 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -7 }}
-                className="soft-card rounded-3xl p-7 flex flex-col bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition"
+            {[
+              { id: "all", label: `⚡ All Domains (${domains.length})` },
+              { id: "trending", label: `🔥 Top Trending 2026 (${domains.filter(d => !!d.badge).length})` },
+              { id: "ai", label: "🤖 AI & Data Science" },
+              { id: "web", label: "💻 Web & Full Stack" },
+              { id: "mobile", label: "📱 Mobile Apps" },
+              { id: "cloud", label: "☁️ Cloud & Security" },
+            ].map((tab) => (
+              <motion.button
+                key={tab.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setFilterTag(tab.id)}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                  filterTag === tab.id
+                    ? "bg-[#FF4D37] text-white shadow-lg shadow-[#FF4D37]/20 font-black"
+                    : tab.id === "trending"
+                    ? "bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 hover:bg-[#ffe5dc]"
+                    : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+                }`}
               >
-                {/* Trend Badge if present */}
-                {domain.badge && (
-                  <div className="mb-3">
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-black bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 inline-block">
-                      {domain.badge}
-                    </span>
-                  </div>
-                )}
-
-                {/* Icon Left - Title Right */}
-                <div className="flex items-center gap-4">
-                  <div className="icon-tile flex h-14 w-14 items-center justify-center flex-shrink-0 bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] rounded-2xl">
-                    {domain.icon}
-                  </div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white leading-snug flex-1">
-                    {domain.title}
-                  </h3>
-                </div>
-
-                {/* Description */}
-                <p className="section-copy mt-5 text-sm flex-1 text-gray-600 dark:text-gray-300">
-                  {domain.description}
-                </p>
-
-                {/* Button */}
-                <a
-                  href="https://forms.gle/gedBkK75jMnxHF8t8"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group mt-7 inline-flex items-center gap-2 font-bold text-[#FF4D37] hover:underline"
-                >
-                  Register Now
-                  <ArrowUpRight
-                    size={18}
-                    className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-                  />
-                </a>
-              </motion.article>
+                {tab.label}
+              </motion.button>
             ))}
           </div>
+
+          <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <AnimatePresence mode="popLayout">
+              {filteredDomains.map((domain, index) => (
+                <motion.article
+                  layout
+                  key={domain.title}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="soft-card rounded-3xl p-7 flex flex-col bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:border-[#ffd5ca] dark:hover:border-slate-700 transition-all duration-300 group"
+                >
+                  {/* Trend Badge if present */}
+                  {domain.badge && (
+                    <div className="mb-3">
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-black bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 inline-block group-hover:scale-105 transition">
+                        {domain.badge}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Icon Left - Title Right */}
+                  <div className="flex items-center gap-4">
+                    <div className="icon-tile flex h-14 w-14 items-center justify-center flex-shrink-0 bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] rounded-2xl group-hover:scale-110 group-hover:rotate-3 group-hover:bg-[#FF4D37] group-hover:text-white transition-all duration-300 shadow-sm">
+                      {domain.icon}
+                    </div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white leading-snug flex-1 group-hover:text-[#FF4D37] transition-colors duration-200">
+                      {domain.title}
+                    </h3>
+                  </div>
+
+                  {/* Description */}
+                  <p className="section-copy mt-5 text-sm flex-1 text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {domain.description}
+                  </p>
+
+                  {/* Button */}
+                  <a
+                    href="https://forms.gle/gedBkK75jMnxHF8t8"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/btn mt-7 inline-flex items-center gap-2 font-bold text-[#FF4D37] hover:underline"
+                  >
+                    Register Now
+                    <ArrowUpRight
+                      size={18}
+                      className="transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
+                    />
+                  </a>
+                </motion.article>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </section>
 
