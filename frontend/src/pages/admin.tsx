@@ -80,19 +80,25 @@ interface ServiceCmsItem {
   description: string;
   note?: string;
   detailedOverview?: string;
-  highlights?: string;
+  highlights?: any;
   subServices?: any;
+  processSteps?: any;
+  keyOutcomes?: any;
+  techStack?: any;
 }
 
 interface ResourceCmsItem {
   id: string;
   title: string;
   category: string;
+  categoryLabel?: string;
   readTime: string;
   fileFormat?: string;
+  author?: string;
+  authorRole?: string;
   description: string;
   summary?: string;
-  takeaways?: string;
+  takeaways?: any;
   date?: string;
 }
 
@@ -105,6 +111,8 @@ interface CareerCmsItem {
   stipend?: string;
   mode?: string;
   desc: string;
+  detailedCurriculum?: string;
+  requirements?: string;
 }
 
 const statusOptions: Array<{ label: string; value: QueryStatus | "all" }> = [
@@ -444,6 +452,15 @@ export default function Admin() {
     const endpoint = isEdit ? `/api/admin/cms/services/${editingService.id}` : "/api/admin/cms/services";
     const method = isEdit ? "PATCH" : "POST";
 
+    const payload = {
+      ...editingService,
+      highlights: typeof editingService.highlights === "string" ? editingService.highlights.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.highlights || []),
+      subServices: typeof editingService.subServices === "string" ? editingService.subServices.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.subServices || []),
+      processSteps: typeof editingService.processSteps === "string" ? editingService.processSteps.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.processSteps || []),
+      keyOutcomes: typeof editingService.keyOutcomes === "string" ? editingService.keyOutcomes.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.keyOutcomes || []),
+      techStack: typeof editingService.techStack === "string" ? editingService.techStack.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.techStack || []),
+    };
+
     try {
       const res = await fetch(endpoint, {
         method,
@@ -451,7 +468,7 @@ export default function Admin() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(editingService),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {
@@ -492,6 +509,11 @@ export default function Admin() {
     const endpoint = isEdit ? `/api/admin/cms/resources/${editingResource.id}` : "/api/admin/cms/resources";
     const method = isEdit ? "PATCH" : "POST";
 
+    const payload = {
+      ...editingResource,
+      takeaways: typeof editingResource.takeaways === "string" ? editingResource.takeaways.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingResource.takeaways || []),
+    };
+
     try {
       const res = await fetch(endpoint, {
         method,
@@ -499,7 +521,7 @@ export default function Admin() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(editingResource),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (res.ok) {
@@ -1187,34 +1209,49 @@ export default function Admin() {
                           <input type="text" required placeholder="e.g. Web Development" value={editingService.title || ""} onChange={(e) => setEditingService({ ...editingService, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                         <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Tag</label>
                           <input type="text" placeholder="e.g. Core Engineering" value={editingService.category || ""} onChange={(e) => setEditingService({ ...editingService, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Card Summary (Short Excerpt)</label>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Card Teaser Summary (Main Card View)</label>
                         <textarea rows={2} placeholder="Brief summary displayed on main service card..." value={editingService.description || ""} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Sub-note / Highlight Banner</label>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Highlight Banner Note</label>
                         <input type="text" placeholder="e.g. High-performance architecture with 99.9% SLA..." value={editingService.note || ""} onChange={(e) => setEditingService({ ...editingService, note: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Detailed Overview (Full Page Modal View)</label>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Detailed Technical Overview (Frontend Modal Click View)</label>
                         <textarea rows={4} placeholder="Full in-depth technical overview when user clicks to explore..." value={editingService.detailedOverview || ""} onChange={(e) => setEditingService({ ...editingService, detailedOverview: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Technical Highlights (Comma-separated)</label>
-                        <input type="text" placeholder="React 19 & Next.js, Node.js & APIs, Scalable Web Apps" value={editingService.highlights || ""} onChange={(e) => setEditingService({ ...editingService, highlights: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Top Key Highlights (Comma-separated)</label>
+                        <input type="text" placeholder="React 19 & Next.js, Node.js & APIs, Scalable Web Apps" value={Array.isArray(editingService.highlights) ? editingService.highlights.join(", ") : (editingService.highlights || "")} onChange={(e) => setEditingService({ ...editingService, highlights: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div>
                         <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Sub-Services Offered (Comma-separated)</label>
                         <textarea rows={2} placeholder="Custom Web Apps, RESTful APIs, E-Commerce, PWA, SEO Optimization" value={Array.isArray(editingService.subServices) ? editingService.subServices.join(", ") : (editingService.subServices || "")} onChange={(e) => setEditingService({ ...editingService, subServices: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Engineering Process Steps (Comma-separated)</label>
+                        <textarea rows={2} placeholder="1. Audit & Discovery, 2. Schema Design, 3. Full-Stack Dev, 4. Security & Launch" value={Array.isArray(editingService.processSteps) ? editingService.processSteps.join(", ") : (editingService.processSteps || "")} onChange={(e) => setEditingService({ ...editingService, processSteps: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Business Outcomes (Comma-separated)</label>
+                        <input type="text" placeholder="Sub-100ms LCP, 99.9% Uptime, SEO SSR Architecture, OWASP Hardened" value={Array.isArray(editingService.keyOutcomes) ? editingService.keyOutcomes.join(", ") : (editingService.keyOutcomes || "")} onChange={(e) => setEditingService({ ...editingService, keyOutcomes: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Tech Stack Badges (Comma-separated)</label>
+                        <input type="text" placeholder="React 19, Next.js, TypeScript, Node.js, PostgreSQL, Docker" value={Array.isArray(editingService.techStack) ? editingService.techStack.join(", ") : (editingService.techStack || "")} onChange={(e) => setEditingService({ ...editingService, techStack: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
@@ -1332,24 +1369,39 @@ export default function Admin() {
                           <input type="text" required placeholder="e.g. SEO Services in Dehradun: 2026 Trends" value={editingResource.title || ""} onChange={(e) => setEditingResource({ ...editingResource, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                         <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                          <input type="text" placeholder="Blogs & Articles / Whitepaper" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Slug</label>
+                          <input type="text" placeholder="whitepaper / casestudy / guide / blogs" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                       </div>
 
                       <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Read Time</label>
-                          <input type="text" placeholder="e.g. 5 min read" value={editingResource.readTime || ""} onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Label</label>
+                          <input type="text" placeholder="e.g. Whitepapers & E-Books" value={editingResource.categoryLabel || ""} onChange={(e) => setEditingResource({ ...editingResource, categoryLabel: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                         <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Read Time</label>
+                          <input type="text" placeholder="e.g. 15 min read" value={editingResource.readTime || ""} onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        <div>
                           <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Asset Format</label>
-                          <input type="text" placeholder="PDF Blueprint / Interactive Guide" value={editingResource.fileFormat || ""} onChange={(e) => setEditingResource({ ...editingResource, fileFormat: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                          <input type="text" placeholder="PDF (3.2 MB) / Interactive Guide" value={editingResource.fileFormat || ""} onChange={(e) => setEditingResource({ ...editingResource, fileFormat: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Author Name</label>
+                          <input type="text" placeholder="e.g. Shivansh Thapa" value={editingResource.author || ""} onChange={(e) => setEditingResource({ ...editingResource, author: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Author Role</label>
+                          <input type="text" placeholder="e.g. Lead Systems Architect" value={editingResource.authorRole || ""} onChange={(e) => setEditingResource({ ...editingResource, authorRole: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Short Excerpt / Teaser</label>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Short Excerpt / Teaser (Card View)</label>
                         <textarea rows={2} placeholder="Brief summary displayed on main article cards..." value={editingResource.description || ""} onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
                       </div>
 
@@ -1360,7 +1412,7 @@ export default function Admin() {
 
                       <div>
                         <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Takeaways (Comma-separated)</label>
-                        <input type="text" placeholder="Chunking strategies, Qdrant indexing, Hybrid search" value={editingResource.takeaways || ""} onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
+                        <input type="text" placeholder="Chunking strategies, Qdrant indexing, Hybrid search" value={Array.isArray(editingResource.takeaways) ? editingResource.takeaways.join(", ") : (editingResource.takeaways || "")} onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
@@ -1377,7 +1429,7 @@ export default function Admin() {
                     <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="px-3 py-1 rounded-full text-[10px] font-black bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400">
-                          {editingResource.category || "Blogs & Articles"}
+                          {editingResource.categoryLabel || editingResource.category || "Blogs & Articles"}
                         </span>
                         <span className="text-[11px] font-bold text-gray-400">{editingResource.readTime || "5 min read"}</span>
                       </div>
@@ -1476,7 +1528,7 @@ export default function Admin() {
                           <input type="text" required placeholder="e.g. Artificial Intelligence" value={editingCareer.title || ""} onChange={(e) => setEditingCareer({ ...editingCareer, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                         <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category (e.g. ai, web, mobile)</label>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Slug (ai / web / mobile / cloud)</label>
                           <input type="text" placeholder="ai / web / mobile / cloud" value={editingCareer.category || ""} onChange={(e) => setEditingCareer({ ...editingCareer, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
                         </div>
                       </div>
@@ -1496,14 +1548,25 @@ export default function Admin() {
                         </div>
                       </div>
 
-                      <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Stipend Policy</label>
-                        <input type="text" placeholder="Performance Based / Performance Stipend" value={editingCareer.stipend || "Performance Based"} onChange={(e) => setEditingCareer({ ...editingCareer, stipend: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Stipend Policy</label>
+                          <input type="text" placeholder="Performance Based / Performance Stipend" value={editingCareer.stipend || "Performance Based"} onChange={(e) => setEditingCareer({ ...editingCareer, stipend: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Prerequisites & Requirements</label>
+                          <input type="text" placeholder="Laptop, basic programming, 10 hrs/week" value={editingCareer.requirements || ""} onChange={(e) => setEditingCareer({ ...editingCareer, requirements: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
                       </div>
 
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Domain Description & Curriculum Overview</label>
-                        <textarea rows={5} placeholder="Detailed curriculum overview (Machine Learning, PyTorch, RAG Pipelines)..." value={editingCareer.desc || ""} onChange={(e) => setEditingCareer({ ...editingCareer, desc: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Domain Card Summary (Teaser)</label>
+                        <textarea rows={2} placeholder="Brief domain description displayed on card..." value={editingCareer.desc || ""} onChange={(e) => setEditingCareer({ ...editingCareer, desc: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Detailed Syllabus & Curriculum Overview</label>
+                        <textarea rows={5} placeholder="Full curriculum overview (Machine Learning, PyTorch, RAG Pipelines, Python & PyTorch)..." value={editingCareer.detailedCurriculum || ""} onChange={(e) => setEditingCareer({ ...editingCareer, detailedCurriculum: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
                       </div>
 
                       <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
