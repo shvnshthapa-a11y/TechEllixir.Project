@@ -128,6 +128,54 @@ async function ensureUserStore() {
   }
 }
 
+const servicesCmsFile = join(dataDir, "cms_services.json");
+const resourcesCmsFile = join(dataDir, "cms_resources.json");
+const careersCmsFile = join(dataDir, "cms_careers.json");
+
+async function ensureCmsStore() {
+  await ensureStore();
+  try {
+    await stat(servicesCmsFile);
+  } catch {
+    const defaultServices = [
+      { id: "srv_1", title: "Web Development", category: "Core Development", description: "Responsive web platforms built with React, Node.js, and modern architecture.", note: "Enterprise scale and performance", highlights: "React 19 & Next.js, REST/GraphQL API, PostgreSQL" },
+      { id: "srv_2", title: "Artificial Intelligence & RAG", category: "AI & Data", description: "Custom LLM integrations, document search, and intelligent workflow automations.", note: "Sub-second response time", highlights: "Vector DB Integration, Custom AI Agents, PyTorch" },
+      { id: "srv_3", title: "Cloud Architecture & DevOps", category: "Infrastructure", description: "AWS/GCP infrastructure setup, Kubernetes clusters, and automated CI/CD pipelines.", note: "99.99% Uptime SLA", highlights: "Docker & Kubernetes, Terraform, Infrastructure as Code" },
+    ];
+    await writeFile(servicesCmsFile, JSON.stringify(defaultServices, null, 2), "utf8");
+  }
+  try {
+    await stat(resourcesCmsFile);
+  } catch {
+    const defaultResources = [
+      { id: "res_1", title: "SEO Services in Dehradun: 2026 Trends & Growth Guide", category: "Blogs & Articles", readTime: "5 min read", description: "Discover the latest search engine optimization strategies driving organic traffic in 2026.", date: "2026-07-24" },
+      { id: "res_2", title: "TechEllixir Announces Next-Gen AI Internship Program", category: "News & Press", readTime: "3 min read", description: "Empowering 500+ student developers with hands-on industrial AI project experience.", date: "2026-07-25" },
+    ];
+    await writeFile(resourcesCmsFile, JSON.stringify(defaultResources, null, 2), "utf8");
+  }
+  try {
+    await stat(careersCmsFile);
+  } catch {
+    const defaultCareers = [
+      { id: "car_1", title: "Artificial Intelligence", category: "AI & Data Science", badge: "🔥 #1 Most Popular", duration: "2 - 6 Months", desc: "Machine Learning, LLM Fine-Tuning, RAG Pipelines, Python & PyTorch." },
+      { id: "car_2", title: "Full Stack Development", category: "Web & Full Stack", badge: "🚀 High Demand", duration: "2 - 6 Months", desc: "React, Node.js, TypeScript, PostgreSQL, REST APIs & Tailwind CSS." },
+      { id: "car_3", title: "Cloud & DevOps Engineering", category: "Cloud & Security", badge: "⚡ Trending 2026", duration: "2 - 6 Months", desc: "Docker, Kubernetes, AWS, Terraform, CI/CD & Linux Administration." },
+    ];
+    await writeFile(careersCmsFile, JSON.stringify(defaultCareers, null, 2), "utf8");
+  }
+}
+
+async function readCms(file) {
+  await ensureCmsStore();
+  const raw = await readFile(file, "utf8");
+  return JSON.parse(raw);
+}
+
+async function writeCms(file, data) {
+  await ensureCmsStore();
+  await writeFile(file, `${JSON.stringify(data, null, 2)}\n`, "utf8");
+}
+
 async function readUsers() {
   await ensureUserStore();
   const raw = await readFile(usersFile, "utf8");
@@ -636,6 +684,169 @@ async function handleApi(req, res, url) {
         };
         await writeSettings(newSettings);
         json(res, 200, { settings: newSettings });
+        return;
+      }
+    }
+
+    // 7. CMS Management API - Services
+    if (url.pathname === "/api/admin/cms/services" || url.pathname === "/api/cms/services") {
+      if (req.method === "GET") {
+        const items = await readCms(servicesCmsFile);
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await readCms(servicesCmsFile);
+        const newItem = {
+          id: `srv_${Date.now()}`,
+          title: String(body.title || "New Service").trim(),
+          category: String(body.category || "Core").trim(),
+          description: String(body.description || "").trim(),
+          note: String(body.note || "").trim(),
+          highlights: String(body.highlights || "").trim(),
+          createdAt: new Date().toISOString(),
+        };
+        items.unshift(newItem);
+        await writeCms(servicesCmsFile, items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const srvCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/services\/([^/]+)$/);
+    if (srvCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = srvCmsMatch[1];
+      const items = await readCms(servicesCmsFile);
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await writeCms(servicesCmsFile, items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await writeCms(servicesCmsFile, items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 8. CMS Management API - Resources
+    if (url.pathname === "/api/admin/cms/resources" || url.pathname === "/api/cms/resources") {
+      if (req.method === "GET") {
+        const items = await readCms(resourcesCmsFile);
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await readCms(resourcesCmsFile);
+        const newItem = {
+          id: `res_${Date.now()}`,
+          title: String(body.title || "New Resource").trim(),
+          category: String(body.category || "Blogs & Articles").trim(),
+          readTime: String(body.readTime || "5 min read").trim(),
+          description: String(body.description || "").trim(),
+          date: new Date().toISOString().slice(0, 10),
+        };
+        items.unshift(newItem);
+        await writeCms(resourcesCmsFile, items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const resCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/resources\/([^/]+)$/);
+    if (resCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = resCmsMatch[1];
+      const items = await readCms(resourcesCmsFile);
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await writeCms(resourcesCmsFile, items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await writeCms(resourcesCmsFile, items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 9. CMS Management API - Careers
+    if (url.pathname === "/api/admin/cms/careers" || url.pathname === "/api/cms/careers") {
+      if (req.method === "GET") {
+        const items = await readCms(careersCmsFile);
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await readCms(careersCmsFile);
+        const newItem = {
+          id: `car_${Date.now()}`,
+          title: String(body.title || "New Domain").trim(),
+          category: String(body.category || "Web & Full Stack").trim(),
+          badge: String(body.badge || "🔥 Trending").trim(),
+          duration: String(body.duration || "2 - 6 Months").trim(),
+          desc: String(body.desc || "").trim(),
+        };
+        items.unshift(newItem);
+        await writeCms(careersCmsFile, items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const carCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/careers\/([^/]+)$/);
+    if (carCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = carCmsMatch[1];
+      const items = await readCms(careersCmsFile);
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await writeCms(careersCmsFile, items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await writeCms(careersCmsFile, items);
+        json(res, 200, { item: deleted, items });
         return;
       }
     }
