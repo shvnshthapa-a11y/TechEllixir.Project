@@ -1,0 +1,34 @@
+[
+  {
+    "id": "usr_101",
+    "name": "Rudra Pratap Singh",
+    "email": "rudra@example.com",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.304Z"
+  },
+  {
+    "id": "usr_102",
+    "name": "Shivansh Thapa",
+    "email": "shivansh@techellixir.com",
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.306Z"
+  },
+  {
+    "id": "usr_103",
+    "name": "Ananya Sharma",
+    "email": "ananya.sharma@dit.edu.in",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.306Z"
+  },
+  {
+    "id": "usr_104",
+    "name": "Vikram Malhotra",
+    "email": "vikram@geu.ac.in",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.306Z"
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "car_1",
+    "title": "Artificial Intelligence",
+    "category": "AI & Data Science",
+    "badge": "🔥 #1 Most Popular",
+    "duration": "2 - 6 Months",
+    "desc": "Machine Learning, LLM Fine-Tuning, RAG Pipelines, Python & PyTorch."
+  },
+  {
+    "id": "car_2",
+    "title": "Full Stack Development",
+    "category": "Web & Full Stack",
+    "badge": "🚀 High Demand",
+    "duration": "2 - 6 Months",
+    "desc": "React, Node.js, TypeScript, PostgreSQL, REST APIs & Tailwind CSS."
+  },
+  {
+    "id": "car_3",
+    "title": "Cloud & DevOps Engineering",
+    "category": "Cloud & Security",
+    "badge": "⚡ Trending 2026",
+    "duration": "2 - 6 Months",
+    "desc": "Docker, Kubernetes, AWS, Terraform, CI/CD & Linux Administration."
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "srv_1",
+    "title": "Web Development",
+    "category": "Core Development",
+    "description": "Responsive web platforms built with React, Node.js, and modern architecture.",
+    "note": "Enterprise scale and performance",
+    "highlights": "React 19 & Next.js, REST/GraphQL API, PostgreSQL"
+  },
+  {
+    "id": "srv_2",
+    "title": "Artificial Intelligence & RAG",
+    "category": "AI & Data",
+    "description": "Custom LLM integrations, document search, and intelligent workflow automations.",
+    "note": "Sub-second response time",
+    "highlights": "Vector DB Integration, Custom AI Agents, PyTorch"
+  },
+  {
+    "id": "srv_3",
+    "title": "Cloud Architecture & DevOps",
+    "category": "Infrastructure",
+    "description": "AWS/GCP infrastructure setup, Kubernetes clusters, and automated CI/CD pipelines.",
+    "note": "99.99% Uptime SLA",
+    "highlights": "Docker & Kubernetes, Terraform, Infrastructure as Code"
+  }
+]

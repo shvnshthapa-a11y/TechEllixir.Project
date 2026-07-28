@@ -11,8 +11,8 @@ import nodemailer from "nodemailer";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const projectRoot = resolve(__dirname, "..");
 const distDir = join(projectRoot, "dist");
-const dataDir = join(__dirname, "data");
-const queriesFile = join(dataDir, "queries.json");
+const resourcesDir = join(__dirname, "resources");
+const queriesFile = join(resourcesDir, "queries.json");
 
 const PORT = Number(process.env.PORT || 4174);
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin@123";
@@ -96,7 +96,7 @@ const mimeTypes = {
 };
 
 async function ensureStore() {
-  await mkdir(dataDir, { recursive: true });
+  await mkdir(resourcesDir, { recursive: true });
   try {
     await stat(queriesFile);
   } catch {
@@ -104,8 +104,8 @@ async function ensureStore() {
   }
 }
 
-const usersFile = join(dataDir, "users.json");
-const settingsFile = join(dataDir, "settings.json");
+const usersFile = join(resourcesDir, "users.json");
+const settingsFile = join(resourcesDir, "settings.json");
 
 async function ensureUserStore() {
   await ensureStore();
@@ -128,9 +128,9 @@ async function ensureUserStore() {
   }
 }
 
-const servicesCmsFile = join(dataDir, "cms_services.json");
-const resourcesCmsFile = join(dataDir, "cms_resources.json");
-const careersCmsFile = join(dataDir, "cms_careers.json");
+const servicesCmsFile = join(resourcesDir, "services.json");
+const resourcesCmsFile = join(resourcesDir, "resources.json");
+const careersCmsFile = join(resourcesDir, "careers.json");
 
 async function ensureCmsStore() {
   await ensureStore();
@@ -897,6 +897,14 @@ const server = createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => {
-  console.log(`TechEllixir backend running on http://localhost:${PORT}`);
+server.listen(PORT, async () => {
+  try {
+    await ensureStore();
+    await ensureUserStore();
+    await ensureCmsStore();
+    console.log(`TechEllixir backend running on http://localhost:${PORT}`);
+    console.log(`Resources directory initialized at: ${resourcesDir}`);
+  } catch (err) {
+    console.error("Failed to initialize backend resources:", err);
+  }
 });
