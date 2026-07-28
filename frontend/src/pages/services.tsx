@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   Activity,
   Briefcase,
@@ -11,7 +11,6 @@ import {
   Megaphone,
   Users,
   Rocket,
-  X,
 } from "lucide-react";
 import Services from "../components/services";
 import Process from "../components/process";
@@ -44,74 +43,70 @@ const cardVariants = {
 };
 
 const OurServices = () => {
-  const [selectedIndustry, setSelectedIndustry] = useState<any | null>(null);
   const { t } = useLanguage();
 
   const industries = [
     { 
+      id: "healthcare",
       name: t("industries.list.healthcare"), 
       icon: <Activity size={24} />, 
       desc: t("industries.list.healthcareDesc"),
-      detailedDesc: t("industries.list.healthcareDetail")
     },
     { 
+      id: "finance",
       name: t("industries.list.finance"), 
       icon: <Briefcase size={24} />, 
       desc: t("industries.list.financeDesc"),
-      detailedDesc: t("industries.list.healthcareDetail") // wait, let's make sure it is financeDetail
     },
     { 
+      id: "retail",
       name: t("industries.list.retail"), 
       icon: <ShoppingCart size={24} />, 
       desc: t("industries.list.retailDesc"),
-      detailedDesc: t("industries.list.retailDetail")
     },
     { 
+      id: "manufacturing",
       name: t("industries.list.manufacturing"), 
       icon: <Factory size={24} />, 
       desc: t("industries.list.manufacturingDesc"),
-      detailedDesc: t("industries.list.manufacturingDetail")
     },
     { 
+      id: "logistics",
       name: t("industries.list.logistics"), 
       icon: <Truck size={24} />, 
       desc: t("industries.list.logisticsDesc"),
-      detailedDesc: t("industries.list.logisticsDetail")
     },
     { 
+      id: "realestate",
       name: t("industries.list.realestate"), 
       icon: <Building size={24} />, 
       desc: t("industries.list.realestateDesc"),
-      detailedDesc: t("industries.list.realestateDetail")
     },
     { 
+      id: "education",
       name: t("industries.list.education"), 
       icon: <GraduationCap size={24} />, 
       desc: t("industries.list.educationDesc"),
-      detailedDesc: t("industries.list.educationDetail")
     },
     { 
+      id: "marketing",
       name: t("industries.list.marketing"), 
       icon: <Megaphone size={24} />, 
       desc: t("industries.list.marketingDesc"),
-      detailedDesc: t("industries.list.marketingDetail")
     },
     { 
+      id: "hr",
       name: t("industries.list.hr"), 
       icon: <Users size={24} />, 
       desc: t("industries.list.hrDesc"),
-      detailedDesc: t("industries.list.hrDetail")
     },
     { 
+      id: "startups",
       name: t("industries.list.startups"), 
       icon: <Rocket size={24} />, 
       desc: t("industries.list.startupsDesc"),
-      detailedDesc: t("industries.list.startupsDetail")
     },
   ];
-
-  // Fix detailedDesc lookup for finance
-  industries[1].detailedDesc = t("industries.list.financeDetail");
 
   return (
     <main className="pt-16">
@@ -148,103 +143,20 @@ const OurServices = () => {
                 key={ind.name}
                 variants={cardVariants}
                 whileHover={{ y: -6, scale: 1.02 }}
-                onClick={() => setSelectedIndustry(ind)}
                 className="soft-card rounded-2xl p-6 flex flex-col justify-between cursor-pointer transition-shadow transition-colors duration-300 hover:shadow-lg hover:border-[#ffd5ca]"
               >
-                <div>
+                <Link to={`/industry/${ind.id}`} className="block h-full">
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFF1EC] to-[#FFF8F4] dark:from-[#2c1a16] dark:to-[#1c1512] text-[#FF4D37] mb-4 border border-[#FF4D37]/10 dark:border-[#FF4D37]/20">
                     {ind.icon}
                   </div>
                   <h3 className="text-base font-black text-[#182033] dark:text-white mb-2">{ind.name}</h3>
                   <p className="text-gray-500 dark:text-gray-400 text-xs leading-relaxed">{ind.desc}</p>
-                </div>
+                </Link>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
-
-      {/* Detail Modal */}
-      <AnimatePresence>
-        {selectedIndustry && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md"
-            onClick={() => setSelectedIndustry(null)}
-          >
-            {/* Modal Box */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 25 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 25 }}
-              transition={{ type: "spring", stiffness: 320, damping: 26 }}
-              onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-xl overflow-hidden rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 shadow-2xl border border-gray-200 dark:border-slate-800 z-10"
-            >
-              {/* Close button */}
-              <button
-                onClick={() => setSelectedIndustry(null)}
-                className="absolute right-6 top-6 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 p-2 text-gray-400 hover:text-gray-700 dark:hover:text-white transition duration-200 cursor-pointer"
-                aria-label="Close modal"
-              >
-                <X size={18} />
-              </button>
-
-              <div className="flex gap-4 items-center mb-6 border-b border-gray-100 dark:border-slate-800 pb-5">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#FFF1EC] to-[#FFF8F4] dark:from-[#2c1a16] dark:to-[#1c1512] text-[#FF4D37] border border-[#FF4D37]/15 shrink-0">
-                  {selectedIndustry.icon}
-                </div>
-                <div>
-                  <span className="eyebrow">{t("industries.detailModalTitle")}</span>
-                  <h3 className="text-2xl font-black text-[#182033] dark:text-white mt-0.5">{selectedIndustry.name}</h3>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed font-medium">
-                  {selectedIndustry.detailedDesc}
-                </p>
-
-                <div className="rounded-2xl border border-gray-100 dark:border-slate-800 bg-gray-50/70 dark:bg-slate-900/60 p-4 space-y-2">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">
-                    Tailored Industry Outcomes
-                  </h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-semibold text-gray-800 dark:text-gray-200">
-                    <div className="flex items-center gap-2">
-                      <Rocket size={14} className="text-[#FF4D37]" />
-                      <span>Accelerated Time-to-Market</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users size={14} className="text-[#FF4D37]" />
-                      <span>Custom Workflow Integration</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-800 flex gap-3">
-                <button
-                  onClick={() => setSelectedIndustry(null)}
-                  className="ghost-button flex-1 px-6 py-3 cursor-pointer text-xs font-bold"
-                >
-                  {t("industries.closeBtn")}
-                </button>
-                <button
-                  onClick={() => {
-                    const event = new CustomEvent("set-contact-subject", {
-                      detail: `${selectedIndustry.name} AI & Data Services Inquiry`,
-                    });
-                    window.dispatchEvent(event);
-                    setSelectedIndustry(null);
-                  }}
-                  className="brand-button flex-1 px-6 py-3 cursor-pointer text-xs font-bold shadow-lg"
-                >
-                  {t("industries.inquireBtn")}
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
       <Process />
       <WhyChooseUs />

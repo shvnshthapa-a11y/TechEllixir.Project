@@ -16,6 +16,7 @@ import ServiceDetail from "./pages/service-detail";
 import ResourceDetail from "./pages/resource-detail";
 import BlogDetail from "./pages/blog-detail";
 import ApplyInternship from "./pages/apply-internship";
+import IndustryDetail from "./pages/industry-detail";
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
         <Route path="/services" element={<Services />} />
         <Route path="/services/detail" element={<ServiceDetail />} />
         <Route path="/services/:id" element={<ServiceDetail />} />
+        <Route path="/industry/:slug" element={<IndustryDetail />} />
+        <Route path="/industries/:slug" element={<IndustryDetail />} />
+        <Route path="/industry" element={<IndustryDetail />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/resources/detail" element={<ResourceDetail />} />
         <Route path="/resources/:id" element={<ResourceDetail />} />
