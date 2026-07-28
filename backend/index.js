@@ -243,7 +243,101 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    // 2. Resource Instant Access / Download Email Endpoint
+    // 2. Internship Application Endpoint
+    if (req.method === "POST" && url.pathname === "/api/internship-applications") {
+      const body = await readBody(req);
+      const fullName = String(body.fullName || "").trim();
+      const email = String(body.email || "").trim().toLowerCase();
+      const phone = String(body.phone || "").trim();
+      const domain = String(body.domain || "Frontend Development").trim();
+      const college = String(body.college || "").trim();
+      const year = String(body.year || "3rd Year").trim();
+      const resumeUrl = String(body.resumeUrl || "").trim();
+      const reason = String(body.reason || "").trim();
+
+      if (fullName.length < 2) {
+        json(res, 400, { error: "Please enter your full name." });
+        return;
+      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        json(res, 400, { error: "Please enter a valid email address." });
+        return;
+      }
+      if (phone.length < 8) {
+        json(res, 400, { error: "Please enter a valid mobile number." });
+        return;
+      }
+
+      const newQuery = {
+        id: randomUUID(),
+        fullName,
+        email,
+        phone,
+        domain,
+        college,
+        year,
+        resumeUrl,
+        reason,
+        type: "internship_application",
+        subject: `Internship Registration: ${domain}`,
+        message: `Applicant: ${fullName}\nPhone: ${phone}\nDomain: ${domain}\nCollege: ${college} (${year})\nResume/LinkedIn: ${resumeUrl || 'N/A'}\nReason: ${reason || 'N/A'}`,
+        status: "new",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const queries = await readQueries();
+      queries.unshift(newQuery);
+      await writeQueries(queries);
+
+      // Dispatch Admin Notification
+      const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      await dispatchEmail({
+        to: adminEmail,
+        subject: `[New Internship Application] ${fullName} - ${domain}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">New Internship Registration</h2>
+            <p><strong>Full Name:</strong> ${fullName}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Mobile/WhatsApp:</strong> ${phone}</p>
+            <p><strong>Applied Domain:</strong> <span style="color: #FF4D37; font-weight: bold;">${domain}</span></p>
+            <p><strong>College/Org:</strong> ${college} (${year})</p>
+            <p><strong>Resume/LinkedIn:</strong> ${resumeUrl ? `<a href="${resumeUrl}">${resumeUrl}</a>` : 'Not provided'}</p>
+            <p><strong>Statement of Purpose:</strong> ${reason || 'N/A'}</p>
+            <p style="font-size: 12px; color: #888;">Submitted at: ${newQuery.createdAt}</p>
+          </div>
+        `,
+      });
+
+      // Dispatch Applicant Confirmation
+      await dispatchEmail({
+        to: email,
+        subject: `[TechEllixir] Application Received for ${domain}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 24px; color: #182033; max-width: 600px; margin: 0 auto; border: 1px solid #ffd5ca; border-radius: 16px;">
+            <h2 style="color: #FF4D37; margin-top: 0;">Application Received! 🎉</h2>
+            <p>Dear ${fullName},</p>
+            <p>Thank you for registering for the <strong>${domain}</strong> Internship Program at TechEllixir.</p>
+            <p>Our talent team is reviewing your profile and will contact you via email/WhatsApp with your onboarding timeline and interview schedule.</p>
+            <div style="background: #FFF5F2; padding: 16px; border-radius: 12px; margin: 20px 0; border: 1px solid #ffd5ca;">
+              <p style="margin: 0; font-weight: bold; color: #182033;">Application Summary:</p>
+              <ul style="margin: 8px 0 0 0; padding-left: 20px; font-size: 14px; color: #555;">
+                <li>Domain: <strong>${domain}</strong></li>
+                <li>College/Org: ${college}</li>
+                <li>Mobile: ${phone}</li>
+              </ul>
+            </div>
+            <p style="font-size: 12px; color: #888;">Warm regards,<br/>TechEllixir Internship & Hiring Team</p>
+          </div>
+        `,
+      });
+
+      json(res, 201, { success: true, application: newQuery });
+      return;
+    }
+
+    // 3. Resource Instant Access / Download Email Endpoint
     if (req.method === "POST" && url.pathname === "/api/resources/download") {
       const body = await readBody(req);
       const userEmail = String(body.email || "").trim().toLowerCase();
