@@ -104,6 +104,52 @@ async function ensureStore() {
   }
 }
 
+const usersFile = join(dataDir, "users.json");
+const settingsFile = join(dataDir, "settings.json");
+
+async function ensureUserStore() {
+  await ensureStore();
+  try {
+    await stat(usersFile);
+  } catch {
+    const defaultUsers = [
+      { id: "usr_101", name: "Rudra Pratap Singh", email: "rudra@example.com", role: "user", status: "active", createdAt: new Date().toISOString() },
+      { id: "usr_102", name: "Shivansh Thapa", email: "shivansh@techellixir.com", role: "admin", status: "active", createdAt: new Date().toISOString() },
+      { id: "usr_103", name: "Ananya Sharma", email: "ananya.sharma@dit.edu.in", role: "user", status: "active", createdAt: new Date().toISOString() },
+      { id: "usr_104", name: "Vikram Malhotra", email: "vikram@geu.ac.in", role: "user", status: "active", createdAt: new Date().toISOString() },
+    ];
+    await writeFile(usersFile, JSON.stringify(defaultUsers, null, 2), "utf8");
+  }
+  try {
+    await stat(settingsFile);
+  } catch {
+    const defaultSettings = { maintenanceMode: false, announcementBanner: "", allowRegistrations: true, updatedBy: "Admin" };
+    await writeFile(settingsFile, JSON.stringify(defaultSettings, null, 2), "utf8");
+  }
+}
+
+async function readUsers() {
+  await ensureUserStore();
+  const raw = await readFile(usersFile, "utf8");
+  return JSON.parse(raw);
+}
+
+async function writeUsers(users) {
+  await ensureUserStore();
+  await writeFile(usersFile, `${JSON.stringify(users, null, 2)}\n`, "utf8");
+}
+
+async function readSettings() {
+  await ensureUserStore();
+  const raw = await readFile(settingsFile, "utf8");
+  return JSON.parse(raw);
+}
+
+async function writeSettings(settings) {
+  await ensureUserStore();
+  await writeFile(settingsFile, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
+}
+
 async function readQueries() {
   await ensureStore();
   const raw = await readFile(queriesFile, "utf8");
@@ -492,6 +538,106 @@ async function handleApi(req, res, url) {
 
       notFound(res);
       return;
+    }
+
+    // 4. Admin Portal Control API - Users Management
+    if (url.pathname === "/api/admin/users") {
+      if (!requireAdmin(req, res)) return;
+      if (req.method === "GET") {
+        const users = await readUsers();
+        json(res, 200, { users });
+        return;
+      }
+    }
+
+    const userMatch = url.pathname.match(/^\/api\/admin\/users\/([^/]+)$/);
+    if (userMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = userMatch[1];
+      const users = await readUsers();
+      const idx = users.findIndex((u) => u.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        users[idx] = {
+          ...users[idx],
+          ...(body.status ? { status: body.status } : {}),
+          ...(body.role ? { role: body.role } : {}),
+          updatedAt: new Date().toISOString(),
+        };
+        await writeUsers(users);
+        json(res, 200, { user: users[idx] });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = users.splice(idx, 1)[0];
+        await writeUsers(users);
+        json(res, 200, { user: deleted });
+        return;
+      }
+    }
+
+    // 5. Admin Direct Email Reply API
+    if (req.method === "POST" && url.pathname === "/api/admin/reply") {
+      if (!requireAdmin(req, res)) return;
+      const body = await readBody(req);
+      const recipientEmail = String(body.to || "").trim();
+      const subject = String(body.subject || "Response from TechEllixir Team").trim();
+      const replyMessage = String(body.message || "").trim();
+
+      if (!recipientEmail || !replyMessage) {
+        json(res, 400, { error: "Recipient email and reply message are required." });
+        return;
+      }
+
+      const emailStatus = await dispatchEmail({
+        to: recipientEmail,
+        subject: `Re: ${subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">TechEllixir Platform Administration</h2>
+            <p>Dear Valued Client,</p>
+            <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #FF4D37; margin: 15px 0;">
+              ${replyMessage.replace(/\n/g, '<br/>')}
+            </div>
+            <p>If you have any further questions, feel free to reply directly to this email.</p>
+            <br/>
+            <p>Warm regards,<br/><strong>TechEllixir Support & Architecture Team</strong></p>
+          </div>
+        `,
+      });
+
+      json(res, 200, { ok: true, message: "Reply email dispatched successfully!", emailStatus });
+      return;
+    }
+
+    // 6. Admin Portal Settings Control API
+    if (url.pathname === "/api/admin/settings") {
+      if (!requireAdmin(req, res)) return;
+      if (req.method === "GET") {
+        const settings = await readSettings();
+        json(res, 200, { settings });
+        return;
+      }
+      if (req.method === "POST") {
+        const body = await readBody(req);
+        const newSettings = {
+          maintenanceMode: Boolean(body.maintenanceMode),
+          announcementBanner: String(body.announcementBanner || "").trim(),
+          allowRegistrations: body.allowRegistrations !== false,
+          updatedAt: new Date().toISOString(),
+          updatedBy: "Admin",
+        };
+        await writeSettings(newSettings);
+        json(res, 200, { settings: newSettings });
+        return;
+      }
     }
 
     notFound(res);

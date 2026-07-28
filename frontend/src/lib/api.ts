@@ -9,6 +9,11 @@ export type ContactQuery = {
   status: QueryStatus;
   createdAt: string;
   updatedAt: string;
+  type?: string;
+  phone?: string;
+  resumeUrl?: string;
+  college?: string;
+  year?: string;
 };
 
 export type QueryPayload = {
