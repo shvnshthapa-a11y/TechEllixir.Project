@@ -26,6 +26,11 @@ import {
   Layers,
   Menu,
   X,
+  Database,
+  MessageSquare,
+  Building2,
+  UserCheck,
+  Star,
 } from "lucide-react";
 import {
   adminLogin,
@@ -44,6 +49,10 @@ type AdminTab =
   | "services_cms"
   | "resources_cms"
   | "careers_cms"
+  | "testimonials_cms"
+  | "industries_cms"
+  | "team_cms"
+  | "database"
   | "settings";
 
 interface PortalUser {
@@ -122,6 +131,10 @@ export default function Admin() {
   const [servicesCms, setServicesCms] = useState<ServiceCmsItem[]>([]);
   const [resourcesCms, setResourcesCms] = useState<ResourceCmsItem[]>([]);
   const [careersCms, setCareersCms] = useState<CareerCmsItem[]>([]);
+  const [testimonialsCms, setTestimonialsCms] = useState<any[]>([]);
+  const [industriesCms, setIndustriesCms] = useState<any[]>([]);
+  const [teamCms, setTeamCms] = useState<any[]>([]);
+  const [dbStatsData, setDbStatsData] = useState<any>(null);
   const [settings, setSettings] = useState<PortalSettings>({
     maintenanceMode: false,
     announcementBanner: "",
@@ -148,6 +161,9 @@ export default function Admin() {
   const [editingService, setEditingService] = useState<Partial<ServiceCmsItem> | null>(null);
   const [editingResource, setEditingResource] = useState<Partial<ResourceCmsItem> | null>(null);
   const [editingCareer, setEditingCareer] = useState<Partial<CareerCmsItem> | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<any | null>(null);
+  const [editingIndustry, setEditingIndustry] = useState<any | null>(null);
+  const [editingTeam, setEditingTeam] = useState<any | null>(null);
 
   // Filtered queries
   const filteredQueries = useMemo(() => {
@@ -261,6 +277,50 @@ export default function Admin() {
         if (carRes.ok) {
           const carData = await carRes.json();
           setCareersCms(Array.isArray(carData.items) ? carData.items : []);
+        }
+      } catch (e) {}
+
+      // 7. Testimonials CMS
+      try {
+        const tstRes = await fetch("/api/admin/cms/testimonials", {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+        if (tstRes.ok) {
+          const tstData = await tstRes.json();
+          setTestimonialsCms(Array.isArray(tstData.items) ? tstData.items : []);
+        }
+      } catch (e) {}
+
+      // 8. Industries CMS
+      try {
+        const indRes = await fetch("/api/admin/cms/industries", {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+        if (indRes.ok) {
+          const indData = await indRes.json();
+          setIndustriesCms(Array.isArray(indData.items) ? indData.items : []);
+        }
+      } catch (e) {}
+
+      // 9. Team CMS
+      try {
+        const tmRes = await fetch("/api/admin/cms/team", {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+        if (tmRes.ok) {
+          const tmData = await tmRes.json();
+          setTeamCms(Array.isArray(tmData.items) ? tmData.items : []);
+        }
+      } catch (e) {}
+
+      // 10. Database Stats
+      try {
+        const dbRes = await fetch("/api/admin/db/stats", {
+          headers: { Authorization: `Bearer ${activeToken}` },
+        });
+        if (dbRes.ok) {
+          const dbData = await dbRes.json();
+          setDbStatsData(dbData.stats);
         }
       } catch (e) {}
     } catch (err) {
@@ -511,6 +571,138 @@ export default function Admin() {
   };
 
   // Settings Handler
+  // CMS Handlers: Testimonials
+  const handleSaveTestimonialCms = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingTestimonial || !editingTestimonial.name) return;
+    const isEdit = Boolean(editingTestimonial.id);
+    const endpoint = isEdit ? `/api/admin/cms/testimonials/${editingTestimonial.id}` : "/api/admin/cms/testimonials";
+    const method = isEdit ? "PATCH" : "POST";
+
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingTestimonial),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTestimonialsCms(data.items);
+        setEditingTestimonial(null);
+        setSuccessMsg(isEdit ? "Testimonial updated!" : "Testimonial added!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to save testimonial");
+    }
+  };
+
+  const handleDeleteTestimonialCms = async (id: string) => {
+    if (!window.confirm("Delete this testimonial?")) return;
+    try {
+      const res = await fetch(`/api/admin/cms/testimonials/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTestimonialsCms(data.items);
+        setSuccessMsg("Testimonial deleted");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to delete testimonial");
+    }
+  };
+
+  // CMS Handlers: Industries
+  const handleSaveIndustryCms = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingIndustry || !editingIndustry.title) return;
+    const isEdit = Boolean(editingIndustry.id);
+    const endpoint = isEdit ? `/api/admin/cms/industries/${editingIndustry.id}` : "/api/admin/cms/industries";
+    const method = isEdit ? "PATCH" : "POST";
+
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingIndustry),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIndustriesCms(data.items);
+        setEditingIndustry(null);
+        setSuccessMsg(isEdit ? "Industry vertical updated!" : "New Industry vertical added!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to save industry vertical");
+    }
+  };
+
+  const handleDeleteIndustryCms = async (id: string) => {
+    if (!window.confirm("Delete this industry vertical?")) return;
+    try {
+      const res = await fetch(`/api/admin/cms/industries/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIndustriesCms(data.items);
+        setSuccessMsg("Industry vertical deleted");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to delete industry vertical");
+    }
+  };
+
+  // CMS Handlers: Team
+  const handleSaveTeamCms = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingTeam || !editingTeam.name) return;
+    const isEdit = Boolean(editingTeam.id);
+    const endpoint = isEdit ? `/api/admin/cms/team/${editingTeam.id}` : "/api/admin/cms/team";
+    const method = isEdit ? "PATCH" : "POST";
+
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingTeam),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTeamCms(data.items);
+        setEditingTeam(null);
+        setSuccessMsg(isEdit ? "Team member updated!" : "New Team member added!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to save team member");
+    }
+  };
+
+  const handleDeleteTeamCms = async (id: string) => {
+    if (!window.confirm("Delete this team member?")) return;
+    try {
+      const res = await fetch(`/api/admin/cms/team/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setTeamCms(data.items);
+        setSuccessMsg("Team member removed");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to delete team member");
+    }
+  };
+
   const handleSaveSettings = async (e: FormEvent) => {
     e.preventDefault();
     try {
@@ -648,6 +840,10 @@ export default function Admin() {
     { id: "services_cms", label: "Manage Services (CMS)", badge: servicesCms.length, icon: <Layers size={18} /> },
     { id: "resources_cms", label: "Manage Resources (CMS)", badge: resourcesCms.length, icon: <BookOpen size={18} /> },
     { id: "careers_cms", label: "Manage Careers (CMS)", badge: careersCms.length, icon: <FolderPlus size={18} /> },
+    { id: "testimonials_cms", label: "Manage Testimonials (CMS)", badge: testimonialsCms.length, icon: <MessageSquare size={18} /> },
+    { id: "industries_cms", label: "Manage Industries (CMS)", badge: industriesCms.length, icon: <Building2 size={18} /> },
+    { id: "team_cms", label: "Manage Team (CMS)", badge: teamCms.length, icon: <UserCheck size={18} /> },
+    { id: "database", label: "Database Explorer", icon: <Database size={18} /> },
     { id: "settings", label: "Portal Control Settings", icon: <Settings size={18} /> },
   ];
 
@@ -1113,8 +1309,201 @@ export default function Admin() {
           )}
 
           {/* --------------------------------------------------------- */}
-          {/* TAB: PORTAL CONTROL SETTINGS */}
+          {/* TAB: CMS TESTIMONIALS */}
           {/* --------------------------------------------------------- */}
+          {activeTab === "testimonials_cms" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                    <MessageSquare size={22} className="text-[#FF4D37]" /> Manage Client & Student Testimonials
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Add, edit, or remove testimonials displayed on the homepage.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setEditingTestimonial({ name: "", company: "", rating: 5, review: "" })}
+                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                >
+                  <Plus size={16} /> Add Testimonial
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {testimonialsCms.map((tst) => (
+                  <div key={tst.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black text-[#182033] dark:text-white">{tst.name}</span>
+                        <div className="flex items-center gap-0.5 text-amber-400">
+                          {Array.from({ length: tst.rating || 5 }).map((_, i) => (
+                            <Star key={i} size={12} className="fill-amber-400" />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-[11px] font-bold text-[#FF4D37]">{tst.company}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium italic">"{tst.review}"</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setEditingTestimonial(tst)}
+                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTestimonialCms(tst.id)}
+                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: CMS INDUSTRIES */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "industries_cms" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                    <Building2 size={22} className="text-[#FF4D37]" /> Manage Industry Verticals
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Add or update industry verticals displayed across the portal.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setEditingIndustry({ id: "", title: "", tagline: "", description: "" })}
+                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                >
+                  <Plus size={16} /> Add Industry Vertical
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {industriesCms.map((ind) => (
+                  <div key={ind.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-black bg-purple-100 dark:bg-slate-800 text-purple-600 dark:text-purple-400 uppercase">
+                        {ind.id}
+                      </span>
+                      <h4 className="text-base font-black text-[#182033] dark:text-white">{ind.title}</h4>
+                      <p className="text-xs font-bold text-[#FF4D37]">{ind.tagline}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{ind.description}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setEditingIndustry(ind)}
+                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteIndustryCms(ind.id)}
+                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: CMS TEAM MEMBERS */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "team_cms" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                    <UserCheck size={22} className="text-[#FF4D37]" /> Manage Team Members
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Add or update leadership and engineering team profiles.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setEditingTeam({ name: "", role: "", bio: "", email: "" })}
+                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                >
+                  <Plus size={16} /> Add Team Member
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {teamCms.map((tm) => (
+                  <div key={tm.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <h4 className="text-base font-black text-[#182033] dark:text-white">{tm.name}</h4>
+                      <p className="text-xs font-extrabold text-[#FF4D37]">{tm.role}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{tm.bio}</p>
+                      <p className="text-[11px] font-semibold text-gray-400">{tm.email}</p>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => setEditingTeam(tm)}
+                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTeamCms(tm.id)}
+                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: DATABASE EXPLORER */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "database" && (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                    <Database size={22} className="text-[#FF4D37]" /> Database Health & Storage Inspection
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Real-time JSON document table metrics, disk storage sizes, and row counts.
+                  </p>
+                </div>
+              </div>
+
+              {dbStatsData && (
+                <div className="grid md:grid-cols-3 gap-5">
+                  {Object.entries(dbStatsData.tables || {}).map(([tableName, info]: [string, any]) => (
+                    <div key={tableName} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-wider text-[#FF4D37]">{tableName}</span>
+                        <span className="text-[10px] font-bold text-gray-400">{info.sizeBytes} Bytes</span>
+                      </div>
+                      <p className="text-2xl font-black text-[#182033] dark:text-white">{info.rowCount} Records</p>
+                      <p className="text-[11px] font-medium text-gray-400">Last Modified: {info.updatedAt ? new Date(info.updatedAt).toLocaleString() : "N/A"}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           {activeTab === "settings" && (
             <div className="soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
               <div>
@@ -1215,6 +1604,62 @@ export default function Admin() {
               <div className="flex justify-end gap-2 pt-2">
                 <button type="button" onClick={() => setEditingCareer(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
                 <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Domain</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Testimonial CMS Modal */}
+      {editingTestimonial && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
+            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingTestimonial.id ? "Edit Testimonial" : "Add Testimonial"}</h3>
+            <form onSubmit={handleSaveTestimonialCms} className="space-y-3 text-xs">
+              <input type="text" required placeholder="Client / Student Name" value={editingTestimonial.name || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <input type="text" placeholder="Company / Role" value={editingTestimonial.company || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, company: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <textarea rows={3} placeholder="Review / Feedback" value={editingTestimonial.review || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, review: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setEditingTestimonial(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
+                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Testimonial</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Industry CMS Modal */}
+      {editingIndustry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
+            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingIndustry.id ? "Edit Industry Vertical" : "Add Industry Vertical"}</h3>
+            <form onSubmit={handleSaveIndustryCms} className="space-y-3 text-xs">
+              <input type="text" required placeholder="Industry Slug (e.g. healthcare, fintech)" value={editingIndustry.id || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, id: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <input type="text" required placeholder="Vertical Title" value={editingIndustry.title || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <input type="text" placeholder="Tagline" value={editingIndustry.tagline || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, tagline: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <textarea rows={3} placeholder="Description" value={editingIndustry.description || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setEditingIndustry(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
+                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Vertical</button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Team CMS Modal */}
+      {editingTeam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
+            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingTeam.id ? "Edit Team Member" : "Add Team Member"}</h3>
+            <form onSubmit={handleSaveTeamCms} className="space-y-3 text-xs">
+              <input type="text" required placeholder="Full Name" value={editingTeam.name || ""} onChange={(e) => setEditingTeam({ ...editingTeam, name: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <input type="text" placeholder="Designation / Role" value={editingTeam.role || ""} onChange={(e) => setEditingTeam({ ...editingTeam, role: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+              <input type="email" placeholder="Email Address" value={editingTeam.email || ""} onChange={(e) => setEditingTeam({ ...editingTeam, email: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold" />
+              <textarea rows={3} placeholder="Bio & Engineering Overview" value={editingTeam.bio || ""} onChange={(e) => setEditingTeam({ ...editingTeam, bio: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setEditingTeam(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
+                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Member</button>
               </div>
             </form>
           </motion.div>

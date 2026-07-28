@@ -778,29 +778,161 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    // 11. Testimonials API
-    if (url.pathname === "/api/testimonials") {
+    // 11. Testimonials API & Admin CMS
+    if (url.pathname === "/api/testimonials" || url.pathname === "/api/admin/cms/testimonials") {
       if (req.method === "GET") {
         const items = await dbSelect("testimonials");
         json(res, 200, { items });
         return;
       }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await dbSelect("testimonials");
+        const newItem = {
+          id: `tst_${Date.now()}`,
+          name: String(body.name || "Anonymous Client").trim(),
+          company: String(body.company || "Enterprise Client").trim(),
+          rating: Number(body.rating || 5),
+          review: String(body.review || "").trim(),
+          createdAt: new Date().toISOString(),
+        };
+        items.unshift(newItem);
+        await dbSave("testimonials", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
     }
 
-    // 12. Industries Verticals API
-    if (url.pathname === "/api/industries") {
+    const tstCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/testimonials\/([^/]+)$/);
+    if (tstCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = tstCmsMatch[1];
+      const items = await dbSelect("testimonials");
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await dbSave("testimonials", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await dbSave("testimonials", items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 12. Industries Verticals API & Admin CMS
+    if (url.pathname === "/api/industries" || url.pathname === "/api/admin/cms/industries") {
       if (req.method === "GET") {
         const items = await dbSelect("industries");
         json(res, 200, { items });
         return;
       }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await dbSelect("industries");
+        const newItem = {
+          id: String(body.id || `ind_${Date.now()}`).trim().toLowerCase(),
+          title: String(body.title || "New Vertical").trim(),
+          tagline: String(body.tagline || "").trim(),
+          description: String(body.description || "").trim(),
+        };
+        items.unshift(newItem);
+        await dbSave("industries", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
     }
 
-    // 13. Team Members API
-    if (url.pathname === "/api/team") {
+    const indCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/industries\/([^/]+)$/);
+    if (indCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = indCmsMatch[1];
+      const items = await dbSelect("industries");
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await dbSave("industries", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await dbSave("industries", items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 13. Team Members API & Admin CMS
+    if (url.pathname === "/api/team" || url.pathname === "/api/admin/cms/team") {
       if (req.method === "GET") {
         const items = await dbSelect("team");
         json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await dbSelect("team");
+        const newItem = {
+          id: `tm_${Date.now()}`,
+          name: String(body.name || "New Member").trim(),
+          role: String(body.role || "Software Engineer").trim(),
+          bio: String(body.bio || "").trim(),
+          email: String(body.email || "").trim(),
+        };
+        items.unshift(newItem);
+        await dbSave("team", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const tmCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/team\/([^/]+)$/);
+    if (tmCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = tmCmsMatch[1];
+      const items = await dbSelect("team");
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await dbSave("team", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await dbSave("team", items);
+        json(res, 200, { item: deleted, items });
         return;
       }
     }
