@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -48,14 +48,16 @@ interface ResourceItem {
 interface BlogItem {
   id: string;
   title: string;
-  excerpt: string;
-  content: string;
+  excerpt?: string;
+  summary?: string;
+  content?: string;
   author: string;
-  role: string;
+  role?: string;
+  authorRole?: string;
   date: string;
   readTime: string;
   tag: string;
-  likes: number;
+  likes?: number;
   featured?: boolean;
 }
 
@@ -366,6 +368,32 @@ const Resources = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [showAllTags, setShowAllTags] = useState<boolean>(false);
 
+  // Dynamic backend CMS resources
+  const [dynamicBlogs, setDynamicBlogs] = useState<BlogItem[]>([]);
+
+  useEffect(() => {
+    fetch("/api/cms/resources")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items)) {
+          const cmsItems: BlogItem[] = data.items.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            category: item.category || "Blogs & Articles",
+            date: item.date || "July 2026",
+            author: "TechEllixir Team",
+            authorRole: "Technical Editorial",
+            readTime: item.readTime || "5 min read",
+            summary: item.description || "",
+            tag: item.category || "General",
+            content: item.description || "",
+          }));
+          setDynamicBlogs(cmsItems);
+        }
+      })
+      .catch((e) => console.warn("Using default blog resources:", e));
+  }, []);
+
   // Bookmarking / Likes State
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [likedBlogs, setLikedBlogs] = useState<Record<string, number>>({});
@@ -407,12 +435,13 @@ const Resources = () => {
     return matchesCategory && matchesTag && matchesSearch;
   });
 
-  // Filtered Blogs
-  const filteredBlogs = blogsList.filter((blog) => {
+  // Filtered Blogs (combining dynamic backend CMS blogs and static list)
+  const combinedBlogs = [...dynamicBlogs, ...blogsList];
+  const filteredBlogs = combinedBlogs.filter((blog) => {
     const matchesTag = activeTag === "All Topics" || blog.tag.toLowerCase().includes(activeTag.toLowerCase());
     const matchesSearch =
       blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      blog.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+      (blog.excerpt || blog.summary || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTag && matchesSearch;
   });
 
@@ -796,11 +825,11 @@ const Resources = () => {
 
                     <div className="flex items-center gap-3">
                       <button
-                        onClick={(e) => handleLikeBlog(blog.id, blog.likes, e)}
+                        onClick={(e) => handleLikeBlog(blog.id, blog.likes || 0, e)}
                         className="flex items-center gap-1 hover:text-[#FF4D37] transition cursor-pointer"
                       >
                         <Star size={14} className="text-amber-400 fill-amber-400" />
-                        <span>{likedBlogs[blog.id] || blog.likes}</span>
+                        <span>{likedBlogs[blog.id] || blog.likes || 0}</span>
                       </button>
 
                       <span>{blog.date}</span>

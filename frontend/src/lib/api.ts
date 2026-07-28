@@ -72,3 +72,15 @@ export function deleteQuery(token: string, id: string) {
     headers: { authorization: `Bearer ${token}` },
   });
 }
+
+export function getCmsServices() {
+  return request<{ items: any[] }>("/api/cms/services");
+}
+
+export function getCmsResources() {
+  return request<{ items: any[] }>("/api/cms/resources");
+}
+
+export function getCmsCareers() {
+  return request<{ items: any[] }>("/api/cms/careers");
+}

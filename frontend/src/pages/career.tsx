@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -340,8 +340,34 @@ const domains = [
 
 export default function Career() {
   const [filterTag, setFilterTag] = useState<string>("all");
+  const [dynamicCareers, setDynamicCareers] = useState<any[]>([]);
 
-  const filteredDomains = domains.filter((d) => {
+  useEffect(() => {
+    fetch("/api/cms/careers")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items)) {
+          const cmsItems = data.items.map((item: any) => ({
+            title: item.title,
+            category: item.category || "Web & Full Stack",
+            badge: item.badge || "🔥 Trending 2026",
+            icon: <Code2 size={24} />,
+            trendRank: "🔥 Top Demand",
+            demandScore: "Very High",
+            duration: item.duration || "2 - 6 Months",
+            stipend: "Performance Based",
+            mode: "Online / Hybrid",
+            desc: item.desc || "",
+          }));
+          setDynamicCareers(cmsItems);
+        }
+      })
+      .catch((e) => console.warn("Using default domains:", e));
+  }, []);
+
+  const allDomainList = [...dynamicCareers, ...domains];
+
+  const filteredDomains = allDomainList.filter((d) => {
     if (filterTag === "all") return true;
     if (filterTag === "trending") return !!d.badge;
     return d.category === filterTag;
