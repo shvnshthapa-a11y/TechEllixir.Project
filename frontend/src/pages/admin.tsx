@@ -31,6 +31,8 @@ import {
   Building2,
   UserCheck,
   Star,
+  ArrowLeft,
+  Eye,
 } from "lucide-react";
 import {
   adminLogin,
@@ -1154,329 +1156,803 @@ export default function Admin() {
           {/* TAB: CMS SERVICES MANAGEMENT */}
           {/* --------------------------------------------------------- */}
           {activeTab === "services_cms" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <Layers size={22} className="text-[#FF4D37]" /> Manage Portal Services
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Add, edit, or remove technical services displayed on the Services page.
-                  </p>
+            editingService ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setEditingService(null)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                  >
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Services List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                    {editingService.id ? "Edit Service Mode" : "New Service Creator"}
+                  </span>
                 </div>
-                <button
-                  onClick={() => setEditingService({ title: "", category: "Core Development", description: "", note: "", highlights: "" })}
-                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
-                >
-                  <Plus size={16} /> Add New Service
-                </button>
-              </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {servicesCms.map((srv) => (
-                  <div key={srv.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 dark:bg-slate-800 text-[#FF4D37]">
-                        {srv.category}
-                      </span>
-                      <h4 className="text-base font-black text-[#182033] dark:text-white">{srv.title}</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{srv.description}</p>
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <Layers size={22} className="text-[#FF4D37]" />
+                        {editingService.id ? `Edit Service: ${editingService.title || "Untitled"}` : "Create Technical Service"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Configure service metadata, sub-services, and detailed click page views.</p>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingService(srv)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteServiceCms(srv.id)}
-                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <form onSubmit={handleSaveServiceCms} className="space-y-4 text-xs">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Service Title</label>
+                          <input type="text" required placeholder="e.g. Web Development" value={editingService.title || ""} onChange={(e) => setEditingService({ ...editingService, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                          <input type="text" placeholder="e.g. Core Engineering" value={editingService.category || ""} onChange={(e) => setEditingService({ ...editingService, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Card Summary (Short Excerpt)</label>
+                        <textarea rows={2} placeholder="Brief summary displayed on main service card..." value={editingService.description || ""} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Sub-note / Highlight Banner</label>
+                        <input type="text" placeholder="e.g. High-performance architecture with 99.9% SLA..." value={editingService.note || ""} onChange={(e) => setEditingService({ ...editingService, note: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Detailed Overview (Full Page Modal View)</label>
+                        <textarea rows={4} placeholder="Full in-depth technical overview when user clicks to explore..." value={editingService.detailedOverview || ""} onChange={(e) => setEditingService({ ...editingService, detailedOverview: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Technical Highlights (Comma-separated)</label>
+                        <input type="text" placeholder="React 19 & Next.js, Node.js & APIs, Scalable Web Apps" value={editingService.highlights || ""} onChange={(e) => setEditingService({ ...editingService, highlights: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Sub-Services Offered (Comma-separated)</label>
+                        <textarea rows={2} placeholder="Custom Web Apps, RESTful APIs, E-Commerce, PWA, SEO Optimization" value={Array.isArray(editingService.subServices) ? editingService.subServices.join(", ") : (editingService.subServices || "")} onChange={(e) => setEditingService({ ...editingService, subServices: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <button type="button" onClick={() => setEditingService(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Service Page</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
+                      <Eye size={16} className="text-[#FF4D37]" /> Live Frontend Portal Preview
+                    </div>
+                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 dark:bg-slate-800 text-[#FF4D37] uppercase">
+                          {editingService.category || "Service Category"}
+                        </span>
+                        <span className="text-[10px] font-bold text-emerald-500 flex items-center gap-1">● Active on Portal</span>
+                      </div>
+                      <h4 className="text-xl font-black text-[#182033] dark:text-white">{editingService.title || "Service Title Placeholder"}</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">{editingService.description || "Card summary will appear here..."}</p>
+                      {editingService.note && (
+                        <div className="p-3 rounded-xl bg-orange-50 dark:bg-slate-900/60 border border-orange-200 dark:border-slate-800 text-[11px] font-bold text-[#FF4D37]">
+                          💡 {editingService.note}
+                        </div>
+                      )}
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <Layers size={22} className="text-[#FF4D37]" /> Manage Portal Services
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Add, edit, or remove technical services displayed on the Services page.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingService({ title: "", category: "Core Development", description: "", note: "", highlights: "" })}
+                    className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add New Service
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {servicesCms.map((srv) => (
+                    <div key={srv.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 dark:bg-slate-800 text-[#FF4D37]">
+                          {srv.category}
+                        </span>
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{srv.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{srv.description}</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingService(srv)}
+                          className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteServiceCms(srv.id)}
+                          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* --------------------------------------------------------- */}
           {/* TAB: CMS RESOURCES & BLOGS */}
           {/* --------------------------------------------------------- */}
           {activeTab === "resources_cms" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <BookOpen size={22} className="text-[#FF4D37]" /> Manage Resources & Blogs
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Publish new blog posts, press releases, and guides for the portal.
-                  </p>
+            editingResource ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setEditingResource(null)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                  >
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Resources List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                    {editingResource.id ? "Edit Resource Article" : "New Resource Creator"}
+                  </span>
                 </div>
-                <button
-                  onClick={() => setEditingResource({ title: "", category: "Blogs & Articles", readTime: "5 min read", description: "" })}
-                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
-                >
-                  <Plus size={16} /> Add New Article
-                </button>
-              </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {resourcesCms.map((res) => (
-                  <div key={res.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <BookOpen size={22} className="text-[#FF4D37]" />
+                        {editingResource.id ? `Edit Article: ${editingResource.title || "Untitled"}` : "Publish Resource Article"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Manage article content, read time, takeaways, and file download assets.</p>
+                    </div>
+
+                    <form onSubmit={handleSaveResourceCms} className="space-y-4 text-xs">
+                      <div className="grid sm:grid-cols-3 gap-4">
+                        <div className="sm:col-span-2">
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Article Title</label>
+                          <input type="text" required placeholder="e.g. SEO Services in Dehradun: 2026 Trends" value={editingResource.title || ""} onChange={(e) => setEditingResource({ ...editingResource, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                          <input type="text" placeholder="Blogs & Articles / Whitepaper" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Read Time</label>
+                          <input type="text" placeholder="e.g. 5 min read" value={editingResource.readTime || ""} onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Asset Format</label>
+                          <input type="text" placeholder="PDF Blueprint / Interactive Guide" value={editingResource.fileFormat || ""} onChange={(e) => setEditingResource({ ...editingResource, fileFormat: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Short Excerpt / Teaser</label>
+                        <textarea rows={2} placeholder="Brief summary displayed on main article cards..." value={editingResource.description || ""} onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Full Article Content / Summary (Click View)</label>
+                        <textarea rows={5} placeholder="Full content displayed when user clicks to read article..." value={editingResource.summary || ""} onChange={(e) => setEditingResource({ ...editingResource, summary: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Takeaways (Comma-separated)</label>
+                        <input type="text" placeholder="Chunking strategies, Qdrant indexing, Hybrid search" value={editingResource.takeaways || ""} onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <button type="button" onClick={() => setEditingResource(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Article</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
+                      <Eye size={16} className="text-[#FF4D37]" /> Live Article Preview
+                    </div>
+                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="px-3 py-1 rounded-full text-[10px] font-black bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400">
-                          {res.category}
+                          {editingResource.category || "Blogs & Articles"}
                         </span>
-                        <span className="text-[11px] font-medium text-gray-400">{res.readTime}</span>
+                        <span className="text-[11px] font-bold text-gray-400">{editingResource.readTime || "5 min read"}</span>
                       </div>
-                      <h4 className="text-base font-black text-[#182033] dark:text-white">{res.title}</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{res.description}</p>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingResource(res)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteResourceCms(res.id)}
-                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <h4 className="text-xl font-black text-[#182033] dark:text-white">{editingResource.title || "Article Title Placeholder"}</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">{editingResource.description || "Article excerpt will appear here..."}</p>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <BookOpen size={22} className="text-[#FF4D37]" /> Manage Resources & Blogs
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Publish new blog posts, press releases, and guides for the portal.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingResource({ title: "", category: "Blogs & Articles", readTime: "5 min read", description: "" })}
+                    className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add New Article
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {resourcesCms.map((res) => (
+                    <div key={res.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-black bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400">
+                            {res.category}
+                          </span>
+                          <span className="text-[11px] font-medium text-gray-400">{res.readTime}</span>
+                        </div>
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{res.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{res.description}</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingResource(res)}
+                          className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteResourceCms(res.id)}
+                          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* --------------------------------------------------------- */}
           {/* TAB: CMS CAREER DOMAINS */}
           {/* --------------------------------------------------------- */}
           {activeTab === "careers_cms" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <FolderPlus size={22} className="text-[#FF4D37]" /> Manage Career & Internship Domains
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Add or update internship training domains displayed on the Career page.
-                  </p>
+            editingCareer ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setEditingCareer(null)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                  >
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Career Domains List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                    {editingCareer.id ? "Edit Internship Domain" : "New Domain Creator"}
+                  </span>
                 </div>
-                <button
-                  onClick={() => setEditingCareer({ title: "", category: "Web & Full Stack", badge: "🔥 Trending", duration: "2 - 6 Months", desc: "" })}
-                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
-                >
-                  <Plus size={16} /> Add New Domain
-                </button>
-              </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {careersCms.map((car) => (
-                  <div key={car.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <FolderPlus size={22} className="text-[#FF4D37]" />
+                        {editingCareer.id ? `Edit Domain: ${editingCareer.title || "Untitled"}` : "Add Internship Domain"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Define training domain details, stipend policies, duration, and curriculum overview.</p>
+                    </div>
+
+                    <form onSubmit={handleSaveCareerCms} className="space-y-4 text-xs">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Domain Title</label>
+                          <input type="text" required placeholder="e.g. Artificial Intelligence" value={editingCareer.title || ""} onChange={(e) => setEditingCareer({ ...editingCareer, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category (e.g. ai, web, mobile)</label>
+                          <input type="text" placeholder="ai / web / mobile / cloud" value={editingCareer.category || ""} onChange={(e) => setEditingCareer({ ...editingCareer, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Trend Badge</label>
+                          <input type="text" placeholder="🔥 #1 Most Popular" value={editingCareer.badge || ""} onChange={(e) => setEditingCareer({ ...editingCareer, badge: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Duration</label>
+                          <input type="text" placeholder="2 - 6 Months" value={editingCareer.duration || ""} onChange={(e) => setEditingCareer({ ...editingCareer, duration: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Work Mode</label>
+                          <input type="text" placeholder="Online / Hybrid" value={editingCareer.mode || "Online / Hybrid"} onChange={(e) => setEditingCareer({ ...editingCareer, mode: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Stipend Policy</label>
+                        <input type="text" placeholder="Performance Based / Performance Stipend" value={editingCareer.stipend || "Performance Based"} onChange={(e) => setEditingCareer({ ...editingCareer, stipend: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Domain Description & Curriculum Overview</label>
+                        <textarea rows={5} placeholder="Detailed curriculum overview (Machine Learning, PyTorch, RAG Pipelines)..." value={editingCareer.desc || ""} onChange={(e) => setEditingCareer({ ...editingCareer, desc: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <button type="button" onClick={() => setEditingCareer(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Domain</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
+                      <Eye size={16} className="text-[#FF4D37]" /> Live Domain Card Preview
+                    </div>
+                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 dark:bg-slate-800 text-[#FF4D37]">
-                          {car.badge}
+                          {editingCareer.badge || "🔥 Trending"}
                         </span>
-                        <span className="text-[11px] font-bold text-gray-400">{car.duration}</span>
+                        <span className="text-[11px] font-bold text-gray-400">{editingCareer.duration || "2 - 6 Months"}</span>
                       </div>
-                      <h4 className="text-base font-black text-[#182033] dark:text-white">{car.title}</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{car.desc}</p>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingCareer(car)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteCareerCms(car.id)}
-                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <h4 className="text-xl font-black text-[#182033] dark:text-white">{editingCareer.title || "Domain Title Placeholder"}</h4>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">{editingCareer.desc || "Curriculum description will appear here..."}</p>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <FolderPlus size={22} className="text-[#FF4D37]" /> Manage Career & Internship Domains
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Add or update internship training domains displayed on the Career page.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingCareer({ title: "", category: "Web & Full Stack", badge: "🔥 Trending", duration: "2 - 6 Months", desc: "" })}
+                    className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add New Domain
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {careersCms.map((car) => (
+                    <div key={car.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="px-3 py-1 rounded-full text-[10px] font-black bg-orange-100 dark:bg-slate-800 text-[#FF4D37]">
+                            {car.badge}
+                          </span>
+                          <span className="text-[11px] font-bold text-gray-400">{car.duration}</span>
+                        </div>
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{car.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium leading-relaxed">{car.desc}</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingCareer(car)}
+                          className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCareerCms(car.id)}
+                          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* --------------------------------------------------------- */}
           {/* TAB: CMS TESTIMONIALS */}
           {/* --------------------------------------------------------- */}
           {activeTab === "testimonials_cms" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <MessageSquare size={22} className="text-[#FF4D37]" /> Manage Client & Student Testimonials
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Add, edit, or remove testimonials displayed on the homepage.
-                  </p>
+            editingTestimonial ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setEditingTestimonial(null)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                  >
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Testimonials List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                    {editingTestimonial.id ? "Edit Testimonial" : "New Testimonial Creator"}
+                  </span>
                 </div>
-                <button
-                  onClick={() => setEditingTestimonial({ name: "", company: "", rating: 5, review: "" })}
-                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
-                >
-                  <Plus size={16} /> Add Testimonial
-                </button>
-              </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {testimonialsCms.map((tst) => (
-                  <div key={tst.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <MessageSquare size={22} className="text-[#FF4D37]" />
+                        {editingTestimonial.id ? `Edit Review: ${editingTestimonial.name || "Untitled"}` : "Add Testimonial"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Manage client rating, feedback text, and reviewer credentials.</p>
+                    </div>
+
+                    <form onSubmit={handleSaveTestimonialCms} className="space-y-4 text-xs">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Client / Student Name</label>
+                          <input type="text" required placeholder="e.g. Vikram Sharma" value={editingTestimonial.name || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Company / Role</label>
+                          <input type="text" placeholder="e.g. CEO, Himalayan Solutions" value={editingTestimonial.company || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, company: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Review & Client Feedback</label>
+                        <textarea rows={4} placeholder="Write detailed client review text..." value={editingTestimonial.review || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, review: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <button type="button" onClick={() => setEditingTestimonial(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Review</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
+                      <Eye size={16} className="text-[#FF4D37]" /> Live Card Preview
+                    </div>
+                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-[#182033] dark:text-white">{tst.name}</span>
+                        <span className="text-sm font-black text-[#182033] dark:text-white">{editingTestimonial.name || "Client Name"}</span>
                         <div className="flex items-center gap-0.5 text-amber-400">
-                          {Array.from({ length: tst.rating || 5 }).map((_, i) => (
+                          {Array.from({ length: 5 }).map((_, i) => (
                             <Star key={i} size={12} className="fill-amber-400" />
                           ))}
                         </div>
                       </div>
-                      <p className="text-[11px] font-bold text-[#FF4D37]">{tst.company}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium italic">"{tst.review}"</p>
-                    </div>
-
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingTestimonial(tst)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTestimonialCms(tst.id)}
-                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <p className="text-xs font-bold text-[#FF4D37]">{editingTestimonial.company || "Company Placeholder"}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium italic">"{editingTestimonial.review || "Review text will appear here..."}"</p>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <MessageSquare size={22} className="text-[#FF4D37]" /> Manage Client & Student Testimonials
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Add, edit, or remove testimonials displayed on the homepage.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingTestimonial({ name: "", company: "", rating: 5, review: "" })}
+                    className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add Testimonial
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {testimonialsCms.map((tst) => (
+                    <div key={tst.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-black text-[#182033] dark:text-white">{tst.name}</span>
+                          <div className="flex items-center gap-0.5 text-amber-400">
+                            {Array.from({ length: tst.rating || 5 }).map((_, i) => (
+                              <Star key={i} size={12} className="fill-amber-400" />
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-[11px] font-bold text-[#FF4D37]">{tst.company}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium italic">"{tst.review}"</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingTestimonial(tst)}
+                          className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTestimonialCms(tst.id)}
+                          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* --------------------------------------------------------- */}
           {/* TAB: CMS INDUSTRIES */}
           {/* --------------------------------------------------------- */}
           {activeTab === "industries_cms" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <Building2 size={22} className="text-[#FF4D37]" /> Manage Industry Verticals
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Add or update industry verticals displayed across the portal.
-                  </p>
+            editingIndustry ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setEditingIndustry(null)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                  >
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Industry List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                    {editingIndustry.id ? "Edit Industry Vertical" : "New Vertical Creator"}
+                  </span>
                 </div>
-                <button
-                  onClick={() => setEditingIndustry({ id: "", title: "", tagline: "", description: "" })}
-                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
-                >
-                  <Plus size={16} /> Add Industry Vertical
-                </button>
-              </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {industriesCms.map((ind) => (
-                  <div key={ind.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <span className="px-3 py-1 rounded-full text-[10px] font-black bg-purple-100 dark:bg-slate-800 text-purple-600 dark:text-purple-400 uppercase">
-                        {ind.id}
-                      </span>
-                      <h4 className="text-base font-black text-[#182033] dark:text-white">{ind.title}</h4>
-                      <p className="text-xs font-bold text-[#FF4D37]">{ind.tagline}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{ind.description}</p>
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <Building2 size={22} className="text-[#FF4D37]" />
+                        {editingIndustry.id ? `Edit Vertical: ${editingIndustry.title || "Untitled"}` : "Add Industry Vertical"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Configure industry slug, title, tagline, and technical overview.</p>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingIndustry(ind)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteIndustryCms(ind.id)}
-                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <form onSubmit={handleSaveIndustryCms} className="space-y-4 text-xs">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Industry Slug (ID)</label>
+                          <input type="text" required placeholder="e.g. healthcare, fintech" value={editingIndustry.id || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, id: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Vertical Title</label>
+                          <input type="text" required placeholder="e.g. Healthcare & Telemedicine" value={editingIndustry.title || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Tagline</label>
+                        <input type="text" placeholder="e.g. HIPAA Compliant Digital Health Systems" value={editingIndustry.tagline || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, tagline: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Industry Description</label>
+                        <textarea rows={4} placeholder="Full description of software solutions for this vertical..." value={editingIndustry.description || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <button type="button" onClick={() => setEditingIndustry(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Vertical</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
+                      <Eye size={16} className="text-[#FF4D37]" /> Live Card Preview
+                    </div>
+                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-3">
+                      <span className="px-3 py-1 rounded-full text-[10px] font-black bg-purple-100 dark:bg-slate-800 text-purple-600 dark:text-purple-400 uppercase">
+                        {editingIndustry.id || "SLUG"}
+                      </span>
+                      <h4 className="text-xl font-black text-[#182033] dark:text-white">{editingIndustry.title || "Vertical Title Placeholder"}</h4>
+                      <p className="text-xs font-bold text-[#FF4D37]">{editingIndustry.tagline || "Tagline placeholder"}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{editingIndustry.description || "Description placeholder..."}</p>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <Building2 size={22} className="text-[#FF4D37]" /> Manage Industry Verticals
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Add or update industry verticals displayed across the portal.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingIndustry({ id: "", title: "", tagline: "", description: "" })}
+                    className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add Industry Vertical
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {industriesCms.map((ind) => (
+                    <div key={ind.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black bg-purple-100 dark:bg-slate-800 text-purple-600 dark:text-purple-400 uppercase">
+                          {ind.id}
+                        </span>
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{ind.title}</h4>
+                        <p className="text-xs font-bold text-[#FF4D37]">{ind.tagline}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{ind.description}</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingIndustry(ind)}
+                          className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteIndustryCms(ind.id)}
+                          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* --------------------------------------------------------- */}
           {/* TAB: CMS TEAM MEMBERS */}
           {/* --------------------------------------------------------- */}
           {activeTab === "team_cms" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <UserCheck size={22} className="text-[#FF4D37]" /> Manage Team Members
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Add or update leadership and engineering team profiles.
-                  </p>
+            editingTeam ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={() => setEditingTeam(null)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer shadow-sm"
+                  >
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Team Directory
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">
+                    {editingTeam.id ? "Edit Team Profile" : "New Team Member Creator"}
+                  </span>
                 </div>
-                <button
-                  onClick={() => setEditingTeam({ name: "", role: "", bio: "", email: "" })}
-                  className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
-                >
-                  <Plus size={16} /> Add Team Member
-                </button>
-              </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {teamCms.map((tm) => (
-                  <div key={tm.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <h4 className="text-base font-black text-[#182033] dark:text-white">{tm.name}</h4>
-                      <p className="text-xs font-extrabold text-[#FF4D37]">{tm.role}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{tm.bio}</p>
-                      <p className="text-[11px] font-semibold text-gray-400">{tm.email}</p>
+                <div className="grid lg:grid-cols-12 gap-8">
+                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
+                    <div>
+                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <UserCheck size={22} className="text-[#FF4D37]" />
+                        {editingTeam.id ? `Edit Member: ${editingTeam.name || "Untitled"}` : "Add Team Member"}
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">Configure team member profile, designation, and bio.</p>
                     </div>
 
-                    <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => setEditingTeam(tm)}
-                        className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTeamCms(tm.id)}
-                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                    <form onSubmit={handleSaveTeamCms} className="space-y-4 text-xs">
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
+                          <input type="text" required placeholder="e.g. Shivansh Thapa" value={editingTeam.name || ""} onChange={(e) => setEditingTeam({ ...editingTeam, name: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                        <div>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Role / Designation</label>
+                          <input type="text" placeholder="e.g. Lead Systems Architect" value={editingTeam.role || ""} onChange={(e) => setEditingTeam({ ...editingTeam, role: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
+                        <input type="email" placeholder="e.g. shivansh@techellixir.com" value={editingTeam.email || ""} onChange={(e) => setEditingTeam({ ...editingTeam, email: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Bio & Technical Background</label>
+                        <textarea rows={4} placeholder="Full engineering bio and accomplishments..." value={editingTeam.bio || ""} onChange={(e) => setEditingTeam({ ...editingTeam, bio: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                      </div>
+
+                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                        <button type="button" onClick={() => setEditingTeam(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
+                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Profile</button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
+                      <Eye size={16} className="text-[#FF4D37]" /> Live Card Preview
+                    </div>
+                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-3">
+                      <h4 className="text-xl font-black text-[#182033] dark:text-white">{editingTeam.name || "Member Name"}</h4>
+                      <p className="text-xs font-extrabold text-[#FF4D37]">{editingTeam.role || "Role Placeholder"}</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{editingTeam.bio || "Bio placeholder..."}</p>
+                      <p className="text-[11px] font-semibold text-gray-400">{editingTeam.email || "email@techellixir.com"}</p>
                     </div>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <UserCheck size={22} className="text-[#FF4D37]" /> Manage Team Members
+                    </h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      Add or update leadership and engineering team profiles.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setEditingTeam({ name: "", role: "", bio: "", email: "" })}
+                    className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Add Team Member
+                  </button>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {teamCms.map((tm) => (
+                    <div key={tm.id} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{tm.name}</h4>
+                        <p className="text-xs font-extrabold text-[#FF4D37]">{tm.role}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{tm.bio}</p>
+                        <p className="text-[11px] font-semibold text-gray-400">{tm.email}</p>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => setEditingTeam(tm)}
+                          className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37] hover:bg-orange-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTeamCms(tm.id)}
+                          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
           )}
 
           {/* --------------------------------------------------------- */}
@@ -1560,218 +2036,8 @@ export default function Admin() {
       </div>
 
       {/* --------------------------------------------------------- */}
-      {/* EDIT / CREATE CMS MODALS */}
+      {/* DIRECT EMAIL REPLY MODAL */}
       {/* --------------------------------------------------------- */}
-      
-      {/* Service CMS Modal */}
-      {editingService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md overflow-y-auto">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-black text-[#182033] dark:text-white">{editingService.id ? "Edit Service Details" : "Add New Technical Service"}</h3>
-            <form onSubmit={handleSaveServiceCms} className="space-y-4 text-xs">
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Service Title</label>
-                  <input type="text" required placeholder="e.g. Web Development" value={editingService.title || ""} onChange={(e) => setEditingService({ ...editingService, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Category</label>
-                  <input type="text" placeholder="e.g. Core Engineering" value={editingService.category || ""} onChange={(e) => setEditingService({ ...editingService, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Card Summary</label>
-                <textarea rows={2} placeholder="Brief summary displayed on main service card..." value={editingService.description || ""} onChange={(e) => setEditingService({ ...editingService, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Sub-note / Banner Highlight</label>
-                <input type="text" placeholder="e.g. High-performance architecture with 99.9% SLA..." value={editingService.note || ""} onChange={(e) => setEditingService({ ...editingService, note: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Detailed Overview (Full Click Page View)</label>
-                <textarea rows={3} placeholder="Full in-depth technical overview when user clicks..." value={editingService.detailedOverview || ""} onChange={(e) => setEditingService({ ...editingService, detailedOverview: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Key Highlights (Comma-separated)</label>
-                <input type="text" placeholder="React 19 & Next.js, Node.js & APIs, Scalable Web Apps" value={editingService.highlights || ""} onChange={(e) => setEditingService({ ...editingService, highlights: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Sub-Services Offered (Comma-separated)</label>
-                <textarea rows={2} placeholder="Custom Web Apps, RESTful APIs, E-Commerce, PWA, SEO Optimization" value={Array.isArray(editingService.subServices) ? editingService.subServices.join(", ") : (editingService.subServices || "")} onChange={(e) => setEditingService({ ...editingService, subServices: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
-                <button type="button" onClick={() => setEditingService(null)} className="px-5 py-2.5 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-6 py-2.5 text-xs font-black">Save Service Details</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Resource CMS Modal */}
-      {editingResource && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md overflow-y-auto">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-black text-[#182033] dark:text-white">{editingResource.id ? "Edit Resource Article" : "Publish New Resource / Whitepaper"}</h3>
-            <form onSubmit={handleSaveResourceCms} className="space-y-4 text-xs">
-              <div className="grid sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="block font-extrabold text-gray-500 mb-1">Article Title</label>
-                  <input type="text" required placeholder="e.g. SEO Services in Dehradun: 2026 Trends" value={editingResource.title || ""} onChange={(e) => setEditingResource({ ...editingResource, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Category</label>
-                  <input type="text" placeholder="Blogs & Articles / Whitepaper" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Read Time</label>
-                  <input type="text" placeholder="e.g. 5 min read" value={editingResource.readTime || ""} onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Asset Format</label>
-                  <input type="text" placeholder="PDF Blueprint / Interactive Guide" value={editingResource.fileFormat || ""} onChange={(e) => setEditingResource({ ...editingResource, fileFormat: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Short Excerpt / Teaser</label>
-                <textarea rows={2} placeholder="Brief summary displayed on main article cards..." value={editingResource.description || ""} onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Full Article Content / Summary (Click View)</label>
-                <textarea rows={4} placeholder="Full content displayed when user clicks to read..." value={editingResource.summary || ""} onChange={(e) => setEditingResource({ ...editingResource, summary: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Key Takeaways (Comma-separated)</label>
-                <input type="text" placeholder="Chunking strategies, Qdrant indexing, Hybrid search" value={editingResource.takeaways || ""} onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold" />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
-                <button type="button" onClick={() => setEditingResource(null)} className="px-5 py-2.5 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-6 py-2.5 text-xs font-black">Publish Resource Article</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Career CMS Modal */}
-      {editingCareer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md overflow-y-auto">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-2xl rounded-3xl bg-white dark:bg-[#161c2a] p-6 sm:p-8 space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-black text-[#182033] dark:text-white">{editingCareer.id ? "Edit Internship Domain Details" : "Add New Internship Training Domain"}</h3>
-            <form onSubmit={handleSaveCareerCms} className="space-y-4 text-xs">
-              <div className="grid sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Domain Title</label>
-                  <input type="text" required placeholder="e.g. Artificial Intelligence" value={editingCareer.title || ""} onChange={(e) => setEditingCareer({ ...editingCareer, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Category (e.g. ai, web, mobile)</label>
-                  <input type="text" placeholder="ai / web / mobile / cloud" value={editingCareer.category || ""} onChange={(e) => setEditingCareer({ ...editingCareer, category: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Trend Badge</label>
-                  <input type="text" placeholder="🔥 #1 Most Popular" value={editingCareer.badge || ""} onChange={(e) => setEditingCareer({ ...editingCareer, badge: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Duration</label>
-                  <input type="text" placeholder="2 - 6 Months" value={editingCareer.duration || ""} onChange={(e) => setEditingCareer({ ...editingCareer, duration: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-                <div>
-                  <label className="block font-extrabold text-gray-500 mb-1">Work Mode</label>
-                  <input type="text" placeholder="Online / Hybrid" value={editingCareer.mode || "Online / Hybrid"} onChange={(e) => setEditingCareer({ ...editingCareer, mode: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Stipend Policy</label>
-                <input type="text" placeholder="Performance Based / Performance Stipend" value={editingCareer.stipend || "Performance Based"} onChange={(e) => setEditingCareer({ ...editingCareer, stipend: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              </div>
-
-              <div>
-                <label className="block font-extrabold text-gray-500 mb-1">Domain Description & Curriculum Overview</label>
-                <textarea rows={4} placeholder="Detailed curriculum overview (e.g. Machine Learning, LLM Fine-Tuning, RAG Pipelines, Python & PyTorch)..." value={editingCareer.desc || ""} onChange={(e) => setEditingCareer({ ...editingCareer, desc: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-3 border-t border-gray-100 dark:border-slate-800">
-                <button type="button" onClick={() => setEditingCareer(null)} className="px-5 py-2.5 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-6 py-2.5 text-xs font-black">Save Internship Domain</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Testimonial CMS Modal */}
-      {editingTestimonial && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
-            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingTestimonial.id ? "Edit Testimonial" : "Add Testimonial"}</h3>
-            <form onSubmit={handleSaveTestimonialCms} className="space-y-3 text-xs">
-              <input type="text" required placeholder="Client / Student Name" value={editingTestimonial.name || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" placeholder="Company / Role" value={editingTestimonial.company || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, company: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <textarea rows={3} placeholder="Review / Feedback" value={editingTestimonial.review || ""} onChange={(e) => setEditingTestimonial({ ...editingTestimonial, review: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setEditingTestimonial(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Testimonial</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Industry CMS Modal */}
-      {editingIndustry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
-            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingIndustry.id ? "Edit Industry Vertical" : "Add Industry Vertical"}</h3>
-            <form onSubmit={handleSaveIndustryCms} className="space-y-3 text-xs">
-              <input type="text" required placeholder="Industry Slug (e.g. healthcare, fintech)" value={editingIndustry.id || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, id: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" required placeholder="Vertical Title" value={editingIndustry.title || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, title: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" placeholder="Tagline" value={editingIndustry.tagline || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, tagline: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <textarea rows={3} placeholder="Description" value={editingIndustry.description || ""} onChange={(e) => setEditingIndustry({ ...editingIndustry, description: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setEditingIndustry(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Vertical</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Team CMS Modal */}
-      {editingTeam && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/65 backdrop-blur-md">
-          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-lg rounded-3xl bg-white dark:bg-[#161c2a] p-6 space-y-4">
-            <h3 className="text-lg font-black text-[#182033] dark:text-white">{editingTeam.id ? "Edit Team Member" : "Add Team Member"}</h3>
-            <form onSubmit={handleSaveTeamCms} className="space-y-3 text-xs">
-              <input type="text" required placeholder="Full Name" value={editingTeam.name || ""} onChange={(e) => setEditingTeam({ ...editingTeam, name: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="text" placeholder="Designation / Role" value={editingTeam.role || ""} onChange={(e) => setEditingTeam({ ...editingTeam, role: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
-              <input type="email" placeholder="Email Address" value={editingTeam.email || ""} onChange={(e) => setEditingTeam({ ...editingTeam, email: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold" />
-              <textarea rows={3} placeholder="Bio & Engineering Overview" value={editingTeam.bio || ""} onChange={(e) => setEditingTeam({ ...editingTeam, bio: e.target.value })} className="w-full p-3 rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setEditingTeam(null)} className="px-4 py-2 rounded-xl text-gray-500 font-bold">Cancel</button>
-                <button type="submit" className="brand-button px-5 py-2 text-xs font-black">Save Member</button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
 
       {/* Direct Email Reply Modal */}
       <AnimatePresence>
