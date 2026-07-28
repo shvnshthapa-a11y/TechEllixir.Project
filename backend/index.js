@@ -826,12 +826,9 @@ const server = createServer(async (req, res) => {
 
 server.listen(PORT, async () => {
   try {
-    await ensureStore();
-    await ensureUserStore();
-    await ensureCmsStore();
+    await initDatabase();
     console.log(`TechEllixir backend running on http://localhost:${PORT}`);
-    console.log(`Resources directory initialized at: ${resourcesDir}`);
   } catch (err) {
-    console.error("Failed to initialize backend resources:", err);
+    console.error("Failed to initialize database:", err);
   }
 });
