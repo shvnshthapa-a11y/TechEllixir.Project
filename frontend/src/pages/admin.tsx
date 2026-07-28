@@ -202,8 +202,12 @@ export default function Admin() {
     setError("");
     try {
       // 1. Queries
-      const data = await getAdminQueries(activeToken);
-      setQueries(data.queries);
+      try {
+        const data = await getAdminQueries(activeToken);
+        setQueries(Array.isArray(data.queries) ? data.queries : []);
+      } catch (e) {
+        console.warn("Queries fetch fallback:", e);
+      }
 
       // 2. Users
       try {
@@ -212,7 +216,7 @@ export default function Admin() {
         });
         if (uRes.ok) {
           const uData = await uRes.json();
-          setUsers(uData.users || []);
+          setUsers(Array.isArray(uData.users) ? uData.users : []);
         }
       } catch (e) {}
 
@@ -234,7 +238,7 @@ export default function Admin() {
         });
         if (srvRes.ok) {
           const srvData = await srvRes.json();
-          setServicesCms(srvData.items || []);
+          setServicesCms(Array.isArray(srvData.items) ? srvData.items : []);
         }
       } catch (e) {}
 
@@ -245,7 +249,7 @@ export default function Admin() {
         });
         if (resRes.ok) {
           const resData = await resRes.json();
-          setResourcesCms(resData.items || []);
+          setResourcesCms(Array.isArray(resData.items) ? resData.items : []);
         }
       } catch (e) {}
 
@@ -256,15 +260,11 @@ export default function Admin() {
         });
         if (carRes.ok) {
           const carData = await carRes.json();
-          setCareersCms(carData.items || []);
+          setCareersCms(Array.isArray(carData.items) ? carData.items : []);
         }
       } catch (e) {}
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load data.");
-      if (err instanceof Error && err.message === "Unauthorized") {
-        localStorage.removeItem("adminToken");
-        setToken("");
-      }
+      console.warn("Admin loadData error:", err);
     } finally {
       setLoading(false);
     }
