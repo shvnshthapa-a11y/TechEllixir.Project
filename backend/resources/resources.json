@@ -1,18 +1,129 @@
 [
   {
-    "id": "res_1",
-    "title": "SEO Services in Dehradun: 2026 Trends & Growth Guide",
-    "category": "Blogs & Articles",
-    "readTime": "5 min read",
-    "description": "Discover the latest search engine optimization strategies driving organic traffic in 2026.",
-    "date": "2026-07-24"
+    "id": "ai-enterprise-guide",
+    "title": "The 2026 Enterprise AI & LLM Implementation Blueprint",
+    "category": "whitepaper",
+    "categoryLabel": "Whitepapers & E-Books",
+    "readTime": "15 min read",
+    "fileFormat": "PDF (3.2 MB)",
+    "author": "Shivansh Thapa",
+    "authorRole": "Head of Systems Architecture",
+    "description": "A comprehensive executive guide on deploying Retrieval-Augmented Generation (RAG), fine-tuning LLMs, and setting up secure MLOps pipelines inside regulated enterprise cloud infrastructure.",
+    "summary": "This blueprint bridges the gap between proof-of-concept AI experiments and mission-critical production deployments. It covers vector database selection, latency optimization, data privacy compliance, cost control strategies, and real-world fallback mechanisms.",
+    "takeaways": [
+      "Step-by-step RAG architecture comparing Pinecone, Qdrant, and pgvector",
+      "Token usage cost-containment strategies for enterprise LLM APIs",
+      "Data sandboxing and PII redaction protocols for AI agent workflows",
+      "Continuous model evaluation & hallucination benchmark frameworks"
+    ],
+    "date": "2026-07-25"
   },
   {
-    "id": "res_2",
-    "title": "TechEllixir Announces Next-Gen AI Internship Program",
-    "category": "News & Press",
-    "readTime": "3 min read",
-    "description": "Empowering 500+ student developers with hands-on industrial AI project experience.",
+    "id": "fintech-bi-casestudy",
+    "title": "How Real-Time Analytics Accelerated Financial Reporting by 10x",
+    "category": "casestudy",
+    "categoryLabel": "Case Studies",
+    "readTime": "8 min read",
+    "fileFormat": "Case Study PDF",
+    "author": "Avneesh Singh",
+    "authorRole": "Lead Data Scientist",
+    "description": "Discover how TechEllixir transformed a multi-currency fintech platform's legacy batch pipeline into a sub-second SQL analytics dashboard using Power BI and Snowflake.",
+    "summary": "By migrating legacy ETL jobs to streaming ELT pipelines, the client reduced end-of-month reconciliation times from 48 hours to under 15 minutes while improving data accuracy across 1.2M daily transactions.",
+    "takeaways": [
+      "Architecting automated ELT pipelines with Snowflake & dbt",
+      "Building high-concurrency Power BI dashboards with DirectQuery optimization",
+      "Automating audit logging and financial compliance verification"
+    ],
+    "date": "2026-07-22"
+  },
+  {
+    "id": "modern-fullstack-starter",
+    "title": "Production React 19 & Node.js Microservices Architecture Starter",
+    "category": "template",
+    "categoryLabel": "Templates & Code",
+    "readTime": "Code Repo",
+    "fileFormat": "GitHub Zip",
+    "author": "Rudra Pratap Singh",
+    "authorRole": "Senior Full Stack Engineer",
+    "description": "Clean code starter repository featuring React 19, TypeScript, Tailwind CSS v4, Docker Compose, JWT authentication, and structured Express microservices.",
+    "summary": "Skip weeks of boilerplate configuration. This starter pack includes production-ready Docker containers, ESLint/Prettier rules, automated GitHub Actions CI/CD workflows, and API rate limiting out of the box.",
+    "takeaways": [
+      "Pre-configured TypeScript strict mode & path aliases",
+      "Ready-to-use JWT authentication & Refresh Token rotation",
+      "Dockerized development and production build configurations"
+    ],
+    "date": "2026-07-18"
+  },
+  {
+    "id": "n8n-automation-guide",
+    "title": "Mastering Autonomous Business Automation with n8n & AI",
+    "category": "guide",
+    "categoryLabel": "Developer Guides",
+    "readTime": "12 min read",
+    "fileFormat": "Interactive Guide",
+    "author": "Priya Sharma",
+    "authorRole": "Lead Automation Engineer",
+    "description": "Learn how to build self-healing business automation workflows connecting CRM systems, Slack, email parsing, and custom AI agents using n8n and Python webhooks.",
+    "summary": "An end-to-end tutorial for automation engineers looking to automate complex cross-platform business workflows. Includes copy-paste JSON workflow nodes and error handling best practices.",
+    "takeaways": [
+      "Setting up self-hosted n8n instances on AWS Lightsail / Docker",
+      "Parsing unstructured email attachments with OpenAI Vision & OCR",
+      "Building webhook retry logic and Slack alert notifications"
+    ],
+    "date": "2026-07-14"
+  },
+  {
+    "id": "seo-services-dehradun-2026-guide",
+    "title": "SEO Services in Dehradun 2026: Trends, Growth Strategies & Business Scaling Guide",
+    "category": "blogs",
+    "categoryLabel": "Blogs & Articles",
+    "readTime": "11 min read",
+    "fileFormat": "Web Article",
+    "author": "Shivansh Thapa",
+    "authorRole": "Head of Growth & SEO Strategy",
+    "description": "Discover top Search Engine Optimization (SEO) strategies for 2026. Learn how businesses in Dehradun and across India leverage AI search optimization (GEO), technical site audits, and Google My Business growth.",
+    "summary": "Search Engine Optimization has transformed dramatically with AI Search Engines like Perplexity, Gemini, and Search Generative Experience (SGE). Ranking #1 requires a dual approach: high-authority localized signals combined with structured Schema.org JSON-LD markup.",
+    "takeaways": [
+      "Generative Engine Optimization (GEO) tactics for AI Search",
+      "Schema.org structured JSON-LD snippet integration",
+      "Local Google My Business 3-pack ranking playbook"
+    ],
     "date": "2026-07-25"
+  },
+  {
+    "id": "blog-rag-vs-finetuning",
+    "title": "Why Fine-Tuning LLMs Fails Without Proper RAG Architecture",
+    "category": "blogs",
+    "categoryLabel": "Blogs & Articles",
+    "readTime": "6 min read",
+    "fileFormat": "Web Article",
+    "author": "Avneesh Singh",
+    "authorRole": "Lead AI Architect",
+    "description": "Many enterprises rush to fine-tune open-weight models on proprietary data, only to suffer from hallucination and high retraining costs. Here is why RAG is the true foundation.",
+    "summary": "When engineering AI applications for businesses, data freshness and factual accuracy are paramount. Fine-tuning alters model weights but does not guarantee memory precision. Retrieval-Augmented Generation (RAG) acts as an external search index that injects exact context into prompts in real time.",
+    "takeaways": [
+      "Vector embeddings vs BM25 hybrid search comparison",
+      "Reranking with Cohere to boost context precision by 34%",
+      "Cost comparison between fine-tuning and vector indexing"
+    ],
+    "date": "2026-07-18"
+  },
+  {
+    "id": "news-ai-partner",
+    "title": "TechEllixir Recognized as Top AI Solutions Provider 2026",
+    "category": "news",
+    "categoryLabel": "News & Press",
+    "readTime": "3 min read",
+    "fileFormat": "Press Release",
+    "author": "TechEllixir Corporate",
+    "authorRole": "Press Office",
+    "description": "TechEllixir has been honored as one of the leading enterprise AI and data automation solution partners for delivering custom LLM and RAG platforms across APAC.",
+    "summary": "TechEllixir today announced its inclusion in the 2026 Global AI & Data Excellence list. Recognized for its practical engineering approach and high client satisfaction rates across healthcare, fintech, and retail industries, TechEllixir continues to empower businesses with cutting-edge software solutions.",
+    "takeaways": [
+      "Industry award recognition for Generative AI engineering",
+      "Over 150+ successful client deployments in APAC",
+      "Expansion into high-concurrency cloud and DevOps advisory"
+    ],
+    "date": "2026-07-15"
   }
 ]
