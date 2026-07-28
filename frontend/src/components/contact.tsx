@@ -20,7 +20,7 @@ const Contact = () => {
     fullName: "",
     email: "",
     phone: "",
-    subject: "Enterprise Software Engineering",
+    subject: "",
     message: "",
   });
 
@@ -205,18 +205,13 @@ const Contact = () => {
                 <label className="block text-sm font-bold text-[#182033] dark:text-gray-200 mb-2">
                   Service You Need
                 </label>
-                <select
+                <input
+                  type="text"
+                  placeholder="e.g. AI-Powered Marketing Strategy, Web Application, Mobile App..."
                   value={form.subject}
                   onChange={(e) => updateField("subject", e.target.value)}
-                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 px-5 py-4 text-sm font-bold text-gray-800 dark:text-gray-100 outline-none focus:border-[#FF4D37] dark:focus:border-[#FF4D37] transition cursor-pointer"
-                >
-                  <option value="AI-Powered Marketing Strategy">AI-Powered Marketing Strategy</option>
-                  <option value="Enterprise Web Application">Enterprise Web Application</option>
-                  <option value="Mobile App Development">Mobile App Development</option>
-                  <option value="Cloud Architecture & DevOps">Cloud Architecture & DevOps</option>
-                  <option value="SEO & Growth Strategy">SEO & Growth Strategy</option>
-                  <option value="Custom Software Engineering">Custom Software Engineering</option>
-                </select>
+                  className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 px-5 py-4 text-sm font-medium text-gray-800 dark:text-gray-100 outline-none focus:border-[#FF4D37] dark:focus:border-[#FF4D37] focus:bg-white dark:focus:bg-slate-900 transition"
+                />
               </div>
 
               {/* Tell Us About Your Goals */}
