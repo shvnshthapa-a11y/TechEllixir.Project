@@ -15,6 +15,7 @@ import Profile from "./pages/profile";
 import ServiceDetail from "./pages/service-detail";
 import ResourceDetail from "./pages/resource-detail";
 import BlogDetail from "./pages/blog-detail";
+import ApplyInternship from "./pages/apply-internship";
 
 function App() {
   return (
@@ -37,6 +38,9 @@ function App() {
         <Route path="/event/:id" element={<ResourceDetail />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/career" element={<Career/>}/>
+        <Route path="/register-internship" element={<ApplyInternship />} />
+        <Route path="/apply-internship" element={<ApplyInternship />} />
+        <Route path="/career/apply" element={<ApplyInternship />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/auth" element={<Auth />} />

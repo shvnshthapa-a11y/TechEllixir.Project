@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -34,10 +35,6 @@ import {
   Building2,
   Layers,
   ArrowUpRight,
-  X,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 
 const domains = [
@@ -344,82 +341,6 @@ const domains = [
 export default function Career() {
   const [filterTag, setFilterTag] = useState<string>("all");
 
-  // Custom Internship Application Form Modal State
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState("Frontend Development");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [college, setCollege] = useState("");
-  const [year, setYear] = useState("3rd Year");
-  const [resumeUrl, setResumeUrl] = useState("");
-  const [reason, setReason] = useState("");
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  const handleOpenModal = (domainTitle?: string) => {
-    if (domainTitle) {
-      setSelectedDomain(domainTitle);
-    }
-    setFormError("");
-    setIsSuccess(false);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const handleSubmitApplication = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
-
-    if (!fullName.trim() || fullName.trim().length < 2) {
-      setFormError("Please enter your full name.");
-      return;
-    }
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setFormError("Please enter a valid email address.");
-      return;
-    }
-    if (!phone.trim() || phone.trim().length < 8) {
-      setFormError("Please enter a valid mobile / WhatsApp number.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const res = await fetch("/api/internship-applications", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: fullName.trim(),
-          email: email.trim().toLowerCase(),
-          phone: phone.trim(),
-          domain: selectedDomain,
-          college: college.trim() || "Not specified",
-          year,
-          resumeUrl: resumeUrl.trim(),
-          reason: reason.trim(),
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || "Failed to submit application");
-      }
-
-      setIsSuccess(true);
-    } catch (err: any) {
-      setFormError(err.message || "Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const filteredDomains = domains.filter((d) => {
     if (filterTag === "all") return true;
     if (filterTag === "trending") return !!d.badge;
@@ -535,8 +456,8 @@ export default function Career() {
                   </p>
 
                   {/* Button */}
-                  <button
-                    onClick={() => handleOpenModal(domain.title)}
+                  <Link
+                    to={`/register-internship?domain=${encodeURIComponent(domain.title)}`}
                     className="group/btn mt-7 inline-flex items-center gap-2 font-bold text-[#FF4D37] hover:underline cursor-pointer text-left"
                   >
                     Register Now
@@ -544,7 +465,7 @@ export default function Career() {
                       size={18}
                       className="transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
                     />
-                  </button>
+                  </Link>
                 </motion.article>
               ))}
             </AnimatePresence>
@@ -562,250 +483,16 @@ export default function Career() {
               Complete your registration and we will review your application.
               Shortlisted candidates will be contacted with the next steps.
             </p>
-            <button
-              onClick={() => handleOpenModal("Full Stack Development")}
-              className="brand-button mt-9 px-9 py-4 cursor-pointer"
+            <Link
+              to="/register-internship?domain=Full%20Stack%20Development"
+              className="brand-button mt-9 px-9 py-4 inline-flex items-center gap-2"
             >
               Register Now
               <ArrowRight size={20} />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
-
-      {/* CUSTOM INTERNSHIP APPLICATION MODAL FORM */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={handleCloseModal}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-            />
-
-            {/* Modal Container */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden z-10 my-8"
-            >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50">
-                <div>
-                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                    <span>Internship Program Application</span>
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Complete your registration to join TechEllixir's practical project program.
-                  </p>
-                </div>
-                <button
-                  onClick={handleCloseModal}
-                  className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-slate-800 transition cursor-pointer"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <div className="p-6 sm:p-8 max-h-[80vh] overflow-y-auto">
-                {isSuccess ? (
-                  <div className="py-8 text-center space-y-4">
-                    <div className="h-16 w-16 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-500 rounded-full flex items-center justify-center mx-auto">
-                      <CheckCircle2 size={36} />
-                    </div>
-                    <h4 className="text-2xl font-black text-[#182033] dark:text-white">
-                      Application Submitted! 🎉
-                    </h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 max-w-md mx-auto leading-relaxed font-medium">
-                      Thank you <span className="font-bold text-[#FF4D37]">{fullName}</span> for applying for the <span className="font-bold">{selectedDomain}</span> Internship. We have sent a confirmation email to <span className="font-bold">{email}</span>.
-                    </p>
-                    <div className="pt-4">
-                      <button
-                        onClick={handleCloseModal}
-                        className="brand-button px-8 py-3 text-xs font-bold cursor-pointer"
-                      >
-                        Done & Close
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmitApplication} className="space-y-4">
-                    
-                    {formError && (
-                      <div className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-300 text-xs font-bold flex items-center gap-2">
-                        <AlertCircle size={16} className="shrink-0" />
-                        <span>{formError}</span>
-                      </div>
-                    )}
-
-                    {/* Domain Selection */}
-                    <div>
-                      <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                        Applied Internship Domain <span className="text-[#FF4D37]">*</span>
-                      </label>
-                      <select
-                        value={selectedDomain}
-                        onChange={(e) => setSelectedDomain(e.target.value)}
-                        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                      >
-                        {domains.map((d) => (
-                          <option key={d.title} value={d.title}>
-                            {d.title} {d.badge ? `(${d.badge})` : ""}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      {/* Full Name */}
-                      <div>
-                        <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                          Full Name <span className="text-[#FF4D37]">*</span>
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          placeholder="e.g. Rudra Pratap Bisht"
-                          value={fullName}
-                          onChange={(e) => setFullName(e.target.value)}
-                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                        />
-                      </div>
-
-                      {/* Email Address */}
-                      <div>
-                        <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                          Email Address <span className="text-[#FF4D37]">*</span>
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          placeholder="e.g. rudra@example.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      {/* Phone Number */}
-                      <div>
-                        <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                          Mobile / WhatsApp Number <span className="text-[#FF4D37]">*</span>
-                        </label>
-                        <input
-                          type="tel"
-                          required
-                          placeholder="e.g. +91 98765 43210"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                        />
-                      </div>
-
-                      {/* Year of Study */}
-                      <div>
-                        <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                          Year of Study / Status <span className="text-[#FF4D37]">*</span>
-                        </label>
-                        <select
-                          value={year}
-                          onChange={(e) => setYear(e.target.value)}
-                          className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                        >
-                          <option value="1st Year">1st Year Student</option>
-                          <option value="2nd Year">2nd Year Student</option>
-                          <option value="3rd Year">3rd Year Student</option>
-                          <option value="Final Year">Final Year Student</option>
-                          <option value="Graduated / Working">Graduated / Working Professional</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* College / University Name */}
-                    <div>
-                      <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                        College / University / Organization Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Graphic Era University / DIT Dehradun"
-                        value={college}
-                        onChange={(e) => setCollege(e.target.value)}
-                        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                      />
-                    </div>
-
-                    {/* Resume / Portfolio Link */}
-                    <div>
-                      <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                        LinkedIn / Portfolio / Resume Link
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://linkedin.in/in/yourprofile or Google Drive link"
-                        value={resumeUrl}
-                        onChange={(e) => setResumeUrl(e.target.value)}
-                        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition"
-                      />
-                    </div>
-
-                    {/* Statement of Purpose */}
-                    <div>
-                      <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                        Why do you want to join TechEllixir?
-                      </label>
-                      <textarea
-                        rows={3}
-                        placeholder="Share your goals and what project experience you hope to gain..."
-                        value={reason}
-                        onChange={(e) => setReason(e.target.value)}
-                        className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-4 py-3 text-xs sm:text-sm font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37] transition resize-none"
-                      />
-                    </div>
-
-                    {/* Submit Button */}
-                    <div className="pt-2 flex items-center justify-end gap-3">
-                      <button
-                        type="button"
-                        onClick={handleCloseModal}
-                        className="px-5 py-3 rounded-2xl text-xs font-bold text-gray-500 hover:text-gray-800 dark:hover:text-white transition cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="brand-button px-8 py-3 text-xs font-black flex items-center gap-2 cursor-pointer shadow-lg disabled:opacity-50"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <Loader2 size={16} className="animate-spin" />
-                            <span>Submitting Application...</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>Submit Application</span>
-                            <ArrowRight size={16} />
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                  </form>
-                )}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
     </main>
   );
 }
