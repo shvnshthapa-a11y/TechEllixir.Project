@@ -13,6 +13,9 @@ import {
   Users,
   Briefcase,
   Code2,
+  UploadCloud,
+  FileText,
+  X,
 } from "lucide-react";
 
 const allDomains = [
@@ -80,9 +83,23 @@ export default function ApplyInternship() {
   const [resumeUrl, setResumeUrl] = useState("");
   const [reason, setReason] = useState("");
 
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        setFormError("Resume file size should be less than 10MB.");
+        return;
+      }
+      setResumeFile(file);
+      setFormError("");
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get("domain")) {
@@ -109,6 +126,10 @@ export default function ApplyInternship() {
 
     setIsSubmitting(true);
 
+    const resumePayload = resumeFile
+      ? `${resumeFile.name} (${(resumeFile.size / (1024 * 1024)).toFixed(2)} MB)`
+      : resumeUrl.trim();
+
     try {
       const res = await fetch("/api/internship-applications", {
         method: "POST",
@@ -120,7 +141,7 @@ export default function ApplyInternship() {
           domain: selectedDomain,
           college: college.trim() || "Not specified",
           year,
-          resumeUrl: resumeUrl.trim(),
+          resumeUrl: resumePayload,
           reason: reason.trim(),
         }),
       });
@@ -337,10 +358,62 @@ export default function ApplyInternship() {
                   />
                 </div>
 
-                {/* LinkedIn / Resume Link */}
+                {/* Resume File Upload Box */}
                 <div>
                   <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
-                    LinkedIn / Portfolio / Resume URL
+                    Upload Resume Document (PDF, DOC, DOCX) <span className="text-[#FF4D37]">*</span>
+                  </label>
+
+                  {resumeFile ? (
+                    <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-50/80 dark:bg-slate-900 border border-orange-200 dark:border-slate-800">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-[#FF4D37] text-white flex items-center justify-center shrink-0 shadow-sm">
+                          <FileText size={20} />
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white truncate max-w-[220px] sm:max-w-xs">
+                            {resumeFile.name}
+                          </p>
+                          <p className="text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                            {(resumeFile.size / (1024 * 1024)).toFixed(2)} MB • Verified Resume Document
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setResumeFile(null)}
+                        className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"
+                        title="Remove file"
+                      >
+                        <X size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 dark:border-slate-800 rounded-2xl bg-gray-50/60 dark:bg-slate-900/60 hover:bg-orange-50/40 dark:hover:bg-slate-900 hover:border-[#FF4D37] transition cursor-pointer text-center group">
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <div className="h-12 w-12 rounded-2xl bg-orange-100 dark:bg-slate-800 text-[#FF4D37] flex items-center justify-center mb-2 group-hover:scale-110 transition">
+                        <UploadCloud size={24} />
+                      </div>
+                      <p className="text-xs sm:text-sm font-bold text-gray-800 dark:text-gray-200">
+                        <span className="text-[#FF4D37]">Click to upload your resume</span> or drag & drop file
+                      </p>
+                      <p className="text-[11px] font-medium text-gray-400 mt-1">
+                        Supports PDF, DOC, DOCX up to 10MB
+                      </p>
+                    </label>
+                  )}
+                </div>
+
+                {/* LinkedIn / Portfolio Link */}
+                <div>
+                  <label className="block text-xs font-extrabold text-gray-700 dark:text-gray-300 mb-1.5 uppercase tracking-wider">
+                    Or LinkedIn / Portfolio / Resume URL (Optional)
                   </label>
                   <input
                     type="url"
