@@ -7,6 +7,7 @@ import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Resend } from "resend";
 import nodemailer from "nodemailer";
+import { initDatabase, dbSelect, dbSave, dbStats } from "./db.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const projectRoot = resolve(__dirname, "..");
@@ -95,118 +96,36 @@ const mimeTypes = {
   ".svg": "image/svg+xml",
 };
 
-async function ensureStore() {
-  await mkdir(resourcesDir, { recursive: true });
-  try {
-    await stat(queriesFile);
-  } catch {
-    await writeFile(queriesFile, "[]\n", "utf8");
-  }
-}
-
-const usersFile = join(resourcesDir, "users.json");
-const settingsFile = join(resourcesDir, "settings.json");
-
-async function ensureUserStore() {
-  await ensureStore();
-  try {
-    await stat(usersFile);
-  } catch {
-    const defaultUsers = [
-      { id: "usr_101", name: "Rudra Pratap Singh", email: "rudra@example.com", role: "user", status: "active", createdAt: new Date().toISOString() },
-      { id: "usr_102", name: "Shivansh Thapa", email: "shivansh@techellixir.com", role: "admin", status: "active", createdAt: new Date().toISOString() },
-      { id: "usr_103", name: "Ananya Sharma", email: "ananya.sharma@dit.edu.in", role: "user", status: "active", createdAt: new Date().toISOString() },
-      { id: "usr_104", name: "Vikram Malhotra", email: "vikram@geu.ac.in", role: "user", status: "active", createdAt: new Date().toISOString() },
-    ];
-    await writeFile(usersFile, JSON.stringify(defaultUsers, null, 2), "utf8");
-  }
-  try {
-    await stat(settingsFile);
-  } catch {
-    const defaultSettings = { maintenanceMode: false, announcementBanner: "", allowRegistrations: true, updatedBy: "Admin" };
-    await writeFile(settingsFile, JSON.stringify(defaultSettings, null, 2), "utf8");
-  }
-}
-
-const servicesCmsFile = join(resourcesDir, "services.json");
-const resourcesCmsFile = join(resourcesDir, "resources.json");
-const careersCmsFile = join(resourcesDir, "careers.json");
-
-async function ensureCmsStore() {
-  await ensureStore();
-  try {
-    await stat(servicesCmsFile);
-  } catch {
-    const defaultServices = [
-      { id: "srv_1", title: "Web Development", category: "Core Development", description: "Responsive web platforms built with React, Node.js, and modern architecture.", note: "Enterprise scale and performance", highlights: "React 19 & Next.js, REST/GraphQL API, PostgreSQL" },
-      { id: "srv_2", title: "Artificial Intelligence & RAG", category: "AI & Data", description: "Custom LLM integrations, document search, and intelligent workflow automations.", note: "Sub-second response time", highlights: "Vector DB Integration, Custom AI Agents, PyTorch" },
-      { id: "srv_3", title: "Cloud Architecture & DevOps", category: "Infrastructure", description: "AWS/GCP infrastructure setup, Kubernetes clusters, and automated CI/CD pipelines.", note: "99.99% Uptime SLA", highlights: "Docker & Kubernetes, Terraform, Infrastructure as Code" },
-    ];
-    await writeFile(servicesCmsFile, JSON.stringify(defaultServices, null, 2), "utf8");
-  }
-  try {
-    await stat(resourcesCmsFile);
-  } catch {
-    const defaultResources = [
-      { id: "res_1", title: "SEO Services in Dehradun: 2026 Trends & Growth Guide", category: "Blogs & Articles", readTime: "5 min read", description: "Discover the latest search engine optimization strategies driving organic traffic in 2026.", date: "2026-07-24" },
-      { id: "res_2", title: "TechEllixir Announces Next-Gen AI Internship Program", category: "News & Press", readTime: "3 min read", description: "Empowering 500+ student developers with hands-on industrial AI project experience.", date: "2026-07-25" },
-    ];
-    await writeFile(resourcesCmsFile, JSON.stringify(defaultResources, null, 2), "utf8");
-  }
-  try {
-    await stat(careersCmsFile);
-  } catch {
-    const defaultCareers = [
-      { id: "car_1", title: "Artificial Intelligence", category: "AI & Data Science", badge: "🔥 #1 Most Popular", duration: "2 - 6 Months", desc: "Machine Learning, LLM Fine-Tuning, RAG Pipelines, Python & PyTorch." },
-      { id: "car_2", title: "Full Stack Development", category: "Web & Full Stack", badge: "🚀 High Demand", duration: "2 - 6 Months", desc: "React, Node.js, TypeScript, PostgreSQL, REST APIs & Tailwind CSS." },
-      { id: "car_3", title: "Cloud & DevOps Engineering", category: "Cloud & Security", badge: "⚡ Trending 2026", duration: "2 - 6 Months", desc: "Docker, Kubernetes, AWS, Terraform, CI/CD & Linux Administration." },
-    ];
-    await writeFile(careersCmsFile, JSON.stringify(defaultCareers, null, 2), "utf8");
-  }
-}
-
-async function readCms(file) {
-  await ensureCmsStore();
-  const raw = await readFile(file, "utf8");
-  return JSON.parse(raw);
-}
-
-async function writeCms(file, data) {
-  await ensureCmsStore();
-  await writeFile(file, `${JSON.stringify(data, null, 2)}\n`, "utf8");
-}
-
-async function readUsers() {
-  await ensureUserStore();
-  const raw = await readFile(usersFile, "utf8");
-  return JSON.parse(raw);
-}
-
-async function writeUsers(users) {
-  await ensureUserStore();
-  await writeFile(usersFile, `${JSON.stringify(users, null, 2)}\n`, "utf8");
-}
-
-async function readSettings() {
-  await ensureUserStore();
-  const raw = await readFile(settingsFile, "utf8");
-  return JSON.parse(raw);
-}
-
-async function writeSettings(settings) {
-  await ensureUserStore();
-  await writeFile(settingsFile, `${JSON.stringify(settings, null, 2)}\n`, "utf8");
-}
-
 async function readQueries() {
-  await ensureStore();
-  const raw = await readFile(queriesFile, "utf8");
-  return JSON.parse(raw);
+  return dbSelect("queries");
 }
 
 async function writeQueries(queries) {
-  await ensureStore();
-  await writeFile(queriesFile, `${JSON.stringify(queries, null, 2)}\n`, "utf8");
+  return dbSave("queries", queries);
+}
+
+async function readUsers() {
+  return dbSelect("users");
+}
+
+async function writeUsers(users) {
+  return dbSave("users", users);
+}
+
+async function readSettings() {
+  return dbSelect("settings");
+}
+
+async function writeSettings(settings) {
+  return dbSave("settings", settings);
+}
+
+async function readCms(tableName) {
+  return dbSelect(tableName);
+}
+
+async function writeCms(tableName, data) {
+  return dbSave(tableName, data);
 }
 
 function json(res, status, payload) {
@@ -691,14 +610,14 @@ async function handleApi(req, res, url) {
     // 7. CMS Management API - Services
     if (url.pathname === "/api/admin/cms/services" || url.pathname === "/api/cms/services") {
       if (req.method === "GET") {
-        const items = await readCms(servicesCmsFile);
+        const items = await readCms("services");
         json(res, 200, { items });
         return;
       }
       if (req.method === "POST") {
         if (!requireAdmin(req, res)) return;
         const body = await readBody(req);
-        const items = await readCms(servicesCmsFile);
+        const items = await readCms("services");
         const newItem = {
           id: `srv_${Date.now()}`,
           title: String(body.title || "New Service").trim(),
@@ -709,7 +628,7 @@ async function handleApi(req, res, url) {
           createdAt: new Date().toISOString(),
         };
         items.unshift(newItem);
-        await writeCms(servicesCmsFile, items);
+        await writeCms("services", items);
         json(res, 200, { item: newItem, items });
         return;
       }
@@ -719,7 +638,7 @@ async function handleApi(req, res, url) {
     if (srvCmsMatch) {
       if (!requireAdmin(req, res)) return;
       const id = srvCmsMatch[1];
-      const items = await readCms(servicesCmsFile);
+      const items = await readCms("services");
       const idx = items.findIndex((i) => i.id === id);
 
       if (idx === -1) {
@@ -730,14 +649,14 @@ async function handleApi(req, res, url) {
       if (req.method === "PATCH") {
         const body = await readBody(req);
         items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
-        await writeCms(servicesCmsFile, items);
+        await writeCms("services", items);
         json(res, 200, { item: items[idx], items });
         return;
       }
 
       if (req.method === "DELETE") {
         const deleted = items.splice(idx, 1)[0];
-        await writeCms(servicesCmsFile, items);
+        await writeCms("services", items);
         json(res, 200, { item: deleted, items });
         return;
       }
@@ -746,14 +665,14 @@ async function handleApi(req, res, url) {
     // 8. CMS Management API - Resources
     if (url.pathname === "/api/admin/cms/resources" || url.pathname === "/api/cms/resources") {
       if (req.method === "GET") {
-        const items = await readCms(resourcesCmsFile);
+        const items = await readCms("resources");
         json(res, 200, { items });
         return;
       }
       if (req.method === "POST") {
         if (!requireAdmin(req, res)) return;
         const body = await readBody(req);
-        const items = await readCms(resourcesCmsFile);
+        const items = await readCms("resources");
         const newItem = {
           id: `res_${Date.now()}`,
           title: String(body.title || "New Resource").trim(),
@@ -763,7 +682,7 @@ async function handleApi(req, res, url) {
           date: new Date().toISOString().slice(0, 10),
         };
         items.unshift(newItem);
-        await writeCms(resourcesCmsFile, items);
+        await writeCms("resources", items);
         json(res, 200, { item: newItem, items });
         return;
       }
@@ -773,7 +692,7 @@ async function handleApi(req, res, url) {
     if (resCmsMatch) {
       if (!requireAdmin(req, res)) return;
       const id = resCmsMatch[1];
-      const items = await readCms(resourcesCmsFile);
+      const items = await readCms("resources");
       const idx = items.findIndex((i) => i.id === id);
 
       if (idx === -1) {
@@ -784,14 +703,14 @@ async function handleApi(req, res, url) {
       if (req.method === "PATCH") {
         const body = await readBody(req);
         items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
-        await writeCms(resourcesCmsFile, items);
+        await writeCms("resources", items);
         json(res, 200, { item: items[idx], items });
         return;
       }
 
       if (req.method === "DELETE") {
         const deleted = items.splice(idx, 1)[0];
-        await writeCms(resourcesCmsFile, items);
+        await writeCms("resources", items);
         json(res, 200, { item: deleted, items });
         return;
       }
@@ -800,14 +719,14 @@ async function handleApi(req, res, url) {
     // 9. CMS Management API - Careers
     if (url.pathname === "/api/admin/cms/careers" || url.pathname === "/api/cms/careers") {
       if (req.method === "GET") {
-        const items = await readCms(careersCmsFile);
+        const items = await readCms("careers");
         json(res, 200, { items });
         return;
       }
       if (req.method === "POST") {
         if (!requireAdmin(req, res)) return;
         const body = await readBody(req);
-        const items = await readCms(careersCmsFile);
+        const items = await readCms("careers");
         const newItem = {
           id: `car_${Date.now()}`,
           title: String(body.title || "New Domain").trim(),
@@ -817,7 +736,7 @@ async function handleApi(req, res, url) {
           desc: String(body.desc || "").trim(),
         };
         items.unshift(newItem);
-        await writeCms(careersCmsFile, items);
+        await writeCms("careers", items);
         json(res, 200, { item: newItem, items });
         return;
       }
@@ -827,7 +746,7 @@ async function handleApi(req, res, url) {
     if (carCmsMatch) {
       if (!requireAdmin(req, res)) return;
       const id = carCmsMatch[1];
-      const items = await readCms(careersCmsFile);
+      const items = await readCms("careers");
       const idx = items.findIndex((i) => i.id === id);
 
       if (idx === -1) {
@@ -838,17 +757,25 @@ async function handleApi(req, res, url) {
       if (req.method === "PATCH") {
         const body = await readBody(req);
         items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
-        await writeCms(careersCmsFile, items);
+        await writeCms("careers", items);
         json(res, 200, { item: items[idx], items });
         return;
       }
 
       if (req.method === "DELETE") {
         const deleted = items.splice(idx, 1)[0];
-        await writeCms(careersCmsFile, items);
+        await writeCms("careers", items);
         json(res, 200, { item: deleted, items });
         return;
       }
+    }
+
+    // 10. Database Health Inspection & Admin Stats API
+    if (url.pathname === "/api/admin/db/stats") {
+      if (!requireAdmin(req, res)) return;
+      const stats = await dbStats();
+      json(res, 200, { stats });
+      return;
     }
 
     notFound(res);
