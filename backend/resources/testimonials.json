@@ -1,0 +1,44 @@
+[
+  {
+    "id": "tst_1",
+    "name": "Rahul Sharma",
+    "company": "ABC Technologies",
+    "rating": 5,
+    "review": "TechEllixir delivered an outstanding website that exceeded our expectations. Their team was professional, responsive and delivered everything on time."
+  },
+  {
+    "id": "tst_2",
+    "name": "Priya Verma",
+    "company": "Innovate Solutions",
+    "rating": 5,
+    "review": "The team was responsive, creative, and delivered our mobile application on time. The experience was smooth from start to finish."
+  },
+  {
+    "id": "tst_3",
+    "name": "David Wilson",
+    "company": "Global IT",
+    "rating": 5,
+    "review": "Excellent support and high-quality software development. Highly recommended for startups and enterprises."
+  },
+  {
+    "id": "tst_4",
+    "name": "Anjali Gupta",
+    "company": "NextGen",
+    "rating": 5,
+    "review": "Professional team with excellent communication and beautiful UI designs. We loved working with them."
+  },
+  {
+    "id": "tst_5",
+    "name": "Amit Kumar",
+    "company": "Digital World",
+    "rating": 5,
+    "review": "Outstanding service from planning to deployment. Great experience and excellent technical support."
+  },
+  {
+    "id": "tst_6",
+    "name": "Sneha Patel",
+    "company": "TechHub",
+    "rating": 5,
+    "review": "Amazing developers and excellent post-launch support. We will definitely work together again."
+  }
+]

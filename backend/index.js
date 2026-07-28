@@ -778,6 +778,33 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    // 11. Testimonials API
+    if (url.pathname === "/api/testimonials") {
+      if (req.method === "GET") {
+        const items = await dbSelect("testimonials");
+        json(res, 200, { items });
+        return;
+      }
+    }
+
+    // 12. Industries Verticals API
+    if (url.pathname === "/api/industries") {
+      if (req.method === "GET") {
+        const items = await dbSelect("industries");
+        json(res, 200, { items });
+        return;
+      }
+    }
+
+    // 13. Team Members API
+    if (url.pathname === "/api/team") {
+      if (req.method === "GET") {
+        const items = await dbSelect("team");
+        json(res, 200, { items });
+        return;
+      }
+    }
+
     notFound(res);
   } catch (error) {
     console.error("API error:", error);

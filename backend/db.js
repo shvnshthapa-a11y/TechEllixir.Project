@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 export const dbDir = join(__dirname, "resources");
 
-// Table file paths
+// Complete Database Table Registry
 const tables = {
   queries: join(dbDir, "queries.json"),
   users: join(dbDir, "users.json"),
@@ -13,20 +13,23 @@ const tables = {
   services: join(dbDir, "services.json"),
   resources: join(dbDir, "resources.json"),
   careers: join(dbDir, "careers.json"),
+  testimonials: join(dbDir, "testimonials.json"),
+  industries: join(dbDir, "industries.json"),
+  team: join(dbDir, "team.json"),
 };
 
-// Initialize Database Schemas & Seed Full Project Data
+// Initialize All Database Tables with Full Project Content Seed
 export async function initDatabase() {
   await mkdir(dbDir, { recursive: true });
 
-  // 1. Queries Table (Leads & Candidates)
+  // 1. Queries & Applications Table
   try {
     await stat(tables.queries);
   } catch {
     await writeFile(tables.queries, "[]\n", "utf8");
   }
 
-  // 2. Users Table (System Accounts & Access Roles)
+  // 2. Portal User Directory Table
   try {
     await stat(tables.users);
   } catch {
@@ -39,7 +42,7 @@ export async function initDatabase() {
     await writeFile(tables.users, JSON.stringify(defaultUsers, null, 2), "utf8");
   }
 
-  // 3. Settings Table (Global Portal Controls)
+  // 3. Settings & Announcement Controls Table
   try {
     await stat(tables.settings);
   } catch {
@@ -47,7 +50,7 @@ export async function initDatabase() {
     await writeFile(tables.settings, JSON.stringify(defaultSettings, null, 2), "utf8");
   }
 
-  // 4. Services Table (Full Technical Services Catalog)
+  // 4. Full Technical Services Catalog Table
   try {
     await stat(tables.services);
   } catch {
@@ -116,7 +119,7 @@ export async function initDatabase() {
     await writeFile(tables.services, JSON.stringify(defaultServices, null, 2), "utf8");
   }
 
-  // 5. Resources Table (Blogs, Whitepapers, News & Press Releases)
+  // 5. Resources, Blogs & Case Studies Table
   try {
     await stat(tables.resources);
   } catch {
@@ -130,7 +133,7 @@ export async function initDatabase() {
     await writeFile(tables.resources, JSON.stringify(defaultResources, null, 2), "utf8");
   }
 
-  // 6. Careers Table (Full 16 Internship Domains)
+  // 6. Complete 16 Career Internship Domains Table
   try {
     await stat(tables.careers);
   } catch {
@@ -155,7 +158,53 @@ export async function initDatabase() {
     await writeFile(tables.careers, JSON.stringify(defaultCareers, null, 2), "utf8");
   }
 
-  console.log("Database initialized successfully at:", dbDir);
+  // 7. Client & Student Testimonials Table
+  try {
+    await stat(tables.testimonials);
+  } catch {
+    const defaultTestimonials = [
+      { id: "tst_1", name: "Rahul Sharma", company: "ABC Technologies", rating: 5, review: "TechEllixir delivered an outstanding website that exceeded our expectations. Their team was professional, responsive and delivered everything on time." },
+      { id: "tst_2", name: "Priya Verma", company: "Innovate Solutions", rating: 5, review: "The team was responsive, creative, and delivered our mobile application on time. The experience was smooth from start to finish." },
+      { id: "tst_3", name: "David Wilson", company: "Global IT", rating: 5, review: "Excellent support and high-quality software development. Highly recommended for startups and enterprises." },
+      { id: "tst_4", name: "Anjali Gupta", company: "NextGen", rating: 5, review: "Professional team with excellent communication and beautiful UI designs. We loved working with them." },
+      { id: "tst_5", name: "Amit Kumar", company: "Digital World", rating: 5, review: "Outstanding service from planning to deployment. Great experience and excellent technical support." },
+      { id: "tst_6", name: "Sneha Patel", company: "TechHub", rating: 5, review: "Amazing developers and excellent post-launch support. We will definitely work together again." }
+    ];
+    await writeFile(tables.testimonials, JSON.stringify(defaultTestimonials, null, 2), "utf8");
+  }
+
+  // 8. Industry Verticals Table
+  try {
+    await stat(tables.industries);
+  } catch {
+    const defaultIndustries = [
+      { id: "healthcare", title: "Healthcare & MedTech", tagline: "HIPAA-Compliant Patient Care & AI Diagnostics", description: "Empowering hospitals, telemedicine platforms, and medical device manufacturers with secure, compliant digital solutions." },
+      { id: "finance", title: "Finance & FinTech", tagline: "High-Concurrency Trading & Micro-Services", description: "Architecting zero-trust banking APIs, automated fraud detection models, and high-frequency transaction engines." },
+      { id: "retail", title: "E-Commerce & Retail", tagline: "Headless Commerce & AI Recommendation Engines", description: "Building omnichannel shopping experiences, inventory sync microservices, and personalized product engines." },
+      { id: "manufacturing", title: "Manufacturing & Industry 4.0", tagline: "IoT Telemetry & Predictive Maintenance", description: "Connecting factory machinery with real-time IoT sensors, automated defect inspection, and supply chain visibility." },
+      { id: "logistics", title: "Logistics & Supply Chain", tagline: "Real-Time Fleet Tracking & Route Optimization", description: "Building dispatch management platforms, driver mobile apps, and automated warehouse inventory systems." },
+      { id: "real-estate", title: "Real Estate & PropTech", tagline: "Virtual Property Tours & Automated CRM Lead Flows", description: "Developing tenant portals, automated lease document generation, and MLS listing integrations." },
+      { id: "education", title: "Education & EdTech", tagline: "Interactive Learning Systems & Proctored Exams", description: "Engineering LMS platforms, live virtual classroom video streaming, and AI automated grading tools." },
+      { id: "marketing", title: "Marketing & AdTech", tagline: "Campaign Analytics & High-Volume Lead Engines", description: "Building real-time bidding analytics, automated email drip engines, and conversion rate optimization tools." },
+      { id: "hr", title: "HR Tech & Recruitment", tagline: "AI Candidate Screening & Payroll Automation", description: "Building resume parser models, automated interview scheduling bots, and employee onboarding portals." },
+      { id: "startups", title: "Startups & Venture Backed", tagline: "Rapid MVP Engineering & Scalable Seed Architecture", description: "Helping founders take ideas from pitch deck wireframes to production-grade applications in under 6 weeks." }
+    ];
+    await writeFile(tables.industries, JSON.stringify(defaultIndustries, null, 2), "utf8");
+  }
+
+  // 9. Core Engineering Team Table
+  try {
+    await stat(tables.team);
+  } catch {
+    const defaultTeam = [
+      { id: "tm_1", name: "Shivansh Thapa", role: "Chief Executive Officer & Founder", bio: "Tech visionary specializing in full-stack architecture, enterprise growth, and AI product execution.", email: "shivansh@techellixir.com" },
+      { id: "tm_2", name: "Rudra Pratap Singh Bisht", role: "Lead Systems Architect", bio: "Expert in distributed cloud systems, high-concurrency microservices, and DevOps infrastructure.", email: "rudra@techellixir.com" },
+      { id: "tm_3", name: "Avneesh Singh", role: "Head of AI & Machine Learning", bio: "Leading Generative AI, RAG architecture, and custom LLM deployments for enterprise clients.", email: "avneesh@techellixir.com" }
+    ];
+    await writeFile(tables.team, JSON.stringify(defaultTeam, null, 2), "utf8");
+  }
+
+  console.log("Full Database initialized successfully at:", dbDir);
 }
 
 // Read Table Data
@@ -194,7 +243,7 @@ export async function dbStats() {
     }
   }
   return {
-    engine: "TechEllixir JSON Document Database v2.0",
+    engine: "TechEllixir Enterprise JSON Document Database v2.0",
     databasePath: dbDir,
     tables: statsResult,
   };
