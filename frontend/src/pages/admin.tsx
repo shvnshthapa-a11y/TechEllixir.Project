@@ -2067,17 +2067,22 @@ export default function Admin() {
                       {/* Toolbar Controls */}
                       <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 overflow-hidden">
                         <div className="p-2 border-b border-gray-200 dark:border-slate-800 flex flex-wrap items-center gap-1 bg-white/50 dark:bg-slate-900/50">
-                          {["H1", "H2", "H3"].map((h) => (
+                          {[
+                            { label: "H1", prefix: "\n# ", text: "Main Section Heading\n" },
+                            { label: "H2", prefix: "\n## ", text: "Sub-Section Heading\n" },
+                            { label: "H3", prefix: "\n### ", text: "Minor Topic Heading\n" },
+                          ].map((h) => (
                             <button
-                              key={h}
+                              key={h.label}
                               type="button"
                               onClick={() => {
                                 const cur = editingResource.summary || "";
-                                setEditingResource({ ...editingResource, summary: cur + `\n# ${h} Section Title\n` });
+                                const gap = cur && !cur.endsWith("\n") ? "\n" : "";
+                                setEditingResource({ ...editingResource, summary: cur + gap + h.prefix + h.text });
                               }}
                               className="px-2.5 py-1 rounded-lg font-black text-xs bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-[#FF4D37] hover:text-white transition"
                             >
-                              {h}
+                              {h.label}
                             </button>
                           ))}
                           <div className="h-4 w-px bg-gray-300 dark:bg-slate-700 mx-1" />
@@ -2093,7 +2098,8 @@ export default function Admin() {
                               type="button"
                               onClick={() => {
                                 const cur = editingResource.summary || "";
-                                setEditingResource({ ...editingResource, summary: cur + btn.tag });
+                                const gap = cur && !cur.endsWith("\n") ? "\n" : "";
+                                setEditingResource({ ...editingResource, summary: cur + gap + btn.tag });
                               }}
                               className="px-2.5 py-1 rounded-lg font-black text-xs bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-[#FF4D37] hover:text-white transition"
                             >
@@ -2112,8 +2118,21 @@ export default function Admin() {
                             className="w-full p-4 bg-transparent font-medium resize-y outline-none text-xs text-gray-800 dark:text-gray-200"
                           />
                         ) : (
-                          <div className="p-6 min-h-[240px] prose dark:prose-invert max-w-none text-xs leading-relaxed whitespace-pre-wrap">
-                            {editingResource.summary || <span className="text-gray-400 italic">No content entered to preview yet...</span>}
+                          <div className="p-6 min-h-[240px] text-xs leading-relaxed space-y-2">
+                            {editingResource.summary ? (
+                              editingResource.summary.split("\n").map((line: string, i: number) => {
+                                const t = line.trim();
+                                if (t.startsWith("### ")) return <h3 key={i} className="text-sm font-black text-[#FF4D37] mt-3 mb-1">{t.slice(4)}</h3>;
+                                if (t.startsWith("## ")) return <h2 key={i} className="text-base font-black text-[#182033] dark:text-white mt-4 mb-1">{t.slice(3)}</h2>;
+                                if (t.startsWith("# ")) return <h1 key={i} className="text-lg font-black text-[#182033] dark:text-white mt-5 mb-2 border-b border-gray-200 dark:border-slate-800 pb-1">{t.slice(2)}</h1>;
+                                if (t.startsWith("> ")) return <blockquote key={i} className="p-2.5 my-2 border-l-4 border-[#FF4D37] bg-orange-50/50 dark:bg-slate-900/50 rounded-r-xl italic text-gray-700 dark:text-gray-300">{t.slice(2)}</blockquote>;
+                                if (t.startsWith("- ")) return <li key={i} className="ml-4 list-disc font-medium text-gray-700 dark:text-gray-300">{t.slice(2)}</li>;
+                                if (!t) return <div key={i} className="h-1.5" />;
+                                return <p key={i} className="text-gray-700 dark:text-gray-300">{t}</p>;
+                              })
+                            ) : (
+                              <span className="text-gray-400 italic">No content entered to preview yet...</span>
+                            )}
                           </div>
                         )}
                       </div>
