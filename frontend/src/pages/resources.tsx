@@ -370,28 +370,53 @@ const Resources = () => {
 
   // Dynamic backend CMS resources
   const [dynamicBlogs, setDynamicBlogs] = useState<BlogItem[]>([]);
+  const [dynamicResources, setDynamicResources] = useState<ResourceItem[]>([]);
 
   useEffect(() => {
     fetch("/api/cms/resources")
       .then((res) => res.json())
       .then((data) => {
         if (data.items && Array.isArray(data.items)) {
-          const cmsItems: BlogItem[] = data.items.map((item: any) => ({
-            id: item.id,
-            title: item.title,
-            category: item.category || "Blogs & Articles",
-            date: item.date || "July 2026",
-            author: "TechEllixir Team",
-            authorRole: "Technical Editorial",
-            readTime: item.readTime || "5 min read",
-            summary: item.description || "",
-            tag: item.category || "General",
-            content: item.description || "",
-          }));
-          setDynamicBlogs(cmsItems);
+          const resItems: ResourceItem[] = [];
+          const blogItems: BlogItem[] = [];
+
+          data.items.forEach((item: any) => {
+            if (item.category === "Resources & Blueprints") {
+              resItems.push({
+                id: item.id,
+                title: item.title,
+                category: "whitepaper",
+                categoryLabel: item.categoryLabel || "Blueprint & Guide",
+                icon: <BookOpen size={20} className="text-[#FF4D37]" />,
+                tag: item.categoryLabel || "Blueprint",
+                description: item.description || item.summary || item.title,
+                summary: item.summary || item.description || item.title,
+                takeaways: Array.isArray(item.takeaways) ? item.takeaways : ["Enterprise Architecture", "Production SLA"],
+                fileFormat: item.fileFormat || "PDF Blueprint & Guide",
+                difficulty: "Advanced",
+                readTime: item.readTime || "8 min read",
+                downloadsCount: "2.4k Downloads",
+              });
+            } else {
+              blogItems.push({
+                id: item.id,
+                title: item.title,
+                date: item.date || "July 2026",
+                author: item.author || "TechEllixir Editorial Board",
+                authorRole: item.authorRole || "Technical Editorial",
+                readTime: item.readTime || "5 min read",
+                summary: item.description || "",
+                tag: item.categoryLabel || item.category || "General",
+                content: item.summary || item.description || "",
+              });
+            }
+          });
+
+          setDynamicResources(resItems);
+          setDynamicBlogs(blogItems);
         }
       })
-      .catch((e) => console.warn("Using default blog resources:", e));
+      .catch((e) => console.warn("Using default resources:", e));
   }, []);
 
   // Bookmarking / Likes State
@@ -424,8 +449,9 @@ const Resources = () => {
     }));
   };
 
-  // Filtered Resources
-  const filteredResources = resourcesList.filter((item) => {
+  // Filtered Resources (combining dynamic backend CMS resources and static list)
+  const combinedResources = [...dynamicResources, ...resourcesList];
+  const filteredResources = combinedResources.filter((item) => {
     const matchesCategory = selectedCategory === "all" || item.category === selectedCategory;
     const matchesTag = activeTag === "All Topics" || item.tag.toLowerCase().includes(activeTag.toLowerCase());
     const matchesSearch =

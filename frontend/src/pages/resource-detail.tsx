@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useParams, NavLink, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -97,24 +97,18 @@ const resourceCatalog: Record<string, ResourceData> = {
     image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
     techStack: ["Kubernetes 1.30", "Istio Ambient", "HashiCorp Vault", "Helm", "Terraform", "GitHub Actions"],
     prerequisites: [
-      "Running Kubernetes cluster (minikube, EKS, or GKE)",
-      "Helm 3.x cli installed with cluster-admin access",
-      "Basic understanding of mTLS and X.509 certificate chains"
+      "Running Kubernetes cluster (minikube, EKS, or GKE)"
     ],
     deliverables: [
-      "Complete Terraform manifests for EKS/GKE VPC isolation",
-      "Istio Ambient Mesh configuration files with mutual TLS enforcement",
-      "HashiCorp Vault dynamic secret injection pod templates",
-      "Trivy vulnerability scanning GitHub Actions workflow"
+      "Istio Ambient Mesh Deployment Helm Manifests",
+      "HashiCorp Vault PKI Secret Engine Auto-Rotation Script",
+      "Trivy Container Vulnerability Scanning GitHub Action Workflow"
     ],
     executionSteps: [
-      { step: "01", title: "Cluster Provisioning with Terraform", description: "Deploy private VPC subnets with NAT gateways and strict ingress security rules." },
-      { step: "02", title: "Istio Service Mesh Installation", description: "Install Istio ambient mesh to enable automatic pod-to-pod mTLS without heavy sidecars." },
-      { step: "03", title: "Vault Dynamic Secrets Integration", description: "Connect HashiCorp Vault Agent Injector for zero-trust database credential generation." },
-      { step: "04", title: "Continuous Compliance Auditing", description: "Run automated Kube-bench and Trivy vulnerability scans in CI/CD pipelines." }
+      { step: "01", title: "Istio Service Mesh Installation", description: "Deploy Istio Ambient Mesh control plane with ztunnel mutual TLS enabled by default." },
+      { step: "02", title: "HashiCorp Vault PKI Integration", description: "Configure automated 90-day SSL/TLS certificate issuing via cert-manager." }
     ],
     content: [
-      "Executive Summary: Microservice security cannot rely solely on perimeter firewalls. A zero-trust network model requires cryptographic identity verification for every inter-service HTTP/gRPC invocation.",
       "1. Service Mesh Integration: Deploying Istio ambient mesh for automatic mTLS sidecar-less encryption and traffic management across multi-region Kubernetes clusters.",
       "2. Container Image Hardening: Using Distroless base images and automated Trivy vulnerability scanning within GitHub Actions pipelines.",
       "3. HashiCorp Vault Secrets Rotation: Dynamically injecting database credentials and TLS certificates into pod environments without storing secrets in version control."
@@ -190,9 +184,54 @@ const ResourceDetailPage = () => {
   const [searchParams] = useSearchParams();
   const params = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const resourceId = params.id || searchParams.get("id") || "rag-blueprint";
+  const resourceId = (params.id || searchParams.get("id") || "rag-blueprint").toLowerCase();
 
-  const resource = resourceCatalog[resourceId] || defaultResource;
+  const [cmsResource, setCmsResource] = useState<ResourceData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/cms/resources")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          const matched = data.items.find((item: any) => {
+            const itemId = (item.id || "").toLowerCase();
+            const itemSlug = (item.slug || item.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const itemTitle = (item.title || "").toLowerCase();
+            return itemId === resourceId || itemSlug === resourceId || itemTitle.includes(resourceId.replace(/-/g, " "));
+          });
+
+          if (matched) {
+            const contentLines = matched.summary ? matched.summary.split("\n") : [matched.description || matched.title];
+
+            setCmsResource({
+              id: matched.id,
+              title: matched.title,
+              category: matched.categoryLabel || matched.category || "Resources & Blueprints",
+              tag: matched.category || "Technical Guide",
+              description: matched.description || "Comprehensive technical guide for enterprise systems.",
+              fileFormat: matched.fileFormat || "PDF Blueprint & Guide",
+              difficulty: "Enterprise",
+              readTime: matched.readTime || "8 min read",
+              publishDate: matched.date || "July 2026",
+              author: matched.author || "TechEllixir Technical Editorial Board",
+              image: matched.image || "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1200",
+              techStack: ["React 19", "TypeScript", "Node.js", "PostgreSQL", "Docker"],
+              prerequisites: ["Standard cloud environment", "API Access"],
+              deliverables: ["Full Whitepaper Specification (PDF)", "Production Configuration Files"],
+              executionSteps: [
+                { step: "01", title: "Architecture Design", description: "Define system boundaries and database schema." },
+                { step: "02", title: "Deployment & Verification", description: "Deploy microservices and verify performance metrics." }
+              ],
+              content: contentLines,
+            });
+          }
+        }
+      })
+      .catch((e) => console.warn("Failed to fetch dynamic CMS resource:", e));
+  }, [resourceId]);
+
+  const staticMatch = resourceCatalog[resourceId];
+  const resource = cmsResource || staticMatch || defaultResource;
 
   const [emailInput, setEmailInput] = useState("");
   const [downloading, setDownloading] = useState(false);

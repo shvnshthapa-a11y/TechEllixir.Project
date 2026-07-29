@@ -5,7 +5,13 @@
     "category": "Blogs & Articles",
     "readTime": "5 min read",
     "description": "test",
-    "date": "2026-07-29"
+    "date": "2026-07-29",
+    "summary": "hello\n\n# Main Section Heading hello\n\nhello\n\n## Sub-Section Heading hello\n\nhello\n\n### Minor Topic Headinghello\nhello",
+    "author": "test",
+    "slug": "test",
+    "categoryLabel": "Blogs & Articles",
+    "takeaways": [],
+    "updatedAt": "2026-07-29T19:10:16.812Z"
   },
   {
     "id": "ai-enterprise-guide",

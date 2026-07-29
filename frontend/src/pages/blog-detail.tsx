@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useParams, NavLink, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -277,9 +277,57 @@ const BlogDetailPage = () => {
   const [searchParams] = useSearchParams();
   const params = useParams<{ id?: string }>();
   const navigate = useNavigate();
-  const blogId = params.id || searchParams.get("id") || "blog-rag-vs-finetuning";
+  const blogId = (params.id || searchParams.get("id") || "blog-rag-vs-finetuning").toLowerCase();
 
-  const blog = blogsCatalog[blogId] || defaultBlog;
+  const [cmsBlog, setCmsBlog] = useState<BlogArticle | null>(null);
+
+  useEffect(() => {
+    fetch("/api/cms/resources")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          const matched = data.items.find((item: any) => {
+            const itemId = (item.id || "").toLowerCase();
+            const itemSlug = (item.slug || item.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            const itemTitle = (item.title || "").toLowerCase();
+            return itemId === blogId || itemSlug === blogId || itemTitle.includes(blogId.replace(/-/g, " "));
+          });
+
+          if (matched) {
+            const takeaways = Array.isArray(matched.takeaways)
+              ? matched.takeaways
+              : (typeof matched.takeaways === "string" ? matched.takeaways.split(",") : ["Enterprise Architecture", "Production Ready"]);
+
+            const summaryLines = (matched.summary || matched.description || matched.title).split("\n");
+            const contentSections = summaryLines.map((line: string, i: number) => ({
+              heading: i === 0 ? "Article Content" : "",
+              body: line,
+            })).filter((sec: any) => sec.body.trim());
+
+            setCmsBlog({
+              id: matched.id,
+              title: matched.title,
+              excerpt: matched.description || matched.title,
+              tag: matched.category || "Blogs & Articles",
+              category: matched.categoryLabel || matched.category || "Technical Article",
+              author: matched.author || "Shivansh Thapa",
+              role: matched.authorRole || "Lead Systems Architect",
+              authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200",
+              date: matched.date || "July 2026",
+              readTime: matched.readTime || "5 min read",
+              likes: 42,
+              image: matched.image || "https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=1200",
+              keyTakeaways: takeaways,
+              contentSections,
+            });
+          }
+        }
+      })
+      .catch((e) => console.warn("Failed to fetch CMS blog detail:", e));
+  }, [blogId]);
+
+  const staticBlog = blogsCatalog[blogId];
+  const blog = cmsBlog || staticBlog || defaultBlog;
 
   const [likesCount, setLikesCount] = useState(blog.likes);
   const [hasLiked, setHasLiked] = useState(false);
