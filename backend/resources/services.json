@@ -5,8 +5,29 @@
     "category": "Core Software Engineering",
     "description": "We build modern, high-performance applications with clean architecture, reliable APIs, and fast load times.",
     "note": "Deliver native-grade performance with clean frontend architecture, enterprise backend systems, and 99.9% uptime SLA.",
-    "highlights": "React 19 & Next.js,Node.js & Microservices,Scalable Enterprise Apps",
-    "createdAt": "2026-07-29T19:52:41.595Z"
+    "highlights": [
+      "React 19 & Next.js",
+      "Node.js & Microservices",
+      "Scalable Enterprise Apps"
+    ],
+    "createdAt": "2026-07-29T19:52:41.595Z",
+    "detailedOverview": "test",
+    "subServices": [
+      "test"
+    ],
+    "processSteps": [
+      "test",
+      "test",
+      "test",
+      "test"
+    ],
+    "keyOutcomes": [
+      "test"
+    ],
+    "techStack": [
+      "test"
+    ],
+    "updatedAt": "2026-07-29T20:00:38.409Z"
   },
   {
     "id": "srv_web_dev",

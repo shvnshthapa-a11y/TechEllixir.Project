@@ -231,10 +231,15 @@ export default function Admin() {
     }, 10);
   };
 
-  // Filtered queries
+  // Filtered queries (Contact Form & Client Inquiries ONLY)
   const filteredQueries = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
     return queries.filter((query) => {
+      const isInternship =
+        query.type === "internship_application" ||
+        (query.subject || "").toLowerCase().includes("internship");
+      if (isInternship) return false;
+
       const matchesFilter = filter === "all" || query.status === filter;
       const matchesSearch =
         !search ||
