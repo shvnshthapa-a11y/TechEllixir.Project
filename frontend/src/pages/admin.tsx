@@ -124,25 +124,32 @@ interface CareerCmsItem {
 }
 
 const statusOptions: Array<{ label: string; value: QueryStatus | "all" }> = [
-  { label: "All Leads", value: "all" },
-  { label: "New", value: "new" },
-  { label: "In Progress", value: "in-progress" },
-  { label: "Resolved", value: "resolved" },
-  { label: "Archived", value: "archived" },
+  { label: "All Status", value: "all" },
+  { label: "Not Started", value: "not_started" },
+  { label: "Pending", value: "pending" },
+  { label: "Completed", value: "completed" },
 ];
 
-const statusLabels: Record<QueryStatus, string> = {
-  new: "New Lead",
-  "in-progress": "In Progress",
-  resolved: "Resolved",
-  archived: "Archived",
+export const statusLabels: Record<string, string> = {
+  not_started: "Not Started",
+  pending: "Pending",
+  completed: "Completed",
+  new: "Not Started",
+  "in-progress": "Pending",
+  in_progress: "Pending",
+  resolved: "Completed",
+  archived: "Completed",
 };
 
-const statusClass: Record<QueryStatus, string> = {
-  new: "bg-orange-100 text-orange-800 dark:bg-orange-950/60 dark:text-orange-300 border border-orange-200 dark:border-orange-800",
-  "in-progress": "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800",
+const statusClass: Record<string, string> = {
+  not_started: "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-300 border border-gray-200 dark:border-slate-700",
+  pending: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
+  new: "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-300 border border-gray-200 dark:border-slate-700",
+  "in-progress": "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
+  in_progress: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
   resolved: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
-  archived: "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-400 border border-gray-200 dark:border-slate-700",
+  archived: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
 };
 
 export default function Admin() {
@@ -274,10 +281,10 @@ export default function Admin() {
   const stats = useMemo(
     () => ({
       totalLeads: clientLeads.length,
-      newLeads: clientLeads.filter((q) => q.status === "new").length,
+      newLeads: clientLeads.filter((q) => q.status === "not_started" || q.status === "pending" || (q.status as string) === "new").length,
       internshipsCount: internshipApplications.length,
       totalUsers: users.length,
-      resolvedCount: queries.filter((q) => q.status === "resolved").length,
+      resolvedCount: queries.filter((q) => q.status === "completed" || (q.status as string) === "resolved").length,
     }),
     [clientLeads, internshipApplications, users, queries]
   );
@@ -514,7 +521,7 @@ export default function Admin() {
       setSuccessMsg(`Reply dispatched to ${replyRecipient.email}!`);
       setTimeout(() => setSuccessMsg(""), 4000);
 
-      await handleStatusChange(replyRecipient.id, "resolved");
+      await handleStatusChange(replyRecipient.id, "completed");
       setReplyRecipient(null);
       setReplyMessage("");
     } catch (err: any) {
@@ -1464,9 +1471,15 @@ export default function Admin() {
                             <p className="text-[11px] text-gray-500 truncate">{q.message}</p>
                           </td>
                           <td className="p-4">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusClass[q.status]}`}>
-                              {statusLabels[q.status]}
-                            </span>
+                            <select
+                              value={q.status || "not_started"}
+                              onChange={(e) => handleStatusChange(q.id, e.target.value as QueryStatus)}
+                              className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer border ${statusClass[q.status] || statusClass.not_started}`}
+                            >
+                              <option value="not_started">Not Started</option>
+                              <option value="pending">Pending</option>
+                              <option value="completed">Completed</option>
+                            </select>
                           </td>
                           <td className="p-4 pr-6 text-right space-x-2">
                             <button
@@ -1564,9 +1577,15 @@ export default function Admin() {
                                 {new Date(app.createdAt).toLocaleDateString()}
                               </td>
                               <td className="p-4">
-                                <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${statusClass[app.status]}`}>
-                                  {statusLabels[app.status]}
-                                </span>
+                                <select
+                                  value={app.status || "not_started"}
+                                  onChange={(e) => handleStatusChange(app.id, e.target.value as QueryStatus)}
+                                  className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer border ${statusClass[app.status] || statusClass.not_started}`}
+                                >
+                                  <option value="not_started">Not Started</option>
+                                  <option value="pending">Pending</option>
+                                  <option value="completed">Completed</option>
+                                </select>
                               </td>
                               <td className="p-4 pr-6 text-right space-x-2">
                                 <button
@@ -1576,11 +1595,11 @@ export default function Admin() {
                                   <Send size={13} /> Reply Candidate
                                 </button>
                                 <button
-                                  onClick={() => handleStatusChange(app.id, app.status === "resolved" ? "new" : "resolved")}
-                                  className="p-2 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white transition cursor-pointer font-bold text-[11px]"
-                                >
-                                  {app.status === "resolved" ? "Mark Pending" : "Shortlist"}
-                                </button>
+                                   onClick={() => handleStatusChange(app.id, app.status === "completed" ? "pending" : "completed")}
+                                   className="p-2 rounded-xl text-emerald-600 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white transition cursor-pointer font-bold text-[11px]"
+                                 >
+                                   {app.status === "completed" ? "Mark Pending" : "Complete"}
+                                 </button>
                                 <button
                                   onClick={() => handleDeleteQuery(app.id)}
                                   className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-slate-800 transition cursor-pointer"

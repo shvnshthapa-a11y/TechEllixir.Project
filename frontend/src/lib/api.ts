@@ -1,4 +1,4 @@
-export type QueryStatus = "new" | "in-progress" | "resolved" | "archived";
+export type QueryStatus = "not_started" | "pending" | "completed";
 
 export type ContactQuery = {
   id: string;
