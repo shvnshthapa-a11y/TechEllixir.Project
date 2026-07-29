@@ -5,9 +5,9 @@
     "fullName": "Manan",
     "id": "2143819c-9c1d-4615-a17d-3ba193c6dbbe",
     "message": "hi hi hi\n\nContact Phone: N/A",
-    "status": "new",
+    "status": "not_started",
     "subject": "[cyber] Manan",
-    "updatedAt": "2026-07-29T18:32:33.222Z"
+    "updatedAt": "2026-07-29T20:21:37.219Z"
   },
   {
     "id": "b6d92937-5000-4bd6-af34-827a52d9227b",
@@ -22,9 +22,9 @@
     "type": "internship_application",
     "subject": "Internship Registration: Artificial Intelligence",
     "message": "Applicant: Manan Aora\nPhone: +918923997966\nDomain: Artificial Intelligence\nCollege: University of Petroleum and Energy Studies (3rd Year)\nResume/LinkedIn: NN_INO_26_05_2049_Intern Weekly Report 3rd week july.pdf (0.13 MB)\nReason: N/A",
-    "status": "new",
+    "status": "not_started",
     "createdAt": "2026-07-29T18:31:53.894Z",
-    "updatedAt": "2026-07-29T18:31:53.894Z"
+    "updatedAt": "2026-07-29T20:21:55.320Z"
   },
   {
     "id": "fd7c4a8d-4f7a-45e0-861d-108eb72df36e",

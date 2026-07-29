@@ -1342,9 +1342,18 @@ export default function Admin() {
 
         {/* Global Site Announcement Banner */}
         {settings.announcementBanner && (
-          <div className="bg-[#FF4D37] text-white py-2 px-4 text-xs font-bold text-center flex items-center justify-center gap-2">
-            <Radio size={14} className="animate-pulse shrink-0" />
-            <span>Active Announcement: "{settings.announcementBanner}"</span>
+          <div className="bg-[#FF4D37] text-white py-2.5 px-6 text-xs font-bold text-center flex items-center justify-between gap-3 shadow-sm border-b border-orange-600/20 shrink-0">
+            <div className="flex items-center gap-2 overflow-hidden truncate">
+              <Radio size={15} className="animate-pulse shrink-0 text-white" />
+              <span className="truncate">Active Site Announcement: <strong>"{settings.announcementBanner}"</strong></span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSettings({ ...settings, announcementBanner: "" })}
+              className="text-white/90 hover:text-white hover:bg-white/20 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition shrink-0 cursor-pointer"
+            >
+              Dismiss
+            </button>
           </div>
         )}
 

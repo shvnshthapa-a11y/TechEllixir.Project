@@ -1,7 +1,7 @@
 {
-  "maintenanceMode": true,
+  "maintenanceMode": false,
   "announcementBanner": "test",
   "allowRegistrations": true,
-  "updatedAt": "2026-07-29T20:20:49.867Z",
+  "updatedAt": "2026-07-29T20:22:21.080Z",
   "updatedBy": "Admin"
 }
