@@ -480,17 +480,10 @@ async function handleApi(req, res, url) {
 
       if (req.method === "PATCH") {
         const body = await readBody(req);
-        const validStatuses = ["not_started", "pending", "completed", "new", "in_progress", "in-progress", "resolved", "archived"];
-        if (body.status && !validStatuses.includes(body.status)) {
-          json(res, 400, { error: "Invalid status value." });
-          return;
+        if (body.status) {
+          queries[index].status = String(body.status).trim();
         }
-
-        queries[index] = {
-          ...queries[index],
-          ...(body.status ? { status: body.status } : {}),
-          updatedAt: new Date().toISOString(),
-        };
+        queries[index].updatedAt = new Date().toISOString();
         await writeQueries(queries);
         json(res, 200, { query: queries[index] });
         return;
