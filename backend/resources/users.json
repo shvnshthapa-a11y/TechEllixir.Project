@@ -1,5 +1,27 @@
 [
   {
+    "id": "usr_1785358252517",
+    "name": "End To End Test User",
+    "email": "newuser_1785358252432@techellixir.com",
+    "phone": "+1 555-9988",
+    "company": "Testing Corp",
+    "role": "user",
+    "status": "active",
+    "password": "mypassword123",
+    "createdAt": "2026-07-29T20:50:52.517Z"
+  },
+  {
+    "id": "usr_1785358179613",
+    "name": "Test Verification User",
+    "email": "testuser30@techellixir.com",
+    "phone": "+1 555-0199",
+    "company": "TechEllixir Testing Inc",
+    "role": "user",
+    "status": "active",
+    "password": "testuser@123",
+    "createdAt": "2026-07-29T20:49:39.613Z"
+  },
+  {
     "id": "usr_101",
     "name": "Rudra Pratap",
     "email": "rudra@example.com",

@@ -417,7 +417,54 @@ async function handleApi(req, res, url) {
       return;
     }
 
-    // 3. Admin & User Auth Login Endpoint
+    // 3a. User Registration Endpoint
+    if (req.method === "POST" && (url.pathname === "/api/auth/register" || url.pathname === "/api/auth/signup")) {
+      const body = await readBody(req);
+      const email = String(body.email || "").trim().toLowerCase();
+      const name = String(body.fullName || body.name || "").trim();
+      const password = String(body.password || "").trim();
+      const phone = String(body.phone || "").trim();
+      const company = String(body.company || "").trim();
+
+      if (!email || !name || !password) {
+        json(res, 400, { error: "Full name, email address, and password are required." });
+        return;
+      }
+
+      const users = await readUsers();
+      const existing = users.find((u) => u.email && u.email.toLowerCase() === email);
+      if (existing) {
+        json(res, 400, { error: "An account with this email address already exists. Please sign in." });
+        return;
+      }
+
+      const newUser = {
+        id: `usr_${Date.now()}`,
+        name,
+        email,
+        phone,
+        company,
+        role: "user",
+        status: "active",
+        password,
+        createdAt: new Date().toISOString(),
+      };
+
+      users.unshift(newUser);
+      await writeUsers(users);
+
+      const token = signToken({
+        expiresAt: Date.now() + TOKEN_TTL_MS,
+        role: "user",
+        email: newUser.email,
+        name: newUser.name,
+      });
+
+      json(res, 201, { ok: true, message: "Account registered successfully!", user: newUser, token, redirect: "/" });
+      return;
+    }
+
+    // 3b. Admin & User Auth Login Endpoint
     if (req.method === "POST" && (url.pathname === "/api/admin/login" || url.pathname === "/api/auth/login")) {
       const body = await readBody(req);
       const usernameInput = String(body.username || body.email || "").trim().toLowerCase();
@@ -500,19 +547,25 @@ async function handleApi(req, res, url) {
       if (!requireAdmin(req, res)) return;
       const id = queryMatch[1];
       const queries = await readQueries();
+      const idx = queries.findIndex((q) => q.id === id);
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
       if (req.method === "PATCH") {
         const body = await readBody(req);
         if (body.status) {
-          queries[index].status = String(body.status).trim();
+          queries[idx].status = String(body.status).trim();
         }
-        queries[index].updatedAt = new Date().toISOString();
+        queries[idx].updatedAt = new Date().toISOString();
         await writeQueries(queries);
-        json(res, 200, { query: queries[index] });
+        json(res, 200, { query: queries[idx] });
         return;
       }
 
       if (req.method === "DELETE") {
-        const deleted = queries.splice(index, 1)[0];
+        const deleted = queries.splice(idx, 1)[0];
         await writeQueries(queries);
         json(res, 200, { query: deleted });
         return;
@@ -527,7 +580,7 @@ async function handleApi(req, res, url) {
       if (!requireAdmin(req, res)) return;
       if (req.method === "GET") {
         const users = await readUsers();
-        json(res, 200, { users });
+        json(res, 200, { users, items: users });
         return;
       }
       if (req.method === "POST") {

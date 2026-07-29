@@ -97,7 +97,7 @@ const Auth = () => {
   };
 
   // Register Handler
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMsg("");
     setErrorMsg("");
@@ -129,17 +129,39 @@ const Auth = () => {
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: regFullName.trim(),
+          email: regEmail.trim().toLowerCase(),
+          phone: regPhone.trim(),
+          company: regCompany.trim(),
+          password: regPassword,
+        }),
+      });
+
+      const data = await res.json();
       setLoading(false);
-      localStorage.setItem("userToken", `token-${Date.now()}`);
-      localStorage.setItem("userEmail", regEmail);
-      localStorage.setItem("userName", regFullName);
-      localStorage.setItem("userPhone", regPhone);
+
+      if (!res.ok || data.error) {
+        setErrorMsg(data.error || "Failed to create account.");
+        return;
+      }
+
+      localStorage.setItem("userToken", data.token);
+      localStorage.setItem("userEmail", regEmail.trim().toLowerCase());
+      localStorage.setItem("userName", regFullName.trim());
+      localStorage.setItem("userPhone", regPhone.trim());
       setSuccessMsg("Account created successfully! Redirecting to Home Page...");
       setTimeout(() => {
         window.location.href = "/";
       }, 1000);
-    }, 800);
+    } catch (err) {
+      setLoading(false);
+      setErrorMsg("Network error during registration. Please try again.");
+    }
   };
 
   return (
