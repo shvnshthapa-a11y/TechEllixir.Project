@@ -779,7 +779,7 @@ async function handleApi(req, res, url) {
     }
 
     // 11. Testimonials API & Admin CMS
-    if (url.pathname === "/api/testimonials" || url.pathname === "/api/admin/cms/testimonials") {
+    if (url.pathname === "/api/testimonials" || url.pathname === "/api/cms/testimonials" || url.pathname === "/api/admin/cms/testimonials") {
       if (req.method === "GET") {
         const items = await dbSelect("testimonials");
         json(res, 200, { items });

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Star } from "lucide-react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -12,36 +13,42 @@ const testimonialsEn = [
   {
     name: "Rahul Sharma",
     company: "ABC Technologies",
+    rating: 5,
     review:
       "TechEllixir delivered an outstanding website that exceeded our expectations. Their team was professional, responsive and delivered everything on time.",
   },
   {
     name: "Priya Verma",
     company: "Innovate Solutions",
+    rating: 5,
     review:
       "The team was responsive, creative, and delivered our mobile application on time. The experience was smooth from start to finish.",
   },
   {
     name: "David Wilson",
     company: "Global IT",
+    rating: 5,
     review:
       "Excellent support and high-quality software development. Highly recommended for startups and enterprises.",
   },
   {
     name: "Anjali Gupta",
     company: "NextGen",
+    rating: 5,
     review:
       "Professional team with excellent communication and beautiful UI designs. We loved working with them.",
   },
   {
     name: "Amit Kumar",
     company: "Digital World",
+    rating: 5,
     review:
       "Outstanding service from planning to deployment. Great experience and excellent technical support.",
   },
   {
     name: "Sneha Patel",
     company: "TechHub",
+    rating: 5,
     review:
       "Amazing developers and excellent post-launch support. We will definitely work together again.",
   },
@@ -49,7 +56,20 @@ const testimonialsEn = [
 
 export default function Testimonials() {
   const { t } = useLanguage();
-  const testimonials = testimonialsEn;
+  const [dynamicTestimonials, setDynamicTestimonials] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/testimonials")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          setDynamicTestimonials(data.items);
+        }
+      })
+      .catch((err) => console.warn("Backend testimonials fetch fallback to static list:", err));
+  }, []);
+
+  const testimonials = dynamicTestimonials.length > 0 ? dynamicTestimonials : testimonialsEn;
 
   return (
     <section className="section-shell bg-[#f8fafc] dark:bg-[#0d111a] transition-colors duration-300">
@@ -125,7 +145,7 @@ export default function Testimonials() {
                     </p>
 
                     <div className="mt-2 flex gap-1">
-                      {[...Array(5)].map((_, i) => (
+                      {[...Array(Number(item.rating || 5))].map((_, i) => (
                         <Star
                           key={i}
                           size={16}
