@@ -142,14 +142,14 @@ export const statusLabels: Record<string, string> = {
 };
 
 const statusClass: Record<string, string> = {
-  not_started: "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-300 border border-gray-200 dark:border-slate-700",
-  pending: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
-  completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
-  new: "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-gray-300 border border-gray-200 dark:border-slate-700",
-  "in-progress": "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
-  in_progress: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800",
-  resolved: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
-  archived: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800",
+  not_started: "bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-300 dark:border-rose-700",
+  pending: "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-700",
+  completed: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700",
+  new: "bg-rose-100 text-rose-700 dark:bg-rose-950/80 dark:text-rose-300 border border-rose-300 dark:border-rose-700",
+  "in-progress": "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-700",
+  in_progress: "bg-amber-100 text-amber-800 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-300 dark:border-amber-700",
+  resolved: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700",
+  archived: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-700",
 };
 
 export default function Admin() {
@@ -1472,7 +1472,7 @@ export default function Admin() {
                           </td>
                           <td className="p-4">
                             <select
-                              value={q.status || "not_started"}
+                              value={(q.status as string) === "new" ? "not_started" : ((q.status as string) === "in-progress" || (q.status as string) === "in_progress" ? "pending" : ((q.status as string) === "resolved" ? "completed" : (q.status || "not_started")))}
                               onChange={(e) => handleStatusChange(q.id, e.target.value as QueryStatus)}
                               className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer border ${statusClass[q.status] || statusClass.not_started}`}
                             >
@@ -1578,7 +1578,7 @@ export default function Admin() {
                               </td>
                               <td className="p-4">
                                 <select
-                                  value={app.status || "not_started"}
+                                  value={(app.status as string) === "new" ? "not_started" : ((app.status as string) === "in-progress" || (app.status as string) === "in_progress" ? "pending" : ((app.status as string) === "resolved" ? "completed" : (app.status || "not_started")))}
                                   onChange={(e) => handleStatusChange(app.id, e.target.value as QueryStatus)}
                                   className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase outline-none cursor-pointer border ${statusClass[app.status] || statusClass.not_started}`}
                                 >
