@@ -1199,7 +1199,6 @@ export default function Admin() {
     { id: "careers_cms", label: "Manage Careers", badge: careersCms.length, icon: <FolderPlus size={18} /> },
     { id: "testimonials_cms", label: "Manage Testimonials", badge: testimonialsCms.length, icon: <MessageSquare size={18} /> },
     { id: "industries_cms", label: "Manage Industries", badge: industriesCms.length, icon: <Building2 size={18} /> },
-    { id: "team_cms", label: "Manage Team", badge: teamCms.length, icon: <UserCheck size={18} /> },
     { id: "database", label: "Database Explorer", icon: <Database size={18} /> },
     { id: "settings", label: "Portal Control Settings", icon: <Settings size={18} /> },
   ];
