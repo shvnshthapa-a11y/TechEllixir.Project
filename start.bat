@@ -1,14 +1,32 @@
 @echo off
-title TechEllixir Platform Launcher
+title TechEllixir Platform Auto-Setup & Launcher
 color 0A
 
 echo ========================================================
 echo          🚀 TechEllixir Enterprise Platform
-echo       Starting Backend & Frontend Servers...
+echo       Auto-Installing Dependencies & Launching...
 echo ========================================================
 echo.
 
 set PROJECT_ROOT=%~dp0
+
+:: Check & Install Backend Dependencies if missing
+if not exist "%PROJECT_ROOT%backend\node_modules\" (
+    echo [SETUP] Installing Backend dependencies (npm install)...
+    cd /d "%PROJECT_ROOT%backend"
+    call npm install
+    echo [SETUP] Backend dependencies installed!
+    echo.
+)
+
+:: Check & Install Frontend Dependencies if missing
+if not exist "%PROJECT_ROOT%frontend\node_modules\" (
+    echo [SETUP] Installing Frontend dependencies (npm install)...
+    cd /d "%PROJECT_ROOT%frontend"
+    call npm install
+    echo [SETUP] Frontend dependencies installed!
+    echo.
+)
 
 echo [1/3] Starting Backend Server (Port 8080)...
 start "TechEllixir Backend (Port 8080)" /min cmd /k "cd /d "%PROJECT_ROOT%backend" && node index.js"
@@ -18,7 +36,7 @@ start "TechEllixir Frontend (Port 5173)" /min cmd /k "cd /d "%PROJECT_ROOT%front
 
 echo.
 echo [3/3] Waiting for servers to initialize...
-timeout /t 3 /nobreak >nul
+timeout /t 4 /nobreak >nul
 
 echo.
 echo --------------------------------------------------------
@@ -29,7 +47,7 @@ echo.
 echo 🔑 Admin Credentials   : admin / admin@123
 echo --------------------------------------------------------
 echo.
-echo Launching your default web browser to http://localhost:5173 ...
+echo Opening web browser to http://localhost:5173 ...
 start http://localhost:5173
 
 pause
