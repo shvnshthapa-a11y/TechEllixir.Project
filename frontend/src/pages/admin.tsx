@@ -2149,22 +2149,33 @@ export default function Admin() {
                             {editingResource.summary ? (
                               editingResource.summary.split("\n").map((line: string, i: number) => {
                                 const t = line.trim();
+                                const renderInline = (str: string) => {
+                                  const html = str
+                                    .replace(/&/g, "&amp;")
+                                    .replace(/</g, "&lt;")
+                                    .replace(/>/g, "&gt;")
+                                    .replace(/&lt;u&gt;(.*?)&lt;\/u&gt;/gi, '<u>$1</u>')
+                                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                                  return <span dangerouslySetInnerHTML={{ __html: html }} />;
+                                };
+
                                 if (t.startsWith("### ") || /^#\s*H3/i.test(t)) {
                                   const text = t.replace(/^(###|#\s*H3:?)\s*/i, "");
-                                  return <h3 key={i} className="text-sm font-black text-[#FF4D37] mt-4 mb-1.5">{text}</h3>;
+                                  return <h3 key={i} className="text-sm font-black text-[#FF4D37] mt-4 mb-1.5">{renderInline(text)}</h3>;
                                 }
                                 if (t.startsWith("## ") || /^#\s*H2/i.test(t)) {
                                   const text = t.replace(/^(##|#\s*H2:?)\s*/i, "");
-                                  return <h2 key={i} className="text-base font-black text-[#182033] dark:text-white mt-5 mb-2">{text}</h2>;
+                                  return <h2 key={i} className="text-base font-black text-[#182033] dark:text-white mt-5 mb-2">{renderInline(text)}</h2>;
                                 }
                                 if (t.startsWith("# ") || /^#\s*H1/i.test(t)) {
                                   const text = t.replace(/^(#|#\s*H1:?)\s*/i, "");
-                                  return <h1 key={i} className="text-xl font-black text-[#182033] dark:text-white mt-6 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">{text}</h1>;
+                                  return <h1 key={i} className="text-xl font-black text-[#182033] dark:text-white mt-6 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">{renderInline(text)}</h1>;
                                 }
-                                if (t.startsWith("> ")) return <blockquote key={i} className="p-2.5 my-2 border-l-4 border-[#FF4D37] bg-orange-50/50 dark:bg-slate-900/50 rounded-r-xl italic text-gray-700 dark:text-gray-300">{t.slice(2)}</blockquote>;
-                                if (t.startsWith("- ")) return <li key={i} className="ml-4 list-disc font-medium text-gray-700 dark:text-gray-300">{t.slice(2)}</li>;
+                                if (t.startsWith("> ")) return <blockquote key={i} className="p-2.5 my-2 border-l-4 border-[#FF4D37] bg-orange-50/50 dark:bg-slate-900/50 rounded-r-xl italic text-gray-700 dark:text-gray-300">{renderInline(t.slice(2))}</blockquote>;
+                                if (t.startsWith("- ")) return <li key={i} className="ml-4 list-disc font-medium text-gray-700 dark:text-gray-300">{renderInline(t.slice(2))}</li>;
                                 if (!t) return <div key={i} className="h-1.5" />;
-                                return <p key={i} className="text-gray-700 dark:text-gray-300">{t}</p>;
+                                return <p key={i} className="text-gray-700 dark:text-gray-300">{renderInline(t)}</p>;
                               })
                             ) : (
                               <span className="text-gray-400 italic">No content entered to preview yet...</span>
