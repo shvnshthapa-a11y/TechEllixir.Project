@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, NavLink, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -34,13 +34,40 @@ const ServiceDetailPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const serviceId = searchParams.get("id") || "web-development";
+  const [dynamicServices, setDynamicServices] = useState<ServiceDetail[]>([]);
 
-  const allServices: ServiceDetail[] = [...coreServicesData, ...aiDataServicesData];
+  useEffect(() => {
+    fetch("/api/cms/services")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          const cmsServices = data.items.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            description: item.description || "Scalable digital solution engineered for enterprise reliability.",
+            note: item.note || "Enterprise scale and performance.",
+            detailedOverview: item.detailedOverview || item.description || "Full technical overview.",
+            highlights: Array.isArray(item.highlights) ? item.highlights : (typeof item.highlights === "string" ? item.highlights.split(",") : ["Enterprise Ready", "High Performance"]),
+            subServices: Array.isArray(item.subServices) ? item.subServices : ["Custom Software Development", "API Integration"],
+            processSteps: Array.isArray(item.processSteps) ? item.processSteps : ["1. Discovery & Architecture", "2. Agile Development", "3. Quality Assurance", "4. Deployment & Launch"],
+            keyOutcomes: Array.isArray(item.keyOutcomes) ? item.keyOutcomes : ["Sub-100ms Load Times", "99.9% Uptime SLA", "OWASP Security Hardening"],
+            techStack: Array.isArray(item.techStack) ? item.techStack : ["React", "TypeScript", "Node.js", "PostgreSQL", "Docker"]
+          }));
+          setDynamicServices(cmsServices);
+        }
+      })
+      .catch((err) => console.warn("Backend service detail fetch fallback:", err));
+  }, []);
+
+  const fallbackServices: ServiceDetail[] = [...coreServicesData, ...aiDataServicesData];
+  const allServices = dynamicServices.length > 0 ? [...dynamicServices, ...fallbackServices] : fallbackServices;
   
-  // Find service matching title or slug
-  const currentService = allServices.find((s) => {
+  // Find service matching title, id or slug
+  const currentService = allServices.find((s: any) => {
     const slug = s.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-    return slug === serviceId.toLowerCase() || s.title.toLowerCase().includes(serviceId.toLowerCase().replace(/-/g, " "));
+    const rawId = (s.id || "").toLowerCase();
+    const queryId = serviceId.toLowerCase();
+    return slug === queryId || rawId === queryId || s.title.toLowerCase().includes(queryId.replace(/-/g, " "));
   }) || allServices[0];
 
   const serviceImage = serviceImageMap[currentService.title.toLowerCase()] || defaultImage;
@@ -120,7 +147,7 @@ const ServiceDetailPage = () => {
               </p>
 
               <div className="flex flex-wrap gap-2 pt-2">
-                {currentService.highlights.map((h) => (
+                {(currentService.highlights || []).map((h) => (
                   <span
                     key={h}
                     className="rounded-full bg-orange-50 dark:bg-orange-950/60 text-[#FF4D37] px-3.5 py-1 text-xs font-black border border-orange-200 dark:border-orange-900"
@@ -174,7 +201,7 @@ const ServiceDetailPage = () => {
               </h2>
               
               <div className="grid sm:grid-cols-2 gap-3">
-                {currentService.subServices.map((sub, idx) => (
+                {(currentService.subServices || []).map((sub, idx) => (
                   <div
                     key={sub}
                     className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 flex items-start gap-3"
@@ -197,7 +224,7 @@ const ServiceDetailPage = () => {
               </h2>
 
               <div className="space-y-4">
-                {currentService.processSteps.map((step) => (
+                {(currentService.processSteps || []).map((step) => (
                   <div
                     key={step}
                     className="p-4 rounded-2xl bg-gray-50 dark:bg-slate-900 border border-gray-100 dark:border-slate-800 flex items-start gap-3"
@@ -221,7 +248,7 @@ const ServiceDetailPage = () => {
                 <ShieldCheck className="text-emerald-500" size={20} /> Guaranteed Outcomes
               </h3>
               <ul className="space-y-2.5">
-                {currentService.keyOutcomes.map((outcome) => (
+                {(currentService.keyOutcomes || []).map((outcome) => (
                   <li key={outcome} className="flex items-start gap-2.5 text-xs font-bold text-gray-700 dark:text-gray-300">
                     <span className="text-emerald-500 font-black">✓</span>
                     <span>{outcome}</span>
@@ -236,7 +263,7 @@ const ServiceDetailPage = () => {
                 <Cpu className="text-[#FF4D37]" size={20} /> Technologies & Tools
               </h3>
               <div className="flex flex-wrap gap-2 pt-1">
-                {currentService.techStack.map((tech) => (
+                {(currentService.techStack || []).map((tech) => (
                   <span
                     key={tech}
                     className="px-3 py-1 rounded-xl bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 text-xs font-bold border border-gray-200 dark:border-slate-700"
