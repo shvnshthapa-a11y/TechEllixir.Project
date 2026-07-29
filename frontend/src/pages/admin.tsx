@@ -1870,7 +1870,23 @@ export default function Admin() {
                         </div>
                         <div>
                           <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Slug</label>
-                          <input type="text" placeholder="whitepaper / casestudy / guide / blogs" value={editingResource.category || ""} onChange={(e) => setEditingResource({ ...editingResource, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                          <select
+                            value={editingResource.category || "Resources & Blueprints"}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setEditingResource({
+                                ...editingResource,
+                                category: val,
+                                categoryLabel: val,
+                              });
+                            }}
+                            className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37] text-xs cursor-pointer"
+                          >
+                            <option value="Resources & Blueprints">Resources & Blueprints</option>
+                            <option value="Blogs & Articles">Blogs & Articles</option>
+                            <option value="News & Press">News & Press</option>
+                            <option value="Events & Webinars">Events & Webinars</option>
+                          </select>
                         </div>
                       </div>
 
@@ -1951,7 +1967,7 @@ export default function Admin() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setEditingResource({ title: "", category: "Blogs & Articles", readTime: "5 min read", description: "" })}
+                    onClick={() => setEditingResource({ title: "", category: "Resources & Blueprints", categoryLabel: "Resources & Blueprints", readTime: "5 min read", description: "" })}
                     className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
                   >
                     <Plus size={16} /> Add New Article
