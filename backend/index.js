@@ -11,7 +11,7 @@ import { initDatabase, dbSelect, dbSave, dbStats } from "./db.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const projectRoot = resolve(__dirname, "..");
-const distDir = join(projectRoot, "dist");
+const distDir = join(projectRoot, "frontend", "dist");
 const resourcesDir = join(__dirname, "resources");
 const queriesFile = join(resourcesDir, "queries.json");
 
@@ -954,12 +954,25 @@ async function serveStatic(res, filePath) {
     const ext = extname(filePath).toLowerCase();
     const contentType = mimeTypes[ext] || "application/octet-stream";
     res.writeHead(200, { "content-type": contentType });
-    createReadStream(filePath).pipe(res);
+    const stream = createReadStream(filePath);
+    stream.on("error", () => {
+      if (!res.headersSent) notFound(res);
+    });
+    stream.pipe(res);
   } catch {
     const fallbackPath = join(distDir, "index.html");
     try {
-      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      createReadStream(fallbackPath).pipe(res);
+      const fbStat = await stat(fallbackPath);
+      if (fbStat.isFile()) {
+        res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+        const fbStream = createReadStream(fallbackPath);
+        fbStream.on("error", () => {
+          if (!res.headersSent) notFound(res);
+        });
+        fbStream.pipe(res);
+      } else {
+        notFound(res);
+      }
     } catch {
       notFound(res);
     }
