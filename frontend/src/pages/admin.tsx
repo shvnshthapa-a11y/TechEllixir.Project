@@ -1641,7 +1641,14 @@ export default function Admin() {
                         </div>
                         <div>
                           <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Tag</label>
-                          <input type="text" placeholder="e.g. Core Engineering" value={editingService.category || ""} onChange={(e) => setEditingService({ ...editingService, category: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                          <select
+                            value={editingService.category || "Core Software Engineering"}
+                            onChange={(e) => setEditingService({ ...editingService, category: e.target.value })}
+                            className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37] text-xs cursor-pointer"
+                          >
+                            <option value="Core Software Engineering">Core Software Engineering</option>
+                            <option value="AI & Data Solutions">AI & Data Solutions</option>
+                          </select>
                         </div>
                       </div>
 
@@ -1726,7 +1733,7 @@ export default function Admin() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setEditingService({ title: "", category: "Core Development", description: "", note: "", highlights: "" })}
+                    onClick={() => setEditingService({ title: "", category: "Core Software Engineering", description: "", note: "", highlights: "" })}
                     className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
                   >
                     <Plus size={16} /> Add New Service
