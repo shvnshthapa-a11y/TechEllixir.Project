@@ -836,13 +836,20 @@ async function handleApi(req, res, url) {
         if (!requireAdmin(req, res)) return;
         const body = await readBody(req);
         const items = await dbSelect("industries");
+        const newId = String(body.id || body.slug || `ind_${Date.now()}`).trim().toLowerCase();
+        const existingIdx = items.findIndex((i) => i.id === newId);
         const newItem = {
-          id: String(body.id || `ind_${Date.now()}`).trim().toLowerCase(),
+          id: newId,
           title: String(body.title || "New Vertical").trim(),
           tagline: String(body.tagline || "").trim(),
           description: String(body.description || "").trim(),
         };
-        items.unshift(newItem);
+
+        if (existingIdx !== -1) {
+          items[existingIdx] = newItem;
+        } else {
+          items.unshift(newItem);
+        }
         await dbSave("industries", items);
         json(res, 200, { item: newItem, items });
         return;
@@ -856,13 +863,20 @@ async function handleApi(req, res, url) {
       const items = await dbSelect("industries");
       const idx = items.findIndex((i) => i.id === id);
 
-      if (idx === -1) {
-        notFound(res);
-        return;
-      }
-
-      if (req.method === "PATCH") {
+      if (req.method === "PATCH" || req.method === "PUT") {
         const body = await readBody(req);
+        if (idx === -1) {
+          const newItem = {
+            id: String(body.id || id).trim().toLowerCase(),
+            title: String(body.title || "New Vertical").trim(),
+            tagline: String(body.tagline || "").trim(),
+            description: String(body.description || "").trim(),
+          };
+          items.unshift(newItem);
+          await dbSave("industries", items);
+          json(res, 200, { item: newItem, items });
+          return;
+        }
         items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
         await dbSave("industries", items);
         json(res, 200, { item: items[idx], items });
@@ -870,9 +884,11 @@ async function handleApi(req, res, url) {
       }
 
       if (req.method === "DELETE") {
-        const deleted = items.splice(idx, 1)[0];
-        await dbSave("industries", items);
-        json(res, 200, { item: deleted, items });
+        if (idx !== -1) {
+          items.splice(idx, 1);
+          await dbSave("industries", items);
+        }
+        json(res, 200, { items });
         return;
       }
     }

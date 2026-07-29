@@ -857,7 +857,7 @@ export default function Admin() {
   const handleSaveIndustryCms = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingIndustry || !editingIndustry.title) return;
-    const isEdit = Boolean(editingIndustry.id);
+    const isEdit = Boolean(editingIndustry.id && industriesCms.some((i) => i.id === editingIndustry.id));
     const endpoint = isEdit ? `/api/admin/cms/industries/${editingIndustry.id}` : "/api/admin/cms/industries";
     const method = isEdit ? "PATCH" : "POST";
 
@@ -869,10 +869,12 @@ export default function Admin() {
       });
       const data = await res.json();
       if (res.ok) {
-        setIndustriesCms(data.items);
+        setIndustriesCms(Array.isArray(data.items) ? data.items : industriesCms);
         setEditingIndustry(null);
         setSuccessMsg(isEdit ? "Industry vertical updated!" : "New Industry vertical added!");
         setTimeout(() => setSuccessMsg(""), 3000);
+      } else {
+        setError(data.error || "Failed to save industry vertical");
       }
     } catch (e) {
       setError("Failed to save industry vertical");
