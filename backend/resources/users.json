@@ -1,11 +1,12 @@
 [
   {
     "id": "usr_101",
-    "name": "Rudra Pratap Singh",
+    "name": "Rudra Pratap",
     "email": "rudra@example.com",
     "role": "user",
     "status": "active",
-    "createdAt": "2026-07-28T09:58:26.304Z"
+    "createdAt": "2026-07-29T20:35:21.008Z",
+    "password": "user@123"
   },
   {
     "id": "usr_102",

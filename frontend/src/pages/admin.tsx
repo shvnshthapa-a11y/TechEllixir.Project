@@ -205,6 +205,16 @@ export default function Admin() {
   const [contentPreviewMode, setContentPreviewMode] = useState<"edit" | "preview">("edit");
   const resourceContentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // User Creation modal state
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [newUserForm, setNewUserForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "user",
+    status: "active",
+  });
+
   const handleFormatResourceText = (prefix: string, suffix: string = "", placeholder: string = "") => {
     const textarea = resourceContentTextareaRef.current;
     const currentText = editingResource?.summary || "";
@@ -585,6 +595,33 @@ export default function Admin() {
       }
     } catch (e) {
       setError("Failed to delete user");
+    }
+  };
+
+  const handleCreateUser = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newUserForm.name || !newUserForm.email || !newUserForm.password) {
+      setError("Please fill in name, email, and password.");
+      return;
+    }
+    try {
+      const res = await fetch("/api/admin/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(newUserForm),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setUsers(data.users || [data.user, ...users]);
+        setIsAddUserOpen(false);
+        setNewUserForm({ name: "", email: "", password: "", role: "user", status: "active" });
+        setSuccessMsg("User account created successfully!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      } else {
+        setError(data.error || "Failed to create user account.");
+      }
+    } catch (e) {
+      setError("Failed to create user account.");
     }
   };
 
@@ -1644,17 +1681,115 @@ export default function Admin() {
                     Manage administrative roles, access privileges, and user account statuses.
                   </p>
                 </div>
-                <div className="relative max-w-xs w-full">
-                  <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search by user name or email..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
-                  />
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div className="relative max-w-xs w-full">
+                    <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search by user name or email..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 pl-10 pr-4 py-2.5 text-xs font-semibold text-gray-800 dark:text-gray-200 outline-none focus:border-[#FF4D37]"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setIsAddUserOpen(true)}
+                    className="brand-button px-4 py-2.5 text-xs font-bold whitespace-nowrap flex items-center gap-2 cursor-pointer shadow-md"
+                  >
+                    <Plus size={16} /> Add User Account
+                  </button>
                 </div>
               </div>
+
+              {/* Add User Modal */}
+              {isAddUserOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                  <div className="w-full max-w-md rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 p-6 shadow-2xl space-y-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-3">
+                      <h4 className="text-lg font-black text-[#182033] dark:text-white flex items-center gap-2">
+                        <UserCheck size={20} className="text-[#FF4D37]" /> Create New User Account
+                      </h4>
+                      <button onClick={() => setIsAddUserOpen(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-1 rounded-lg">
+                        <X size={18} />
+                      </button>
+                    </div>
+                    <form onSubmit={handleCreateUser} className="space-y-3">
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">Full Name</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Rudra Pratap Singh"
+                          value={newUserForm.name}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, name: e.target.value })}
+                          className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-[#FF4D37] outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">Email Address</label>
+                        <input
+                          type="email"
+                          required
+                          placeholder="user@example.com"
+                          value={newUserForm.email}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, email: e.target.value })}
+                          className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-[#FF4D37] outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">Password</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Password (e.g. user@123)"
+                          value={newUserForm.password}
+                          onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })}
+                          className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-3.5 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-[#FF4D37] outline-none"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">Role</label>
+                          <select
+                            value={newUserForm.role}
+                            onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })}
+                            className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-[#FF4D37] outline-none"
+                          >
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">Status</label>
+                          <select
+                            value={newUserForm.status}
+                            onChange={(e) => setNewUserForm({ ...newUserForm, status: e.target.value })}
+                            className="w-full rounded-xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 px-3 py-2 text-xs text-gray-800 dark:text-gray-200 focus:border-[#FF4D37] outline-none"
+                          >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => setIsAddUserOpen(false)}
+                          className="px-4 py-2 rounded-xl text-xs font-bold text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="brand-button px-5 py-2 text-xs font-bold cursor-pointer"
+                        >
+                          Create Account
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
 
               <div className="soft-card rounded-3xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">

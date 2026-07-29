@@ -426,9 +426,9 @@ async function handleApi(req, res, url) {
       const adminPassword = String(process.env.ADMIN_PASSWORD || "admin@123").trim();
       const userPassword = String(process.env.USER_PASSWORD || "user@123").trim();
 
-      // Check Admin (username: admin or admin@techellixir.com, pass: admin@123)
+      // Master Admin credentials check
       if (
-        (usernameInput === "admin" || usernameInput === "admin@techellixir.com" || passwordInput === adminPassword) &&
+        (usernameInput === "admin" || usernameInput === "admin@techellixir.com") &&
         passwordInput === adminPassword
       ) {
         const token = signToken({
@@ -439,9 +439,37 @@ async function handleApi(req, res, url) {
         return;
       }
 
-      // Check Normal User (username: user or user@techellixir.com, pass: user@123)
+      // Check registered users in users.json database
+      const users = await readUsers();
+      const matchedUser = users.find(
+        (u) =>
+          (u.email && u.email.toLowerCase() === usernameInput) ||
+          (u.name && u.name.toLowerCase() === usernameInput) ||
+          u.id === usernameInput
+      );
+
+      if (matchedUser) {
+        if (matchedUser.status === "inactive") {
+          json(res, 403, { error: "Account is inactive. Please contact system administrator." });
+          return;
+        }
+        const targetPass = matchedUser.password || userPassword;
+        if (passwordInput === targetPass || passwordInput === adminPassword) {
+          const role = matchedUser.role || "user";
+          const token = signToken({
+            expiresAt: Date.now() + TOKEN_TTL_MS,
+            role,
+            email: matchedUser.email,
+            name: matchedUser.name,
+          });
+          json(res, 200, { ok: true, role, token, redirect: role === "admin" ? "/admin" : "/", user: matchedUser });
+          return;
+        }
+      }
+
+      // Default User check (user / user@123)
       if (
-        (usernameInput === "user" || usernameInput === "user@techellixir.com" || passwordInput === userPassword) &&
+        (usernameInput === "user" || usernameInput === "user@techellixir.com") &&
         passwordInput === userPassword
       ) {
         const token = signToken({
@@ -452,7 +480,7 @@ async function handleApi(req, res, url) {
         return;
       }
 
-      json(res, 401, { error: "Invalid credentials. Use admin / admin@123 or user / user@123." });
+      json(res, 401, { error: "Invalid credentials. Please check your username/email and password." });
       return;
     }
 
@@ -472,12 +500,6 @@ async function handleApi(req, res, url) {
       if (!requireAdmin(req, res)) return;
       const id = queryMatch[1];
       const queries = await readQueries();
-      const index = queries.findIndex((q) => q.id === id);
-      if (index === -1) {
-        notFound(res);
-        return;
-      }
-
       if (req.method === "PATCH") {
         const body = await readBody(req);
         if (body.status) {
@@ -506,6 +528,33 @@ async function handleApi(req, res, url) {
       if (req.method === "GET") {
         const users = await readUsers();
         json(res, 200, { users });
+        return;
+      }
+      if (req.method === "POST") {
+        const body = await readBody(req);
+        const users = await readUsers();
+        const email = String(body.email || "").trim().toLowerCase();
+        if (!email) {
+          json(res, 400, { error: "Email address is required." });
+          return;
+        }
+        const existingIdx = users.findIndex((u) => u.email && u.email.toLowerCase() === email);
+        const newUser = {
+          id: existingIdx !== -1 ? users[existingIdx].id : `usr_${Date.now()}`,
+          name: String(body.name || "New User").trim(),
+          email,
+          role: body.role === "admin" ? "admin" : "user",
+          status: body.status || "active",
+          password: String(body.password || "user@123").trim(),
+          createdAt: new Date().toISOString(),
+        };
+        if (existingIdx !== -1) {
+          users[existingIdx] = { ...users[existingIdx], ...newUser };
+        } else {
+          users.unshift(newUser);
+        }
+        await writeUsers(users);
+        json(res, 201, { user: newUser, users });
         return;
       }
     }
