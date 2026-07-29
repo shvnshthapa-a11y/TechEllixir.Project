@@ -2122,9 +2122,18 @@ export default function Admin() {
                             {editingResource.summary ? (
                               editingResource.summary.split("\n").map((line: string, i: number) => {
                                 const t = line.trim();
-                                if (t.startsWith("### ")) return <h3 key={i} className="text-sm font-black text-[#FF4D37] mt-3 mb-1">{t.slice(4)}</h3>;
-                                if (t.startsWith("## ")) return <h2 key={i} className="text-base font-black text-[#182033] dark:text-white mt-4 mb-1">{t.slice(3)}</h2>;
-                                if (t.startsWith("# ")) return <h1 key={i} className="text-lg font-black text-[#182033] dark:text-white mt-5 mb-2 border-b border-gray-200 dark:border-slate-800 pb-1">{t.slice(2)}</h1>;
+                                if (t.startsWith("### ") || /^#\s*H3/i.test(t)) {
+                                  const text = t.replace(/^(###|#\s*H3:?)\s*/i, "");
+                                  return <h3 key={i} className="text-sm font-black text-[#FF4D37] mt-4 mb-1.5">{text}</h3>;
+                                }
+                                if (t.startsWith("## ") || /^#\s*H2/i.test(t)) {
+                                  const text = t.replace(/^(##|#\s*H2:?)\s*/i, "");
+                                  return <h2 key={i} className="text-base font-black text-[#182033] dark:text-white mt-5 mb-2">{text}</h2>;
+                                }
+                                if (t.startsWith("# ") || /^#\s*H1/i.test(t)) {
+                                  const text = t.replace(/^(#|#\s*H1:?)\s*/i, "");
+                                  return <h1 key={i} className="text-xl font-black text-[#182033] dark:text-white mt-6 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">{text}</h1>;
+                                }
                                 if (t.startsWith("> ")) return <blockquote key={i} className="p-2.5 my-2 border-l-4 border-[#FF4D37] bg-orange-50/50 dark:bg-slate-900/50 rounded-r-xl italic text-gray-700 dark:text-gray-300">{t.slice(2)}</blockquote>;
                                 if (t.startsWith("- ")) return <li key={i} className="ml-4 list-disc font-medium text-gray-700 dark:text-gray-300">{t.slice(2)}</li>;
                                 if (!t) return <div key={i} className="h-1.5" />;
