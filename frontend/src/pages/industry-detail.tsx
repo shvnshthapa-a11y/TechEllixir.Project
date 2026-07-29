@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -380,10 +380,48 @@ const industryDetailsMap: Record<string, IndustryData> = {
 export default function IndustryDetail() {
   const { slug } = useParams<{ slug?: string }>();
   const navigate = useNavigate();
+  const [cmsIndustry, setCmsIndustry] = useState<IndustryData | null>(null);
 
   // Match industry or default to healthcare
   const key = slug ? slug.toLowerCase().replace(/[^a-z]/g, "") : "healthcare";
-  const industry = industryDetailsMap[key] || industryDetailsMap["healthcare"];
+
+  useEffect(() => {
+    fetch("/api/cms/industries")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data.items) && slug) {
+          const match = data.items.find(
+            (i: any) =>
+              i.id === slug ||
+              i.slug === slug ||
+              (i.title || "").toLowerCase().replace(/[^a-z0-9]+/g, "-") === slug.toLowerCase() ||
+              (i.title || "").toLowerCase().includes(slug.toLowerCase())
+          );
+          if (match) {
+            setCmsIndustry({
+              id: match.id || slug,
+              name: match.title || match.name,
+              category: match.tagline || "Specialized Industry Solution",
+              icon: <Rocket size={32} />,
+              shortDesc: match.description || match.tagline || "",
+              fullDesc: match.description || match.tagline || "",
+              outcomes: [
+                "100% Custom Tailored Solution",
+                "Proven High Performance & Scalability",
+                "Enterprise Security & Compliance",
+              ],
+              capabilities: [
+                { title: "Specialized Integration", desc: match.description || "Tailored workflow engineering." }
+              ],
+              useCases: ["Enterprise Sector Automation", "Real-Time Pipeline Optimization"],
+            });
+          }
+        }
+      })
+      .catch(() => {});
+  }, [slug]);
+
+  const industry = cmsIndustry || industryDetailsMap[key] || industryDetailsMap["healthcare"];
 
   return (
     <main className="bg-[#fffaf7] dark:bg-[#0d111a] text-[#182033] dark:text-gray-100 transition-colors duration-300 min-h-screen pt-32 pb-24">
