@@ -1,5 +1,13 @@
 [
   {
+    "id": "car_1785351252792",
+    "title": "test",
+    "category": "Web & Full Stack",
+    "badge": "🔥 Trending",
+    "duration": "2 - 6 Months",
+    "desc": "test"
+  },
+  {
     "id": "car_ai",
     "title": "Artificial Intelligence",
     "category": "ai",

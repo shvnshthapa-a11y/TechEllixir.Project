@@ -1,5 +1,13 @@
 [
   {
+    "id": "res_1785351291619",
+    "title": "test",
+    "category": "Blogs & Articles",
+    "readTime": "5 min read",
+    "description": "test",
+    "date": "2026-07-29"
+  },
+  {
     "id": "ai-enterprise-guide",
     "title": "The 2026 Enterprise AI & LLM Implementation Blueprint",
     "category": "whitepaper",

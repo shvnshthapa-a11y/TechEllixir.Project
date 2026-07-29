@@ -544,13 +544,62 @@ export default function Admin() {
     const endpoint = isEdit ? `/api/admin/cms/services/${editingService.id}` : "/api/admin/cms/services";
     const method = isEdit ? "PATCH" : "POST";
 
+    const title = editingService.title.trim();
+    const category = editingService.category || "Core Software Engineering";
+
+    let highlightsArr = typeof editingService.highlights === "string" ? editingService.highlights.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.highlights || []);
+    let subServicesArr = typeof editingService.subServices === "string" ? editingService.subServices.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.subServices || []);
+    let processStepsArr = typeof editingService.processSteps === "string" ? editingService.processSteps.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.processSteps || []);
+    let keyOutcomesArr = typeof editingService.keyOutcomes === "string" ? editingService.keyOutcomes.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.keyOutcomes || []);
+    let techStackArr = typeof editingService.techStack === "string" ? editingService.techStack.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.techStack || []);
+
+    if (highlightsArr.length === 0) {
+      highlightsArr = ["React 19 & Next.js", "Node.js & Microservices", "Scalable Enterprise Apps"];
+    }
+    if (subServicesArr.length === 0) {
+      subServicesArr = [
+        `Custom ${title} Solutions`,
+        "Frontend & UI Engineering (React/Next.js)",
+        "Backend & RESTful APIs (Node.js)",
+        "Database Architecture & Optimization",
+        "Performance Tuning & SEO Hardening",
+        "API Integration & Webhooks",
+        "Single Page Applications (SPA)",
+        "Maintenance & SLA Support"
+      ];
+    }
+    if (processStepsArr.length === 0) {
+      processStepsArr = [
+        "1. Discovery & Technical Architecture Audit",
+        "2. UI/UX Wireframing & Database Schema Design",
+        "3. Full-Stack Agile Development & Automated CI/CD",
+        "4. Performance Tuning, Security Audit & Production Launch"
+      ];
+    }
+    if (keyOutcomesArr.length === 0) {
+      keyOutcomesArr = [
+        "Sub-100ms LCP Page Load Speeds",
+        "99.9% Production Server Uptime",
+        "SEO-Optimized SSR Architecture",
+        "OWASP Security Hardened APIs"
+      ];
+    }
+    if (techStackArr.length === 0) {
+      techStackArr = ["React 19", "Next.js", "TypeScript", "Node.js", "Express", "PostgreSQL", "Docker"];
+    }
+
     const payload = {
       ...editingService,
-      highlights: typeof editingService.highlights === "string" ? editingService.highlights.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.highlights || []),
-      subServices: typeof editingService.subServices === "string" ? editingService.subServices.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.subServices || []),
-      processSteps: typeof editingService.processSteps === "string" ? editingService.processSteps.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.processSteps || []),
-      keyOutcomes: typeof editingService.keyOutcomes === "string" ? editingService.keyOutcomes.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.keyOutcomes || []),
-      techStack: typeof editingService.techStack === "string" ? editingService.techStack.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingService.techStack || []),
+      title,
+      category,
+      description: editingService.description?.trim() || `We build modern, high-performance ${title} with clean architecture, reliable APIs, and lightning-fast load times.`,
+      note: editingService.note?.trim() || `We deliver native-grade ${title} with clean frontend architecture, enterprise backend systems, and 99.9% production uptime SLA.`,
+      detailedOverview: editingService.detailedOverview?.trim() || `We engineer enterprise ${title} built for extreme speed, search visibility, and fault tolerance. Using React 19, Next.js, and Node.js microservices, we build platforms that process millions of requests while providing smooth user flows.`,
+      highlights: highlightsArr,
+      subServices: subServicesArr,
+      processSteps: processStepsArr,
+      keyOutcomes: keyOutcomesArr,
+      techStack: techStackArr,
     };
 
     try {
@@ -1733,7 +1782,20 @@ export default function Admin() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setEditingService({ title: "", category: "Core Software Engineering", description: "", note: "", highlights: "" })}
+                    onClick={() =>
+                      setEditingService({
+                        title: "",
+                        category: "Core Software Engineering",
+                        description: "We build modern, high-performance applications with clean architecture, reliable APIs, and fast load times.",
+                        note: "Deliver native-grade performance with clean frontend architecture, enterprise backend systems, and 99.9% uptime SLA.",
+                        detailedOverview: "We engineer enterprise solutions built for extreme speed, search visibility, and fault tolerance. Using React 19, Next.js, and Node.js microservices, we build platforms that process millions of requests while providing smooth user flows.",
+                        highlights: "React 19 & Next.js, Node.js & Microservices, Scalable Enterprise Apps",
+                        subServices: "Custom Web Applications, Frontend Development (React/Next.js), Backend & RESTful APIs (Node.js), Database Architecture, Performance Optimization & SEO",
+                        processSteps: "1. Discovery & Technical Architecture Audit, 2. UI/UX Wireframing & Schema Design, 3. Full-Stack Agile Development & Automated CI/CD, 4. Security Audit & Production Launch",
+                        keyOutcomes: "Sub-100ms LCP Page Load Speeds, 99.9% Production Server Uptime, SEO-Optimized SSR Architecture, OWASP Security Hardened APIs",
+                        techStack: "React 19, Next.js, TypeScript, Node.js, Express, PostgreSQL, Docker"
+                      })
+                    }
                     className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"
                   >
                     <Plus size={16} /> Add New Service
