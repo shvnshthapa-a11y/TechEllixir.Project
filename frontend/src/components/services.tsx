@@ -548,19 +548,38 @@ const Services = ({ detailed = false }: ServicesProps) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-          const cmsServices = data.items.map((item: any) => ({
-            title: item.title,
-            rawCategory: item.category || "",
-            icon: (item.category?.toLowerCase().includes("ai") || item.title?.toLowerCase().includes("ai")) ? <Brain size={28} /> : <Code2 size={28} />,
-            description: item.description || "Scalable digital solution engineered for enterprise reliability.",
-            note: item.note || "Enterprise scale and performance.",
-            detailedOverview: item.detailedOverview || item.description || "Full technical overview.",
-            highlights: Array.isArray(item.highlights) ? item.highlights : (typeof item.highlights === "string" ? item.highlights.split(",") : ["Enterprise Ready", "High Performance"]),
-            subServices: Array.isArray(item.subServices) ? item.subServices : ["Custom Software Development", "API Integration"],
-            processSteps: Array.isArray(item.processSteps) ? item.processSteps : ["1. Discovery & Architecture", "2. Agile Development", "3. Quality Assurance", "4. Deployment & Launch"],
-            keyOutcomes: Array.isArray(item.keyOutcomes) ? item.keyOutcomes : ["Sub-100ms Load Times", "99.9% Uptime SLA", "OWASP Security Hardening"],
-            techStack: Array.isArray(item.techStack) ? item.techStack : ["React", "TypeScript", "Node.js", "PostgreSQL", "Docker"]
-          }));
+          const cmsServices = data.items.map((item: any) => {
+            const title = String(item.title || "").trim();
+            const cat = String(item.category || "").trim();
+            const t = title.toLowerCase();
+
+            let icon = <Brain size={28} />;
+            if (t.includes("web")) icon = <Code2 size={28} />;
+            else if (t.includes("mobile") || t.includes("app")) icon = <Smartphone size={28} />;
+            else if (t.includes("cloud") || t.includes("devops") || t.includes("mlops")) icon = <Cloud size={28} />;
+            else if (t.includes("design") || t.includes("ui") || t.includes("ux") || t.includes("palette")) icon = <Palette size={28} />;
+            else if (t.includes("security") || t.includes("cyber") || t.includes("audit")) icon = <ShieldCheck size={28} />;
+            else if (t.includes("analytics") || t.includes("bi") || t.includes("intelligence")) icon = <BarChart3 size={28} />;
+            else if (t.includes("science") || t.includes("predict")) icon = <LineChart size={28} />;
+            else if (t.includes("machine") || t.includes("deep") || t.includes("learning") || t.includes("neural")) icon = <Cpu size={28} />;
+            else if (t.includes("automation") || t.includes("process") || t.includes("workflow")) icon = <Zap size={28} />;
+            else if (t.includes("engineering") || t.includes("warehouse") || t.includes("etl")) icon = <Database size={28} />;
+            else if (t.includes("consulting") || t.includes("strategy") || t.includes("poc")) icon = <Target size={28} />;
+
+            return {
+              title,
+              rawCategory: cat,
+              icon,
+              description: item.description || "Scalable digital solution engineered for enterprise reliability.",
+              note: item.note || "Enterprise scale and performance.",
+              detailedOverview: item.detailedOverview || item.description || "Full technical overview.",
+              highlights: Array.isArray(item.highlights) ? item.highlights : (typeof item.highlights === "string" ? item.highlights.split(",") : ["Enterprise Ready", "High Performance"]),
+              subServices: Array.isArray(item.subServices) ? item.subServices : ["Custom Software Development", "API Integration"],
+              processSteps: Array.isArray(item.processSteps) ? item.processSteps : ["1. Discovery & Architecture", "2. Agile Development", "3. Quality Assurance", "4. Deployment & Launch"],
+              keyOutcomes: Array.isArray(item.keyOutcomes) ? item.keyOutcomes : ["Sub-100ms Load Times", "99.9% Uptime SLA", "OWASP Security Hardening"],
+              techStack: Array.isArray(item.techStack) ? item.techStack : ["React", "TypeScript", "Node.js", "PostgreSQL", "Docker"]
+            };
+          });
           setDynamicServices(cmsServices);
         }
       })
@@ -571,9 +590,9 @@ const Services = ({ detailed = false }: ServicesProps) => {
     const cat = (item.rawCategory || "").toLowerCase();
     const title = (item.title || "").toLowerCase();
     if (activeCategory === "ai") {
-      return cat.includes("ai") || cat.includes("data") || cat.includes("machine") || cat.includes("automation") || title.includes("ai") || title.includes("data") || title.includes("analytics");
+      return cat.includes("ai") || cat.includes("data") || cat.includes("machine") || cat.includes("science") || cat.includes("automation") || title.includes("ai") || title.includes("data") || title.includes("analytics") || title.includes("learning");
     }
-    return !cat.includes("ai") || cat.includes("core") || cat.includes("mobile") || cat.includes("design") || cat.includes("devops") || title.includes("web") || title.includes("mobile");
+    return !cat.includes("ai") || cat.includes("core") || cat.includes("mobile") || cat.includes("design") || cat.includes("devops") || cat.includes("cyber") || cat.includes("security") || title.includes("web") || title.includes("mobile") || title.includes("cloud") || title.includes("security") || title.includes("design");
   });
 
   const baseServicesData = activeCategory === "core" ? coreServicesData : aiDataServicesData;
