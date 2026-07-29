@@ -635,7 +635,7 @@ const Services = ({ detailed = false }: ServicesProps) => {
           <p className="section-copy mt-4 max-w-2xl mx-auto text-sm sm:text-base">
             {activeCategory === "core"
               ? "From discovery to deployment, we shape reliable technology around your users, your workflows, and the way your business actually runs."
-              : "We help businesses transform data into actionable insights and build intelligent AI-powered solutions that automate workflows."}
+              : "We help businesses transform their data into actionable insights and build intelligent AI-powered solutions that automate workflows, improve decision-making, and accelerate growth."}
           </p>
 
           {/* Category Toggle Tabs */}

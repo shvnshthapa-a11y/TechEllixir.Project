@@ -148,14 +148,14 @@
       "Intelligent Document Processing (OCR)"
     ],
     "subServices": [
+      "Custom AI Application Development",
+      "Generative AI Solutions",
       "AI Chatbots & Virtual Assistants",
-      "LLM Integration & Prompt Engineering",
-      "Automated AI Workflows & Agents",
-      "Intelligent Document Processing (OCR)",
-      "Custom AI Tooling & API Integration",
+      "AI Agents & Business Automation",
+      "Large Language Model (LLM) Integration",
       "Retrieval-Augmented Generation (RAG)",
-      "Multi-Agent Task Delegation",
-      "Zero-Data Leakage AI Sandboxing"
+      "AI API Integration",
+      "Intelligent Document Processing (OCR + AI)"
     ],
     "processSteps": [
       "1. AI Opportunity & Data Privacy Audit",
