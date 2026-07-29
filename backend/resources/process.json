@@ -1,0 +1,26 @@
+[
+  {
+    "id": "prc_1",
+    "step": "01",
+    "title": "Discovery & Strategy",
+    "description": "We analyze your project requirements, target market, and technical goals to outline a clear architecture roadmap."
+  },
+  {
+    "id": "prc_2",
+    "step": "02",
+    "title": "Architecture & UI/UX Design",
+    "description": "Designing intuitive wireframes, Figma interactive prototypes, and high-concurrency microservice system architecture."
+  },
+  {
+    "id": "prc_3",
+    "step": "03",
+    "title": "Agile Development & QA",
+    "description": "Iterative sprint development with clean code standards, automated testing, continuous integration, and security reviews."
+  },
+  {
+    "id": "prc_4",
+    "step": "04",
+    "title": "Deployment & Ongoing Support",
+    "description": "Production release, cloud infrastructure monitoring, zero-downtime CI/CD automation, and post-launch maintenance."
+  }
+]

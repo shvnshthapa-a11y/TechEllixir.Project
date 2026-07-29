@@ -1,0 +1,32 @@
+[
+  {
+    "id": "wcu_1",
+    "title": "End-to-End Solutions",
+    "description": "From product discovery and UI design to cloud deployment and ongoing maintenance, we manage the complete lifecycle."
+  },
+  {
+    "id": "wcu_2",
+    "title": "Custom App Engineering",
+    "description": "Tailored software platforms built with React, Node.js, and modern tech stacks built specifically for your business."
+  },
+  {
+    "id": "wcu_3",
+    "title": "Scalable Cloud Architecture",
+    "description": "Containerized microservices running on AWS, GCP, or Azure designed to scale effortless with high user traffic."
+  },
+  {
+    "id": "wcu_4",
+    "title": "Security & Quality Assurance",
+    "description": "OWASP vulnerability audits, automated test suites, and enterprise data encryption protocols."
+  },
+  {
+    "id": "wcu_5",
+    "title": "Rapid On-Time Delivery",
+    "description": "Agile sprint workflows ensuring predictable milestones, transparent communication, and fast time-to-market."
+  },
+  {
+    "id": "wcu_6",
+    "title": "24/7 Dedicated Support",
+    "description": "Continuous monitoring, automated uptime alerts, and proactive maintenance to keep your applications running 24/7."
+  }
+]

@@ -480,7 +480,7 @@ async function handleApi(req, res, url) {
 
       if (req.method === "PATCH") {
         const body = await readBody(req);
-        const validStatuses = ["new", "in_progress", "resolved"];
+        const validStatuses = ["not_started", "pending", "completed", "new", "in_progress", "in-progress", "resolved", "archived"];
         if (body.status && !validStatuses.includes(body.status)) {
           json(res, 400, { error: "Invalid status value." });
           return;

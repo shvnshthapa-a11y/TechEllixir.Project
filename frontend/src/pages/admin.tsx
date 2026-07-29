@@ -473,10 +473,13 @@ export default function Admin() {
   // Lead Status Change
   const handleStatusChange = async (id: string, nextStatus: QueryStatus) => {
     try {
+      setQueries((prev) => prev.map((q) => (q.id === id ? { ...q, status: nextStatus } : q)));
       const res = await updateQueryStatus(token, id, nextStatus);
       const updated: ContactQuery = (res as any).query || res;
-      setQueries((prev) => prev.map((q) => (q.id === id ? updated : q)));
-      setSuccessMsg(`Status updated to "${nextStatus}"`);
+      if (updated && updated.id) {
+        setQueries((prev) => prev.map((q) => (q.id === id ? updated : q)));
+      }
+      setSuccessMsg(`Status updated to "${statusLabels[nextStatus] || nextStatus}"`);
       setTimeout(() => setSuccessMsg(""), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update status.");
