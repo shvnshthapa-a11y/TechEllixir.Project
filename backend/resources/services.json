@@ -42,7 +42,8 @@
       "Tailwind CSS v4",
       "PostgreSQL",
       "Docker"
-    ]
+    ],
+    "updatedAt": "2026-07-29T14:53:31.232Z"
   },
   {
     "id": "srv_mobile_dev",
@@ -86,7 +87,8 @@
       "Firebase",
       "REST/GraphQL",
       "SQLite"
-    ]
+    ],
+    "updatedAt": "2026-07-29T14:44:36.900Z"
   },
   {
     "id": "srv_cloud_devops",

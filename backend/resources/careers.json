@@ -9,7 +9,8 @@
     "stipend": "Performance Based",
     "desc": "Build intelligent applications using AI, LLMs, prompt engineering, and automation tools.",
     "detailedCurriculum": "Machine Learning, LLM Fine-Tuning, RAG Pipelines, Python & PyTorch.",
-    "requirements": "Laptop, basic programming knowledge, 10 hrs/week"
+    "requirements": "Laptop, basic programming knowledge, 10 hrs/week",
+    "updatedAt": "2026-07-29T14:45:26.026Z"
   },
   {
     "id": "car_fullstack",

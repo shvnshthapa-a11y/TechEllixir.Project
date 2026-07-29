@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
@@ -541,8 +541,33 @@ const Services = ({ detailed = false }: ServicesProps) => {
   const [activeCategory, setActiveCategory] = useState<"core" | "ai">("core");
   const [selectedService, setSelectedService] = useState<ServiceDetail | null>(null);
   const [modalTab, setModalTab] = useState<"overview" | "process" | "outcomes">("overview");
+  const [dynamicServices, setDynamicServices] = useState<ServiceDetail[]>([]);
 
-  const currentServicesData = activeCategory === "core" ? coreServicesData : aiDataServicesData;
+  useEffect(() => {
+    fetch("/api/cms/services")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          const cmsServices = data.items.map((item: any) => ({
+            title: item.title,
+            icon: item.category?.toLowerCase().includes("ai") ? <Brain size={28} /> : <Code2 size={28} />,
+            description: item.description || "Scalable digital solution engineered for enterprise reliability.",
+            note: item.note || "Enterprise scale and performance.",
+            detailedOverview: item.detailedOverview || item.description || "Full technical overview.",
+            highlights: Array.isArray(item.highlights) ? item.highlights : (typeof item.highlights === "string" ? item.highlights.split(",") : ["Enterprise Ready", "High Performance"]),
+            subServices: Array.isArray(item.subServices) ? item.subServices : ["Custom Software Development", "API Integration"],
+            processSteps: Array.isArray(item.processSteps) ? item.processSteps : ["1. Discovery & Architecture", "2. Agile Development", "3. Quality Assurance", "4. Deployment & Launch"],
+            keyOutcomes: Array.isArray(item.keyOutcomes) ? item.keyOutcomes : ["Sub-100ms Load Times", "99.9% Uptime SLA", "OWASP Security Hardening"],
+            techStack: Array.isArray(item.techStack) ? item.techStack : ["React", "TypeScript", "Node.js", "PostgreSQL", "Docker"]
+          }));
+          setDynamicServices(cmsServices);
+        }
+      })
+      .catch((err) => console.warn("Backend services fetch fallback to static data:", err));
+  }, []);
+
+  const baseServicesData = activeCategory === "core" ? coreServicesData : aiDataServicesData;
+  const currentServicesData = dynamicServices.length > 0 ? dynamicServices : baseServicesData;
   const displayedServices = detailed ? currentServicesData : currentServicesData.slice(0, 6);
 
   const handleRequestDemo = (serviceTitle: string) => {

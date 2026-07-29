@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": "9755190d-b7e0-4f2e-ab31-e66b7e83df90",
+    "fullName": "Manan Aora",
+    "email": "m@gmail.com",
+    "phone": "+918923997966",
+    "domain": "Artificial Intelligence",
+    "college": "University of Petroleum and Energy Studies",
+    "year": "3rd Year",
+    "resumeUrl": "AURA - WARP'26.docx (0.45 MB)",
+    "reason": "hi",
+    "type": "internship_application",
+    "subject": "Internship Registration: Artificial Intelligence",
+    "message": "Applicant: Manan Aora\nPhone: +918923997966\nDomain: Artificial Intelligence\nCollege: University of Petroleum and Energy Studies (3rd Year)\nResume/LinkedIn: AURA - WARP'26.docx (0.45 MB)\nReason: hi",
+    "status": "new",
+    "createdAt": "2026-07-29T15:14:04.438Z",
+    "updatedAt": "2026-07-29T15:14:04.438Z"
+  },
+  {
+    "createdAt": "2026-07-29T14:52:45.095Z",
+    "email": "m@gmail.com",
+    "fullName": "Manan",
+    "id": "0cf4a2bc-3961-4dd1-97db-c62083183c5f",
+    "message": "hello\n\nContact Phone: N/A",
+    "status": "new",
+    "subject": "[ai] Manan",
+    "updatedAt": "2026-07-29T14:52:45.117Z"
+  }
+]
