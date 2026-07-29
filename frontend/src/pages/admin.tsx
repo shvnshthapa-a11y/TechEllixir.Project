@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import type { FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -196,6 +196,40 @@ export default function Admin() {
   const [editingWhychoseus, setEditingWhychoseus] = useState<any | null>(null);
   const [editingAbout, setEditingAbout] = useState<any | null>(null);
   const [contentPreviewMode, setContentPreviewMode] = useState<"edit" | "preview">("edit");
+  const resourceContentTextareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const handleFormatResourceText = (prefix: string, suffix: string = "", placeholder: string = "") => {
+    const textarea = resourceContentTextareaRef.current;
+    const currentText = editingResource?.summary || "";
+
+    if (!textarea) {
+      const gap = currentText && !currentText.endsWith("\n") ? "\n" : "";
+      setEditingResource({
+        ...editingResource,
+        summary: currentText + gap + prefix + placeholder + suffix,
+      });
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selected = currentText.substring(start, end);
+
+    const insertedText = selected || placeholder;
+    const newText = currentText.substring(0, start) + prefix + insertedText + suffix + currentText.substring(end);
+
+    setEditingResource({
+      ...editingResource,
+      summary: newText,
+    });
+
+    setTimeout(() => {
+      textarea.focus();
+      const newStart = start + prefix.length;
+      const newEnd = newStart + insertedText.length;
+      textarea.setSelectionRange(newStart, newEnd);
+    }, 10);
+  };
 
   // Filtered queries
   const filteredQueries = useMemo(() => {
@@ -2068,18 +2102,14 @@ export default function Admin() {
                       <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 overflow-hidden">
                         <div className="p-2 border-b border-gray-200 dark:border-slate-800 flex flex-wrap items-center gap-1 bg-white/50 dark:bg-slate-900/50">
                           {[
-                            { label: "H1", prefix: "\n# ", text: "Main Section Heading\n" },
-                            { label: "H2", prefix: "\n## ", text: "Sub-Section Heading\n" },
-                            { label: "H3", prefix: "\n### ", text: "Minor Topic Heading\n" },
+                            { label: "H1", prefix: "# ", suffix: "\n", text: "Main Section Heading" },
+                            { label: "H2", prefix: "## ", suffix: "\n", text: "Sub-Section Heading" },
+                            { label: "H3", prefix: "### ", suffix: "\n", text: "Minor Topic Heading" },
                           ].map((h) => (
                             <button
                               key={h.label}
                               type="button"
-                              onClick={() => {
-                                const cur = editingResource.summary || "";
-                                const gap = cur && !cur.endsWith("\n") ? "\n" : "";
-                                setEditingResource({ ...editingResource, summary: cur + gap + h.prefix + h.text });
-                              }}
+                              onClick={() => handleFormatResourceText(h.prefix, h.suffix, h.text)}
                               className="px-2.5 py-1 rounded-lg font-black text-xs bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-[#FF4D37] hover:text-white transition"
                             >
                               {h.label}
@@ -2087,20 +2117,16 @@ export default function Admin() {
                           ))}
                           <div className="h-4 w-px bg-gray-300 dark:bg-slate-700 mx-1" />
                           {[
-                            { label: "B", tag: "**Bold Text**" },
-                            { label: "I", tag: "*Italic Text*" },
-                            { label: "U", tag: "<u>Underlined Text</u>" },
-                            { label: "Quote", tag: "\n> Quoted insight...\n" },
-                            { label: "List", tag: "\n- Bullet item 1\n- Bullet item 2\n" },
+                            { label: "B", prefix: "**", suffix: "**", text: "Bold Text" },
+                            { label: "I", prefix: "*", suffix: "*", text: "Italic Text" },
+                            { label: "U", prefix: "<u>", suffix: "</u>", text: "Underlined Text" },
+                            { label: "Quote", prefix: "> ", suffix: "\n", text: "Quoted insight..." },
+                            { label: "List", prefix: "- ", suffix: "\n", text: "Bullet item" },
                           ].map((btn) => (
                             <button
                               key={btn.label}
                               type="button"
-                              onClick={() => {
-                                const cur = editingResource.summary || "";
-                                const gap = cur && !cur.endsWith("\n") ? "\n" : "";
-                                setEditingResource({ ...editingResource, summary: cur + gap + btn.tag });
-                              }}
+                              onClick={() => handleFormatResourceText(btn.prefix, btn.suffix, btn.text)}
                               className="px-2.5 py-1 rounded-lg font-black text-xs bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-[#FF4D37] hover:text-white transition"
                             >
                               {btn.label}
@@ -2110,6 +2136,7 @@ export default function Admin() {
 
                         {contentPreviewMode === "edit" ? (
                           <textarea
+                            ref={resourceContentTextareaRef}
                             rows={10}
                             required
                             placeholder="Write full post content here..."
