@@ -922,12 +922,12 @@ export default function Admin() {
     { id: "queries", label: "Client Inquiries", badge: clientLeads.length, icon: <Mail size={18} /> },
     { id: "internships", label: "Internship Applications", badge: internshipApplications.length, icon: <Briefcase size={18} /> },
     { id: "users", label: "Portal User Directory", badge: users.length, icon: <Users size={18} /> },
-    { id: "services_cms", label: "Manage Services (CMS)", badge: servicesCms.length, icon: <Layers size={18} /> },
-    { id: "resources_cms", label: "Manage Resources (CMS)", badge: resourcesCms.length, icon: <BookOpen size={18} /> },
-    { id: "careers_cms", label: "Manage Careers (CMS)", badge: careersCms.length, icon: <FolderPlus size={18} /> },
-    { id: "testimonials_cms", label: "Manage Testimonials (CMS)", badge: testimonialsCms.length, icon: <MessageSquare size={18} /> },
-    { id: "industries_cms", label: "Manage Industries (CMS)", badge: industriesCms.length, icon: <Building2 size={18} /> },
-    { id: "team_cms", label: "Manage Team (CMS)", badge: teamCms.length, icon: <UserCheck size={18} /> },
+    { id: "services_cms", label: "Manage Services", badge: servicesCms.length, icon: <Layers size={18} /> },
+    { id: "resources_cms", label: "Manage Resources", badge: resourcesCms.length, icon: <BookOpen size={18} /> },
+    { id: "careers_cms", label: "Manage Careers", badge: careersCms.length, icon: <FolderPlus size={18} /> },
+    { id: "testimonials_cms", label: "Manage Testimonials", badge: testimonialsCms.length, icon: <MessageSquare size={18} /> },
+    { id: "industries_cms", label: "Manage Industries", badge: industriesCms.length, icon: <Building2 size={18} /> },
+    { id: "team_cms", label: "Manage Team", badge: teamCms.length, icon: <UserCheck size={18} /> },
     { id: "database", label: "Database Explorer", icon: <Database size={18} /> },
     { id: "settings", label: "Portal Control Settings", icon: <Settings size={18} /> },
   ];
@@ -975,7 +975,7 @@ export default function Admin() {
           {/* Navigation Links */}
           <nav className="space-y-1.5">
             <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-400 block px-3 mb-2">
-              Navigation & CMS
+              Console Navigation
             </span>
 
             {navItems.map((item) => (
@@ -1046,7 +1046,7 @@ export default function Admin() {
               <Menu size={20} />
             </button>
             <h1 className="text-lg font-black text-[#182033] dark:text-white capitalize">
-              {activeTab.replace("_cms", " CMS").replace("_", " ")}
+              {activeTab.replace("_cms", "").replace("_", " ")}
             </h1>
           </div>
 
