@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Layers3, Target, Users } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
@@ -7,33 +8,47 @@ const itemVariants = {
   show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 100, damping: 15 } }
 };
 
+const defaultPrincipleIcons = [<Target size={22} />, <Layers3 size={22} />, <Users size={22} />];
+
 const About = () => {
   const { t } = useLanguage();
+  const [dynamicAbout, setDynamicAbout] = useState<any[]>([]);
 
-  const metrics = [
+  useEffect(() => {
+    fetch("/api/cms/about")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          setDynamicAbout(data.items);
+        }
+      })
+      .catch((err) => console.warn("Backend about fetch fallback:", err));
+  }, []);
+
+  const fallbackMetrics: [string, string][] = [
     ["100+", t("about.metrics.delivered")],
     ["50+", t("about.metrics.happy")],
     ["10+", t("about.metrics.experience")],
     ["24/7", t("about.metrics.support")],
   ];
 
-  const principles = [
-    {
-      icon: <Target size={22} />,
-      title: t("about.principles.outcome"),
-      copy: t("about.principles.outcomeDesc"),
-    },
-    {
-      icon: <Layers3 size={22} />,
-      title: t("about.principles.scale"),
-      copy: t("about.principles.scaleDesc"),
-    },
-    {
-      icon: <Users size={22} />,
-      title: t("about.principles.human"),
-      copy: t("about.principles.humanDesc"),
-    },
+  const fallbackPrinciples = [
+    { icon: <Target size={22} />, title: t("about.principles.outcome"), copy: t("about.principles.outcomeDesc") },
+    { icon: <Layers3 size={22} />, title: t("about.principles.scale"), copy: t("about.principles.scaleDesc") },
+    { icon: <Users size={22} />, title: t("about.principles.human"), copy: t("about.principles.humanDesc") },
   ];
+
+  const metrics: [string, string][] = dynamicAbout.filter((item) => item.type === "metric" || item.value).length > 0
+    ? dynamicAbout.filter((item) => item.type === "metric").map((item) => [item.value || "100+", item.label || item.title])
+    : fallbackMetrics;
+
+  const principles = dynamicAbout.filter((item) => item.type === "principle").length > 0
+    ? dynamicAbout.filter((item) => item.type === "principle").map((item, idx) => ({
+        icon: defaultPrincipleIcons[idx % defaultPrincipleIcons.length],
+        title: item.title,
+        copy: item.label || item.description || item.copy,
+      }))
+    : fallbackPrinciples;
 
   return (
     <section className="section-shell bg-white dark:bg-[#0d111a] transition-colors duration-300">

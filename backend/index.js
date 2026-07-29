@@ -937,6 +937,54 @@ async function handleApi(req, res, url) {
       }
     }
 
+    // 14. Generic Dynamic CMS Table API (Process, Why Choose Us, About)
+    const cmsMatch = url.pathname.match(/^\/api\/(?:admin\/cms\/)?(process|whychoseus|about)(?:\/([^/]+))?$/);
+    if (cmsMatch) {
+      const tableName = cmsMatch[1];
+      const itemId = cmsMatch[2];
+      const items = await dbSelect(tableName);
+
+      if (!itemId) {
+        if (req.method === "GET") {
+          json(res, 200, { items });
+          return;
+        }
+        if (req.method === "POST") {
+          if (!requireAdmin(req, res)) return;
+          const body = await readBody(req);
+          const newItem = {
+            id: `${tableName.slice(0, 3)}_${Date.now()}`,
+            ...body,
+            createdAt: new Date().toISOString(),
+          };
+          items.unshift(newItem);
+          await dbSave(tableName, items);
+          json(res, 200, { item: newItem, items });
+          return;
+        }
+      } else {
+        if (!requireAdmin(req, res)) return;
+        const idx = items.findIndex((i) => i.id === itemId);
+        if (idx === -1) {
+          notFound(res);
+          return;
+        }
+        if (req.method === "PATCH") {
+          const body = await readBody(req);
+          items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+          await dbSave(tableName, items);
+          json(res, 200, { item: items[idx], items });
+          return;
+        }
+        if (req.method === "DELETE") {
+          const deleted = items.splice(idx, 1)[0];
+          await dbSave(tableName, items);
+          json(res, 200, { item: deleted, items });
+          return;
+        }
+      }
+    }
+
     notFound(res);
   } catch (error) {
     console.error("API error:", error);

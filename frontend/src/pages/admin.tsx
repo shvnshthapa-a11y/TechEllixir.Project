@@ -33,6 +33,8 @@ import {
   Star,
   ArrowLeft,
   Eye,
+  Sparkles,
+  Target,
 } from "lucide-react";
 import {
   adminLogin,
@@ -54,6 +56,9 @@ type AdminTab =
   | "testimonials_cms"
   | "industries_cms"
   | "team_cms"
+  | "process_cms"
+  | "whychoseus_cms"
+  | "about_cms"
   | "database"
   | "settings";
 
@@ -151,6 +156,9 @@ export default function Admin() {
   const [testimonialsCms, setTestimonialsCms] = useState<any[]>([]);
   const [industriesCms, setIndustriesCms] = useState<any[]>([]);
   const [teamCms, setTeamCms] = useState<any[]>([]);
+  const [processCms, setProcessCms] = useState<any[]>([]);
+  const [whychoseusCms, setWhychoseusCms] = useState<any[]>([]);
+  const [aboutCms, setAboutCms] = useState<any[]>([]);
   const [dbStatsData, setDbStatsData] = useState<any>(null);
   const [settings, setSettings] = useState<PortalSettings>({
     maintenanceMode: false,
@@ -181,6 +189,9 @@ export default function Admin() {
   const [editingTestimonial, setEditingTestimonial] = useState<any | null>(null);
   const [editingIndustry, setEditingIndustry] = useState<any | null>(null);
   const [editingTeam, setEditingTeam] = useState<any | null>(null);
+  const [editingProcess, setEditingProcess] = useState<any | null>(null);
+  const [editingWhychoseus, setEditingWhychoseus] = useState<any | null>(null);
+  const [editingAbout, setEditingAbout] = useState<any | null>(null);
 
   // Filtered queries
   const filteredQueries = useMemo(() => {
@@ -330,7 +341,34 @@ export default function Admin() {
         }
       } catch (e) {}
 
-      // 10. Database Stats
+      // 10. Process CMS
+      try {
+        const prcRes = await fetch("/api/admin/cms/process", { headers: { Authorization: `Bearer ${activeToken}` } });
+        if (prcRes.ok) {
+          const prcData = await prcRes.json();
+          setProcessCms(Array.isArray(prcData.items) ? prcData.items : []);
+        }
+      } catch (e) {}
+
+      // 11. WhyChooseUs CMS
+      try {
+        const wcuRes = await fetch("/api/admin/cms/whychoseus", { headers: { Authorization: `Bearer ${activeToken}` } });
+        if (wcuRes.ok) {
+          const wcuData = await wcuRes.json();
+          setWhychoseusCms(Array.isArray(wcuData.items) ? wcuData.items : []);
+        }
+      } catch (e) {}
+
+      // 12. About CMS
+      try {
+        const abtRes = await fetch("/api/admin/cms/about", { headers: { Authorization: `Bearer ${activeToken}` } });
+        if (abtRes.ok) {
+          const abtData = await abtRes.json();
+          setAboutCms(Array.isArray(abtData.items) ? abtData.items : []);
+        }
+      } catch (e) {}
+
+      // 13. Database Stats
       try {
         const dbRes = await fetch("/api/admin/db/stats", {
           headers: { Authorization: `Bearer ${activeToken}` },
@@ -788,6 +826,123 @@ export default function Admin() {
     }
   };
 
+  // CMS Handlers: Process
+  const handleSaveProcessCms = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingProcess || !editingProcess.title) return;
+    const isEdit = Boolean(editingProcess.id);
+    const endpoint = isEdit ? `/api/admin/cms/process/${editingProcess.id}` : "/api/admin/cms/process";
+    const method = isEdit ? "PATCH" : "POST";
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingProcess),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProcessCms(data.items);
+        setEditingProcess(null);
+        setSuccessMsg(isEdit ? "Process step updated!" : "Process step added!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to save process step");
+    }
+  };
+
+  const handleDeleteProcessCms = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this process step?")) return;
+    try {
+      const res = await fetch(`/api/admin/cms/process/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setProcessCms(data.items);
+    } catch (e) {
+      setError("Failed to delete process step");
+    }
+  };
+
+  // CMS Handlers: WhyChooseUs
+  const handleSaveWhychoseusCms = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingWhychoseus || !editingWhychoseus.title) return;
+    const isEdit = Boolean(editingWhychoseus.id);
+    const endpoint = isEdit ? `/api/admin/cms/whychoseus/${editingWhychoseus.id}` : "/api/admin/cms/whychoseus";
+    const method = isEdit ? "PATCH" : "POST";
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingWhychoseus),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWhychoseusCms(data.items);
+        setEditingWhychoseus(null);
+        setSuccessMsg(isEdit ? "Feature updated!" : "Feature added!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to save feature");
+    }
+  };
+
+  const handleDeleteWhychoseusCms = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this feature card?")) return;
+    try {
+      const res = await fetch(`/api/admin/cms/whychoseus/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setWhychoseusCms(data.items);
+    } catch (e) {
+      setError("Failed to delete feature");
+    }
+  };
+
+  // CMS Handlers: About
+  const handleSaveAboutCms = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!editingAbout || !editingAbout.title) return;
+    const isEdit = Boolean(editingAbout.id);
+    const endpoint = isEdit ? `/api/admin/cms/about/${editingAbout.id}` : "/api/admin/cms/about";
+    const method = isEdit ? "PATCH" : "POST";
+    try {
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(editingAbout),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAboutCms(data.items);
+        setEditingAbout(null);
+        setSuccessMsg(isEdit ? "Company metric/principle updated!" : "Added!");
+        setTimeout(() => setSuccessMsg(""), 3000);
+      }
+    } catch (e) {
+      setError("Failed to save metric");
+    }
+  };
+
+  const handleDeleteAboutCms = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this metric/principle item?")) return;
+    try {
+      const res = await fetch(`/api/admin/cms/about/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setAboutCms(data.items);
+    } catch (e) {
+      setError("Failed to delete item");
+    }
+  };
+
   const handleSaveSettings = async (e: FormEvent) => {
     e.preventDefault();
     try {
@@ -925,6 +1080,9 @@ export default function Admin() {
     { id: "services_cms", label: "Manage Services", badge: servicesCms.length, icon: <Layers size={18} /> },
     { id: "resources_cms", label: "Manage Resources", badge: resourcesCms.length, icon: <BookOpen size={18} /> },
     { id: "careers_cms", label: "Manage Careers", badge: careersCms.length, icon: <FolderPlus size={18} /> },
+    { id: "process_cms", label: "Manage Process Steps", badge: processCms.length, icon: <Sparkles size={18} /> },
+    { id: "whychoseus_cms", label: "Manage Features", badge: whychoseusCms.length, icon: <CheckCircle2 size={18} /> },
+    { id: "about_cms", label: "Manage Metrics", badge: aboutCms.length, icon: <Target size={18} /> },
     { id: "testimonials_cms", label: "Manage Testimonials", badge: testimonialsCms.length, icon: <MessageSquare size={18} /> },
     { id: "industries_cms", label: "Manage Industries", badge: industriesCms.length, icon: <Building2 size={18} /> },
     { id: "team_cms", label: "Manage Team", badge: teamCms.length, icon: <UserCheck size={18} /> },
@@ -2039,6 +2197,201 @@ export default function Admin() {
                         >
                           <Trash2 size={16} />
                         </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: CMS PROCESS STEPS */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "process_cms" && (
+            editingProcess ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setEditingProcess(null)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 transition shadow-sm">
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Process List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">{editingProcess.id ? "Edit Step" : "New Process Step"}</span>
+                </div>
+                <div className="soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm max-w-2xl space-y-6">
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2"><Sparkles size={22} className="text-[#FF4D37]" /> Configure Engineering Process Step</h3>
+                  <form onSubmit={handleSaveProcessCms} className="space-y-4 text-xs">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Step Number (e.g. 01, 02)</label>
+                        <input type="text" required placeholder="01" value={editingProcess.step || ""} onChange={(e) => setEditingProcess({ ...editingProcess, step: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                      </div>
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Step Title</label>
+                        <input type="text" required placeholder="Discovery & Planning" value={editingProcess.title || ""} onChange={(e) => setEditingProcess({ ...editingProcess, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Step Description</label>
+                      <textarea rows={3} required placeholder="Detailed step description..." value={editingProcess.description || ""} onChange={(e) => setEditingProcess({ ...editingProcess, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                      <button type="button" onClick={() => setEditingProcess(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold">Cancel</button>
+                      <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save Process Step</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2"><Sparkles size={22} className="text-[#FF4D37]" /> Manage Engineering Process Steps</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Edit step titles and descriptions rendered in the 'How We Work' homepage section.</p>
+                  </div>
+                  <button onClick={() => setEditingProcess({ step: "01", title: "", description: "" })} className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"><Plus size={16} /> Add Process Step</button>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {processCms.map((item, idx) => (
+                    <div key={item.id || idx} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <span className="text-3xl font-black text-[#FF4D37]/30">{item.step || `0${idx + 1}`}</span>
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{item.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{item.description}</p>
+                      </div>
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-2">
+                        <button onClick={() => setEditingProcess(item)} className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37]"><Edit2 size={16} /></button>
+                        <button onClick={() => handleDeleteProcessCms(item.id)} className="p-2 rounded-xl text-gray-400 hover:text-rose-500"><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: CMS WHY CHOOSE US FEATURES */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "whychoseus_cms" && (
+            editingWhychoseus ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setEditingWhychoseus(null)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 transition shadow-sm">
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Features List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">{editingWhychoseus.id ? "Edit Feature Card" : "New Feature Card"}</span>
+                </div>
+                <div className="soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm max-w-2xl space-y-6">
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2"><CheckCircle2 size={22} className="text-[#FF4D37]" /> Configure Feature Card</h3>
+                  <form onSubmit={handleSaveWhychoseusCms} className="space-y-4 text-xs">
+                    <div>
+                      <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Feature Title</label>
+                      <input type="text" required placeholder="End-to-End Solutions" value={editingWhychoseus.title || ""} onChange={(e) => setEditingWhychoseus({ ...editingWhychoseus, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                    </div>
+                    <div>
+                      <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Feature Description</label>
+                      <textarea rows={3} required placeholder="Description of value proposition..." value={editingWhychoseus.description || ""} onChange={(e) => setEditingWhychoseus({ ...editingWhychoseus, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                      <button type="button" onClick={() => setEditingWhychoseus(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold">Cancel</button>
+                      <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save Feature Card</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2"><CheckCircle2 size={22} className="text-[#FF4D37]" /> Manage Why Choose Us Features</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Add or update value proposition feature cards rendered on the homepage.</p>
+                  </div>
+                  <button onClick={() => setEditingWhychoseus({ title: "", description: "" })} className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"><Plus size={16} /> Add Feature Card</button>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {whychoseusCms.map((item, idx) => (
+                    <div key={item.id || idx} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <h4 className="text-base font-black text-[#182033] dark:text-white">{item.title}</h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{item.description}</p>
+                      </div>
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-2">
+                        <button onClick={() => setEditingWhychoseus(item)} className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37]"><Edit2 size={16} /></button>
+                        <button onClick={() => handleDeleteWhychoseusCms(item.id)} className="p-2 rounded-xl text-gray-400 hover:text-rose-500"><Trash2 size={16} /></button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          )}
+
+          {/* --------------------------------------------------------- */}
+          {/* TAB: CMS COMPANY METRICS & PRINCIPLES */}
+          {/* --------------------------------------------------------- */}
+          {activeTab === "about_cms" && (
+            editingAbout ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setEditingAbout(null)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 text-gray-700 dark:text-gray-200 text-xs font-bold hover:bg-orange-50 transition shadow-sm">
+                    <ArrowLeft size={16} className="text-[#FF4D37]" /> Back to Metrics List
+                  </button>
+                  <span className="text-xs font-black text-gray-400 uppercase tracking-wider">{editingAbout.id ? "Edit Metric/Principle" : "New Metric/Principle"}</span>
+                </div>
+                <div className="soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm max-w-2xl space-y-6">
+                  <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2"><Target size={22} className="text-[#FF4D37]" /> Configure Metric / Principle</h3>
+                  <form onSubmit={handleSaveAboutCms} className="space-y-4 text-xs">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Item Category Type</label>
+                        <select value={editingAbout.type || "metric"} onChange={(e) => setEditingAbout({ ...editingAbout, type: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold">
+                          <option value="metric">Key Metric (Stat)</option>
+                          <option value="principle">Core Principle</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Item Title / Value</label>
+                        <input type="text" required placeholder="e.g. 100+ Projects or Outcome-Driven" value={editingAbout.title || ""} onChange={(e) => setEditingAbout({ ...editingAbout, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                      </div>
+                    </div>
+                    {editingAbout.type === "metric" && (
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Metric Number/Stat Value (e.g. 100+, 50+)</label>
+                        <input type="text" placeholder="100+" value={editingAbout.value || ""} onChange={(e) => setEditingAbout({ ...editingAbout, value: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold" />
+                      </div>
+                    )}
+                    <div>
+                      <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Description / Label</label>
+                      <textarea rows={3} required placeholder="Label or description text..." value={editingAbout.label || ""} onChange={(e) => setEditingAbout({ ...editingAbout, label: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none" />
+                    </div>
+                    <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
+                      <button type="button" onClick={() => setEditingAbout(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold">Cancel</button>
+                      <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save Metric Item</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm">
+                  <div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2"><Target size={22} className="text-[#FF4D37]" /> Manage Company Metrics & Core Principles</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">Manage key statistics and principles rendered on the 'About Us' section.</p>
+                  </div>
+                  <button onClick={() => setEditingAbout({ type: "metric", title: "", value: "100+", label: "" })} className="brand-button px-5 py-3 text-xs font-black cursor-pointer shadow-md inline-flex items-center gap-2"><Plus size={16} /> Add Metric / Principle</button>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {aboutCms.map((item, idx) => (
+                    <div key={item.id || idx} className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-3 flex flex-col justify-between">
+                      <div className="space-y-2">
+                        <span className="px-3 py-1 rounded-full text-[10px] font-black uppercase bg-orange-100 dark:bg-slate-800 text-[#FF4D37]">{item.type || "metric"}</span>
+                        <h4 className="text-xl font-black text-[#FF4D37]">{item.value || item.title}</h4>
+                        <p className="text-xs font-bold text-[#182033] dark:text-white">{item.title}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-300 font-medium">{item.label}</p>
+                      </div>
+                      <div className="pt-4 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-2">
+                        <button onClick={() => setEditingAbout(item)} className="p-2 rounded-xl text-gray-500 hover:text-[#FF4D37]"><Edit2 size={16} /></button>
+                        <button onClick={() => handleDeleteAboutCms(item.id)} className="p-2 rounded-xl text-gray-400 hover:text-rose-500"><Trash2 size={16} /></button>
                       </div>
                     </div>
                   ))}

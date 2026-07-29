@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Brain,
@@ -32,41 +33,39 @@ const cardVariants = {
   },
 };
 
+const defaultFeatureIcons = [<Brain size={30} />, <Code2 size={30} />, <Cloud size={30} />, <ShieldCheck size={30} />, <Zap size={30} />, <Headphones size={30} />];
+
 const WhyChooseUs = () => {
   const { t } = useLanguage();
+  const [dynamicFeatures, setDynamicFeatures] = useState<any[]>([]);
 
-  const features = [
-    {
-      icon: <Brain size={30} />,
-      title: t("whychoseus.features.endToEnd"),
-      description: t("whychoseus.features.endToEndDesc"),
-    },
-    {
-      icon: <Code2 size={30} />,
-      title: t("whychoseus.features.customApp"),
-      description: t("whychoseus.features.customAppDesc"),
-    },
-    {
-      icon: <Cloud size={30} />,
-      title: t("whychoseus.features.scalableCloud"),
-      description: t("whychoseus.features.scalableCloudDesc"),
-    },
-    {
-      icon: <ShieldCheck size={30} />,
-      title: t("whychoseus.features.secureReliable"),
-      description: t("whychoseus.features.secureReliableDesc"),
-    },
-    {
-      icon: <Zap size={30} />,
-      title: t("whychoseus.features.fastDelivery"),
-      description: t("whychoseus.features.fastDeliveryDesc"),
-    },
-    {
-      icon: <Headphones size={30} />,
-      title: t("whychoseus.features.ongoingSupport"),
-      description: t("whychoseus.features.ongoingSupportDesc"),
-    },
+  useEffect(() => {
+    fetch("/api/cms/whychoseus")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          setDynamicFeatures(data.items);
+        }
+      })
+      .catch((err) => console.warn("Backend whychoseus fetch fallback:", err));
+  }, []);
+
+  const fallbackFeatures = [
+    { icon: <Brain size={30} />, title: t("whychoseus.features.endToEnd"), description: t("whychoseus.features.endToEndDesc") },
+    { icon: <Code2 size={30} />, title: t("whychoseus.features.customApp"), description: t("whychoseus.features.customAppDesc") },
+    { icon: <Cloud size={30} />, title: t("whychoseus.features.scalableCloud"), description: t("whychoseus.features.scalableCloudDesc") },
+    { icon: <ShieldCheck size={30} />, title: t("whychoseus.features.secureReliable"), description: t("whychoseus.features.secureReliableDesc") },
+    { icon: <Zap size={30} />, title: t("whychoseus.features.fastDelivery"), description: t("whychoseus.features.fastDeliveryDesc") },
+    { icon: <Headphones size={30} />, title: t("whychoseus.features.ongoingSupport"), description: t("whychoseus.features.ongoingSupportDesc") },
   ];
+
+  const features = dynamicFeatures.length > 0
+    ? dynamicFeatures.map((item, idx) => ({
+        icon: defaultFeatureIcons[idx % defaultFeatureIcons.length],
+        title: item.title,
+        description: item.description,
+      }))
+    : fallbackFeatures;
 
   return (
     <section className="section-shell bg-[#fffaf7] dark:bg-[#131924] transition-colors duration-300">

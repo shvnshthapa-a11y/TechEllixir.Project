@@ -16,6 +16,9 @@ const tables = {
   testimonials: join(dbDir, "testimonials.json"),
   industries: join(dbDir, "industries.json"),
   team: join(dbDir, "team.json"),
+  process: join(dbDir, "process.json"),
+  whychoseus: join(dbDir, "whychoseus.json"),
+  about: join(dbDir, "about.json"),
 };
 
 // Initialize All Database Tables with Full Project Content Seed
@@ -202,6 +205,50 @@ export async function initDatabase() {
       { id: "tm_3", name: "Avneesh Singh", role: "Head of AI & Machine Learning", bio: "Leading Generative AI, RAG architecture, and custom LLM deployments for enterprise clients.", email: "avneesh@techellixir.com" }
     ];
     await writeFile(tables.team, JSON.stringify(defaultTeam, null, 2), "utf8");
+  }
+
+  // 10. Engineering Process Steps Table
+  try {
+    await stat(tables.process);
+  } catch {
+    const defaultProcess = [
+      { id: "prc_1", step: "01", title: "Discovery & Strategy", description: "We analyze your project requirements, target market, and technical goals to outline a clear architecture roadmap." },
+      { id: "prc_2", step: "02", title: "Architecture & UI/UX Design", description: "Designing intuitive wireframes, Figma interactive prototypes, and high-concurrency microservice system architecture." },
+      { id: "prc_3", step: "03", title: "Agile Development & QA", description: "Iterative sprint development with clean code standards, automated testing, continuous integration, and security reviews." },
+      { id: "prc_4", step: "04", title: "Deployment & Ongoing Support", description: "Production release, cloud infrastructure monitoring, zero-downtime CI/CD automation, and post-launch maintenance." }
+    ];
+    await writeFile(tables.process, JSON.stringify(defaultProcess, null, 2), "utf8");
+  }
+
+  // 11. Why Choose Us Features Table
+  try {
+    await stat(tables.whychoseus);
+  } catch {
+    const defaultWhyChooseUs = [
+      { id: "wcu_1", title: "End-to-End Solutions", description: "From product discovery and UI design to cloud deployment and ongoing maintenance, we manage the complete lifecycle." },
+      { id: "wcu_2", title: "Custom App Engineering", description: "Tailored software platforms built with React, Node.js, and modern tech stacks built specifically for your business." },
+      { id: "wcu_3", title: "Scalable Cloud Architecture", description: "Containerized microservices running on AWS, GCP, or Azure designed to scale effortless with high user traffic." },
+      { id: "wcu_4", title: "Security & Quality Assurance", description: "OWASP vulnerability audits, automated test suites, and enterprise data encryption protocols." },
+      { id: "wcu_5", title: "Rapid On-Time Delivery", description: "Agile sprint workflows ensuring predictable milestones, transparent communication, and fast time-to-market." },
+      { id: "wcu_6", title: "24/7 Dedicated Support", description: "Continuous monitoring, automated uptime alerts, and proactive maintenance to keep your applications running 24/7." }
+    ];
+    await writeFile(tables.whychoseus, JSON.stringify(defaultWhyChooseUs, null, 2), "utf8");
+  }
+
+  // 12. Company Metrics & Principles Table
+  try {
+    await stat(tables.about);
+  } catch {
+    const defaultAbout = [
+      { id: "abt_1", title: "100+ Projects Delivered", type: "metric", value: "100+", label: "Delivered Projects" },
+      { id: "abt_2", title: "50+ Happy Clients", type: "metric", value: "50+", label: "Happy Clients" },
+      { id: "abt_3", title: "10+ Years Tech Experience", type: "metric", value: "10+", label: "Years Experience" },
+      { id: "abt_4", title: "24/7 Support", type: "metric", value: "24/7", label: "Enterprise Support" },
+      { id: "abt_5", title: "Outcome-Driven Engineering", type: "principle", value: "Principle 1", label: "We build software aimed directly at solving core operational challenges and driving measurable revenue growth." },
+      { id: "abt_6", title: "Built for Enterprise Scale", type: "principle", value: "Principle 2", label: "Our modular microservices and clean code bases are engineered to scale seamlessly as your user base expands." },
+      { id: "abt_7", title: "Human-Centered Design", type: "principle", value: "Principle 3", label: "We prioritize intuitive UX, accessibility, and high performance to deliver software products users love." }
+    ];
+    await writeFile(tables.about, JSON.stringify(defaultAbout, null, 2), "utf8");
   }
 
   console.log("Full Database initialized successfully at:", dbDir);

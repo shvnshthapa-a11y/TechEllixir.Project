@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Code2, PenTool, Rocket, Search } from "lucide-react";
 import { useLanguage } from "../context/LanguageContext";
@@ -25,35 +26,38 @@ const cardVariants = {
   },
 };
 
+const defaultProcessIcons = [<Search size={30} />, <PenTool size={30} />, <Code2 size={30} />, <Rocket size={30} />];
+
 const Process = () => {
   const { t } = useLanguage();
+  const [dynamicProcess, setDynamicProcess] = useState<any[]>([]);
 
-  const process = [
-    {
-      id: "01",
-      icon: <Search size={30} />,
-      title: t("process.steps.discovery"),
-      description: t("process.steps.discoveryDesc"),
-    },
-    {
-      id: "02",
-      icon: <PenTool size={30} />,
-      title: t("process.steps.design"),
-      description: t("process.steps.designDesc"),
-    },
-    {
-      id: "03",
-      icon: <Code2 size={30} />,
-      title: t("process.steps.development"),
-      description: t("process.steps.developmentDesc"),
-    },
-    {
-      id: "04",
-      icon: <Rocket size={30} />,
-      title: t("process.steps.launch"),
-      description: t("process.steps.launchDesc"),
-    },
+  useEffect(() => {
+    fetch("/api/cms/process")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          setDynamicProcess(data.items);
+        }
+      })
+      .catch((err) => console.warn("Backend process fetch fallback:", err));
+  }, []);
+
+  const fallbackProcess = [
+    { id: "01", icon: <Search size={30} />, title: t("process.steps.discovery"), description: t("process.steps.discoveryDesc") },
+    { id: "02", icon: <PenTool size={30} />, title: t("process.steps.design"), description: t("process.steps.designDesc") },
+    { id: "03", icon: <Code2 size={30} />, title: t("process.steps.development"), description: t("process.steps.developmentDesc") },
+    { id: "04", icon: <Rocket size={30} />, title: t("process.steps.launch"), description: t("process.steps.launchDesc") },
   ];
+
+  const processList = dynamicProcess.length > 0
+    ? dynamicProcess.map((item, idx) => ({
+        id: item.step || `0${idx + 1}`,
+        icon: defaultProcessIcons[idx % defaultProcessIcons.length],
+        title: item.title,
+        description: item.description,
+      }))
+    : fallbackProcess;
 
   return (
     <section className="section-shell bg-white dark:bg-[#0d111a] transition-colors duration-300">
@@ -81,7 +85,7 @@ const Process = () => {
           viewport={{ once: true, margin: "-100px" }}
           className="relative mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4"
         >
-          {process.map((item) => (
+          {processList.map((item) => (
             <motion.article
               key={item.id}
               variants={cardVariants}
