@@ -875,7 +875,7 @@ async function handleApi(req, res, url) {
     }
 
     // 12. Industries Verticals API & Admin CMS
-    if (url.pathname === "/api/industries" || url.pathname === "/api/admin/cms/industries") {
+    if (url.pathname === "/api/industries" || url.pathname === "/api/cms/industries" || url.pathname === "/api/admin/cms/industries") {
       if (req.method === "GET") {
         const items = await dbSelect("industries");
         json(res, 200, { items });
