@@ -1,30 +1,5 @@
 [
   {
-    "id": "test 3",
-    "title": "test 3",
-    "tagline": "test 3",
-    "description": "test 3"
-  },
-  {
-    "id": "test 2",
-    "title": "test 2",
-    "tagline": "test 2",
-    "description": "test 2"
-  },
-  {
-    "id": "test",
-    "title": "tset",
-    "tagline": "test",
-    "description": "tset",
-    "updatedAt": "2026-07-29T20:27:27.471Z"
-  },
-  {
-    "id": "healthcare",
-    "title": "Healthcare & MedTech",
-    "tagline": "HIPAA-Compliant Patient Care & AI Diagnostics",
-    "description": "Empowering hospitals, telemedicine platforms, and medical device manufacturers with secure, compliant digital solutions."
-  },
-  {
     "id": "finance",
     "title": "Finance & FinTech",
     "tagline": "High-Concurrency Trading & Micro-Services",

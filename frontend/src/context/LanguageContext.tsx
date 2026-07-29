@@ -58,7 +58,7 @@ const enTranslations = {
     title: "Our AI & Data Services",
     copy: "We help businesses transform their data into actionable insights and build intelligent AI-powered solutions that automate workflows, improve decision-making, and accelerate growth.",
     planBtn: "Plan this service",
-    viewAll: "View All AI & Data Services",
+    viewAll: "View All Services",
     categories: {
       ai: "Artificial Intelligence Solutions",
       analytics: "Data Analytics",

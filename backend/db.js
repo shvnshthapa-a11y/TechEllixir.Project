@@ -22,7 +22,10 @@ const tables = {
 };
 
 // Initialize All Database Tables with Full Project Content Seed
+let _dbInitialized = false;
 export async function initDatabase() {
+  if (_dbInitialized) return;
+  _dbInitialized = true;
   await mkdir(dbDir, { recursive: true });
 
   // 1. Queries & Applications Table
@@ -265,7 +268,6 @@ export async function dbSelect(tableName) {
 
 // Write Table Data
 export async function dbSave(tableName, data) {
-  await initDatabase();
   const filePath = tables[tableName];
   if (!filePath) throw new Error(`Invalid table name: ${tableName}`);
   await writeFile(filePath, `${JSON.stringify(data, null, 2)}\n`, "utf8");
@@ -274,7 +276,6 @@ export async function dbSave(tableName, data) {
 
 // Database Statistics & Health Inspection
 export async function dbStats() {
-  await initDatabase();
   const statsResult = {};
   for (const [table, filePath] of Object.entries(tables)) {
     try {

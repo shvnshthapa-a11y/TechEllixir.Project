@@ -1,21 +1,5 @@
 [
   {
-    "id": "tst_1785357365812",
-    "name": "test 2",
-    "company": "test 2",
-    "rating": 5,
-    "review": "t",
-    "createdAt": "2026-07-29T20:36:05.812Z"
-  },
-  {
-    "id": "tst_1785355202548",
-    "name": "test",
-    "company": "test",
-    "rating": 5,
-    "review": "test",
-    "createdAt": "2026-07-29T20:00:02.548Z"
-  },
-  {
     "id": "tst_1785339450634",
     "name": "Manan",
     "company": "User",

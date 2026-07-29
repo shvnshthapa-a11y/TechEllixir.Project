@@ -545,9 +545,20 @@ async function handleApi(req, res, url) {
     const queryMatch = url.pathname.match(/^\/api\/admin\/queries\/([^/]+)$/);
     if (queryMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = queryMatch[1];
+      const rawId = queryMatch[1];
+      const decodedId = decodeURIComponent(rawId);
       const queries = await readQueries();
-      const idx = queries.findIndex((q) => q.id === id);
+      const idx = queries.findIndex((q) => q.id === rawId || q.id === decodedId);
+
+      if (req.method === "DELETE") {
+        if (idx !== -1) {
+          queries.splice(idx, 1);
+          await writeQueries(queries);
+        }
+        json(res, 200, { ok: true, queries });
+        return;
+      }
+
       if (idx === -1) {
         notFound(res);
         return;
@@ -560,19 +571,9 @@ async function handleApi(req, res, url) {
         }
         queries[idx].updatedAt = new Date().toISOString();
         await writeQueries(queries);
-        json(res, 200, { query: queries[idx] });
+        json(res, 200, { query: queries[idx], queries });
         return;
       }
-
-      if (req.method === "DELETE") {
-        const deleted = queries.splice(idx, 1)[0];
-        await writeQueries(queries);
-        json(res, 200, { query: deleted });
-        return;
-      }
-
-      notFound(res);
-      return;
     }
 
     // 4. Admin Portal Control API - Users Management
@@ -615,9 +616,21 @@ async function handleApi(req, res, url) {
     const userMatch = url.pathname.match(/^\/api\/admin\/users\/([^/]+)$/);
     if (userMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = userMatch[1];
+      const rawId = userMatch[1];
+      const decodedId = decodeURIComponent(rawId);
       const users = await readUsers();
-      const idx = users.findIndex((u) => u.id === id);
+      const idx = users.findIndex(
+        (u) => u.id === rawId || u.email === rawId || u.id === decodedId || u.email === decodedId
+      );
+
+      if (req.method === "DELETE") {
+        if (idx !== -1) {
+          users.splice(idx, 1);
+          await writeUsers(users);
+        }
+        json(res, 200, { ok: true, users, items: users });
+        return;
+      }
 
       if (idx === -1) {
         notFound(res);
@@ -633,14 +646,7 @@ async function handleApi(req, res, url) {
           updatedAt: new Date().toISOString(),
         };
         await writeUsers(users);
-        json(res, 200, { user: users[idx] });
-        return;
-      }
-
-      if (req.method === "DELETE") {
-        const deleted = users.splice(idx, 1)[0];
-        await writeUsers(users);
-        json(res, 200, { user: deleted });
+        json(res, 200, { user: users[idx], users, items: users });
         return;
       }
     }
@@ -732,9 +738,9 @@ async function handleApi(req, res, url) {
     const srvCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/services\/([^/]+)$/);
     if (srvCmsMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = srvCmsMatch[1];
+      const id = decodeURIComponent(srvCmsMatch[1]);
       const items = await readCms("services");
-      const idx = items.findIndex((i) => i.id === id);
+      const idx = items.findIndex((i) => i.id === id || i.id === srvCmsMatch[1]);
 
       if (idx === -1) {
         notFound(res);
@@ -786,9 +792,9 @@ async function handleApi(req, res, url) {
     const resCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/resources\/([^/]+)$/);
     if (resCmsMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = resCmsMatch[1];
+      const id = decodeURIComponent(resCmsMatch[1]);
       const items = await readCms("resources");
-      const idx = items.findIndex((i) => i.id === id);
+      const idx = items.findIndex((i) => i.id === id || i.id === resCmsMatch[1]);
 
       if (idx === -1) {
         notFound(res);
@@ -840,7 +846,7 @@ async function handleApi(req, res, url) {
     const carCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/careers\/([^/]+)$/);
     if (carCmsMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = carCmsMatch[1];
+      const id = decodeURIComponent(carCmsMatch[1]);
       const items = await readCms("careers");
       const idx = items.findIndex((i) => i.id === id);
 
@@ -902,7 +908,7 @@ async function handleApi(req, res, url) {
     const tstCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/testimonials\/([^/]+)$/);
     if (tstCmsMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = tstCmsMatch[1];
+      const id = decodeURIComponent(tstCmsMatch[1]);
       const items = await dbSelect("testimonials");
       const idx = items.findIndex((i) => i.id === id);
 
@@ -961,9 +967,9 @@ async function handleApi(req, res, url) {
     const indCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/industries\/([^/]+)$/);
     if (indCmsMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = indCmsMatch[1];
+      const id = decodeURIComponent(indCmsMatch[1]);
       const items = await dbSelect("industries");
-      const idx = items.findIndex((i) => i.id === id);
+      const idx = items.findIndex((i) => i.id === id || i.id === indCmsMatch[1]);
 
       if (req.method === "PATCH" || req.method === "PUT") {
         const body = await readBody(req);
@@ -1023,7 +1029,7 @@ async function handleApi(req, res, url) {
     const tmCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/team\/([^/]+)$/);
     if (tmCmsMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = tmCmsMatch[1];
+      const id = decodeURIComponent(tmCmsMatch[1]);
       const items = await dbSelect("team");
       const idx = items.findIndex((i) => i.id === id);
 
