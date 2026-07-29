@@ -651,7 +651,6 @@ const Services = ({ detailed = false }: ServicesProps) => {
           variants={containerVariants}
           initial="hidden"
           animate="show"
-          viewport={{ once: true, margin: "-100px" }}
           className="mt-14 grid gap-7 md:grid-cols-2 lg:grid-cols-3"
         >
           {displayedServices.map((service) => (

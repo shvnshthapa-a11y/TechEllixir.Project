@@ -103,9 +103,8 @@ const OurServices = () => {
         <div className="container-shell">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 80, damping: 15 }}
-            viewport={{ once: true }}
             className="mx-auto max-w-3xl text-center mb-16"
           >
             <p className="eyebrow justify-center">{t("industries.eyebrow")}</p>
@@ -120,8 +119,7 @@ const OurServices = () => {
           <motion.div
             variants={containerVariants}
             initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, margin: "-100px" }}
+            animate="show"
             className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5"
           >
             {displayIndustries.map((ind) => (
