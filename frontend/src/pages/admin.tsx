@@ -97,6 +97,9 @@ interface ResourceCmsItem {
   title: string;
   category: string;
   categoryLabel?: string;
+  slug?: string;
+  image?: string;
+  metaTitle?: string;
   readTime: string;
   fileFormat?: string;
   author?: string;
@@ -192,6 +195,7 @@ export default function Admin() {
   const [editingProcess, setEditingProcess] = useState<any | null>(null);
   const [editingWhychoseus, setEditingWhychoseus] = useState<any | null>(null);
   const [editingAbout, setEditingAbout] = useState<any | null>(null);
+  const [contentPreviewMode, setContentPreviewMode] = useState<"edit" | "preview">("edit");
 
   // Filtered queries
   const filteredQueries = useMemo(() => {
@@ -650,8 +654,21 @@ export default function Admin() {
     const endpoint = isEdit ? `/api/admin/cms/resources/${editingResource.id}` : "/api/admin/cms/resources";
     const method = isEdit ? "PATCH" : "POST";
 
+    const title = editingResource.title.trim();
+    const slug = editingResource.slug?.trim() || title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const category = editingResource.category || "Resources & Blueprints";
+    const categoryLabel = editingResource.categoryLabel || category;
+    const author = editingResource.author?.trim() || "Shivansh Thapa";
+
     const payload = {
       ...editingResource,
+      title,
+      slug,
+      category,
+      categoryLabel,
+      author,
+      description: editingResource.description?.trim() || editingResource.title,
+      summary: editingResource.summary?.trim() || editingResource.description || editingResource.title,
       takeaways: typeof editingResource.takeaways === "string" ? editingResource.takeaways.split(",").map((s: string) => s.trim()).filter(Boolean) : (editingResource.takeaways || []),
     };
 
@@ -1852,24 +1869,116 @@ export default function Admin() {
                   </span>
                 </div>
 
-                <div className="grid lg:grid-cols-12 gap-8">
-                  <div className="lg:col-span-7 soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6">
-                    <div>
-                      <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
-                        <BookOpen size={22} className="text-[#FF4D37]" />
-                        {editingResource.id ? `Edit Article: ${editingResource.title || "Untitled"}` : "Publish Resource Article"}
-                      </h3>
-                      <p className="text-xs text-gray-500 mt-1 font-medium">Manage article content, read time, takeaways, and file download assets.</p>
+                <div className="soft-card rounded-3xl p-6 sm:p-8 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm space-y-6 max-w-4xl mx-auto">
+                  <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-800 pb-4">
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white flex items-center gap-2">
+                      <BookOpen size={22} className="text-[#FF4D37]" />
+                      {editingResource.id ? `Edit Article: ${editingResource.title || "Untitled"}` : "Create Blog & Resource Article"}
+                    </h3>
+                  </div>
+
+                  <form onSubmit={handleSaveResourceCms} className="space-y-6 text-xs">
+                    
+                    {/* SECTION 1: FEATURED IMAGE UPLOAD (Matching Screenshot 1 & 2) */}
+                    <div className="space-y-2">
+                      <label className="block font-black text-gray-800 dark:text-gray-200 text-sm">Featured Image</label>
+                      <div className="border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-3xl p-6 text-center bg-gray-50/50 dark:bg-slate-900/50 hover:border-[#FF4D37] transition group space-y-3 relative overflow-hidden">
+                        {editingResource.image ? (
+                          <div className="relative max-h-48 rounded-2xl overflow-hidden group">
+                            <img src={editingResource.image} alt="Featured Preview" className="w-full h-48 object-cover rounded-2xl" />
+                            <button
+                              type="button"
+                              onClick={() => setEditingResource({ ...editingResource, image: "" })}
+                              className="absolute top-2 right-2 p-2 rounded-xl bg-black/70 text-white hover:bg-rose-600 transition"
+                            >
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="h-12 w-12 rounded-2xl bg-orange-100 dark:bg-slate-800 text-[#FF4D37] mx-auto flex items-center justify-center border border-orange-200 dark:border-slate-700 shadow-sm group-hover:scale-105 transition">
+                              <BookOpen size={24} />
+                            </div>
+                            <div>
+                              <p className="font-extrabold text-gray-800 dark:text-gray-200 text-xs">Click to upload an image</p>
+                              <p className="text-[11px] text-gray-400 mt-0.5">PNG, JPG, WebP or GIF (max. 5MB)</p>
+                            </div>
+                          </>
+                        )}
+                        <input
+                          type="text"
+                          placeholder="Or paste direct Image URL (e.g., https://images.unsplash.com/...)"
+                          value={editingResource.image || ""}
+                          onChange={(e) => setEditingResource({ ...editingResource, image: e.target.value })}
+                          className="w-full p-3 rounded-2xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-medium text-xs outline-none focus:border-[#FF4D37] text-center"
+                        />
+                      </div>
                     </div>
 
-                    <form onSubmit={handleSaveResourceCms} className="space-y-4 text-xs">
-                      <div className="grid sm:grid-cols-3 gap-4">
-                        <div className="sm:col-span-2">
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Article Title</label>
-                          <input type="text" required placeholder="e.g. SEO Services in Dehradun: 2026 Trends" value={editingResource.title || ""} onChange={(e) => setEditingResource({ ...editingResource, title: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
-                        </div>
+                    {/* SECTION 2: POST DETAILS (Matching Screenshot 1 & 2) */}
+                    <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-slate-800">
+                      <h4 className="text-base font-black text-[#182033] dark:text-white">Post Details</h4>
+
+                      {/* Title */}
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">
+                          Title <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Enter post title..."
+                          value={editingResource.title || ""}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const slug = val.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+                            setEditingResource({
+                              ...editingResource,
+                              title: val,
+                              slug: editingResource.slug || slug,
+                            });
+                          }}
+                          className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37] text-xs"
+                        />
+                      </div>
+
+                      {/* Author */}
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">
+                          Author <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Enter author name"
+                          value={editingResource.author || ""}
+                          onChange={(e) => setEditingResource({ ...editingResource, author: e.target.value })}
+                          className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37] text-xs"
+                        />
+                      </div>
+
+                      {/* custom url */}
+                      <div>
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">
+                          custom url <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="my-blog-post"
+                          value={editingResource.slug || (editingResource.title ? editingResource.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "")}
+                          onChange={(e) => setEditingResource({ ...editingResource, slug: e.target.value })}
+                          className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37] text-xs"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1 font-medium">URL-friendly version of the title (e.g., my-blog-post)</p>
+                      </div>
+
+                      {/* Category Tag Dropdown & Read Time */}
+                      <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Slug</label>
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">
+                            Category Tag <span className="text-rose-500">*</span>
+                          </label>
                           <select
                             value={editingResource.category || "Resources & Blueprints"}
                             onChange={(e) => {
@@ -1888,71 +1997,154 @@ export default function Admin() {
                             <option value="Events & Webinars">Events & Webinars</option>
                           </select>
                         </div>
-                      </div>
 
-                      <div className="grid sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Category Label</label>
-                          <input type="text" placeholder="e.g. Whitepapers & E-Books" value={editingResource.categoryLabel || ""} onChange={(e) => setEditingResource({ ...editingResource, categoryLabel: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
-                        </div>
-                        <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Read Time</label>
-                          <input type="text" placeholder="e.g. 15 min read" value={editingResource.readTime || ""} onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
-                        </div>
-                      </div>
-
-                      <div className="grid sm:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Asset Format</label>
-                          <input type="text" placeholder="PDF (3.2 MB) / Interactive Guide" value={editingResource.fileFormat || ""} onChange={(e) => setEditingResource({ ...editingResource, fileFormat: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
-                        </div>
-                        <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Author Name</label>
-                          <input type="text" placeholder="e.g. Shivansh Thapa" value={editingResource.author || ""} onChange={(e) => setEditingResource({ ...editingResource, author: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
-                        </div>
-                        <div>
-                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Author Role</label>
-                          <input type="text" placeholder="e.g. Lead Systems Architect" value={editingResource.authorRole || ""} onChange={(e) => setEditingResource({ ...editingResource, authorRole: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37]" />
+                          <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Read Time / Format</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 5 min read"
+                            value={editingResource.readTime || ""}
+                            onChange={(e) => setEditingResource({ ...editingResource, readTime: e.target.value })}
+                            className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-bold outline-none focus:border-[#FF4D37] text-xs"
+                          />
                         </div>
                       </div>
 
+                      {/* Excerpt */}
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Short Excerpt / Teaser (Card View)</label>
-                        <textarea rows={2} placeholder="Brief summary displayed on main article cards..." value={editingResource.description || ""} onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">
+                          Excerpt <span className="text-rose-500">*</span>
+                        </label>
+                        <textarea
+                          rows={3}
+                          required
+                          placeholder="A brief summary of the post (displayed in blog listings)"
+                          value={editingResource.description || ""}
+                          onChange={(e) => setEditingResource({ ...editingResource, description: e.target.value })}
+                          className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37] text-xs"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1 font-medium">A brief summary of the post (displayed in blog listings)</p>
                       </div>
 
+                      {/* Meta Title */}
                       <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Full Article Content / Summary (Click View)</label>
-                        <textarea rows={5} placeholder="Full content displayed when user clicks to read article..." value={editingResource.summary || ""} onChange={(e) => setEditingResource({ ...editingResource, summary: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-medium resize-none outline-none focus:border-[#FF4D37]" />
+                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Meta Title (optional)</label>
+                        <input
+                          type="text"
+                          placeholder="Custom title for search engines (leave empty to use post title)"
+                          value={editingResource.metaTitle || ""}
+                          onChange={(e) => setEditingResource({ ...editingResource, metaTitle: e.target.value })}
+                          className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37] text-xs"
+                        />
+                        <p className="text-[10px] text-gray-400 mt-1 font-medium">Custom title for search engines (leave empty to use post title)</p>
                       </div>
-
-                      <div>
-                        <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Takeaways (Comma-separated)</label>
-                        <input type="text" placeholder="Chunking strategies, Qdrant indexing, Hybrid search" value={Array.isArray(editingResource.takeaways) ? editingResource.takeaways.join(", ") : (editingResource.takeaways || "")} onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })} className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37]" />
-                      </div>
-
-                      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-800">
-                        <button type="button" onClick={() => setEditingResource(null)} className="px-6 py-3 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition">Cancel</button>
-                        <button type="submit" className="brand-button px-8 py-3 text-xs font-black shadow-lg">Save & Publish Article</button>
-                      </div>
-                    </form>
-                  </div>
-
-                  <div className="lg:col-span-5 space-y-4">
-                    <div className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-wider">
-                      <Eye size={16} className="text-[#FF4D37]" /> Live Article Preview
                     </div>
-                    <div className="soft-card rounded-3xl p-6 bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-md space-y-4">
+
+                    {/* SECTION 3: RICH CONTENT EDITOR WITH TOOLBAR & PREVIEW (Matching Screenshot 3) */}
+                    <div className="space-y-2 pt-4 border-t border-gray-100 dark:border-slate-800">
                       <div className="flex items-center justify-between">
-                        <span className="px-3 py-1 rounded-full text-[10px] font-black bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-blue-400">
-                          {editingResource.categoryLabel || editingResource.category || "Blogs & Articles"}
-                        </span>
-                        <span className="text-[11px] font-bold text-gray-400">{editingResource.readTime || "5 min read"}</span>
+                        <label className="block font-black text-gray-800 dark:text-gray-200 text-sm">
+                          Content <span className="text-rose-500">*</span>
+                        </label>
+                        <div className="flex items-center gap-1 bg-gray-100 dark:bg-slate-900 p-1 rounded-xl border border-gray-200 dark:border-slate-800 text-[11px] font-bold">
+                          <button
+                            type="button"
+                            onClick={() => setContentPreviewMode("edit")}
+                            className={`px-3 py-1 rounded-lg transition ${contentPreviewMode === "edit" ? "bg-[#FF4D37] text-white shadow-sm" : "text-gray-500 hover:text-gray-800 dark:hover:text-white"}`}
+                          >
+                            ✏️ Write Content
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setContentPreviewMode("preview")}
+                            className={`px-3 py-1 rounded-lg transition ${contentPreviewMode === "preview" ? "bg-[#FF4D37] text-white shadow-sm" : "text-gray-500 hover:text-gray-800 dark:hover:text-white"}`}
+                          >
+                            👁️ Live Preview
+                          </button>
+                        </div>
                       </div>
-                      <h4 className="text-xl font-black text-[#182033] dark:text-white">{editingResource.title || "Article Title Placeholder"}</h4>
-                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed font-medium">{editingResource.description || "Article excerpt will appear here..."}</p>
+
+                      {/* Toolbar Controls */}
+                      <div className="rounded-3xl border border-gray-200 dark:border-slate-800 bg-gray-50/80 dark:bg-slate-900/80 overflow-hidden">
+                        <div className="p-2 border-b border-gray-200 dark:border-slate-800 flex flex-wrap items-center gap-1 bg-white/50 dark:bg-slate-900/50">
+                          {["H1", "H2", "H3"].map((h) => (
+                            <button
+                              key={h}
+                              type="button"
+                              onClick={() => {
+                                const cur = editingResource.summary || "";
+                                setEditingResource({ ...editingResource, summary: cur + `\n# ${h} Section Title\n` });
+                              }}
+                              className="px-2.5 py-1 rounded-lg font-black text-xs bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-[#FF4D37] hover:text-white transition"
+                            >
+                              {h}
+                            </button>
+                          ))}
+                          <div className="h-4 w-px bg-gray-300 dark:bg-slate-700 mx-1" />
+                          {[
+                            { label: "B", tag: "**Bold Text**" },
+                            { label: "I", tag: "*Italic Text*" },
+                            { label: "U", tag: "<u>Underlined Text</u>" },
+                            { label: "Quote", tag: "\n> Quoted insight...\n" },
+                            { label: "List", tag: "\n- Bullet item 1\n- Bullet item 2\n" },
+                          ].map((btn) => (
+                            <button
+                              key={btn.label}
+                              type="button"
+                              onClick={() => {
+                                const cur = editingResource.summary || "";
+                                setEditingResource({ ...editingResource, summary: cur + btn.tag });
+                              }}
+                              className="px-2.5 py-1 rounded-lg font-black text-xs bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-[#FF4D37] hover:text-white transition"
+                            >
+                              {btn.label}
+                            </button>
+                          ))}
+                        </div>
+
+                        {contentPreviewMode === "edit" ? (
+                          <textarea
+                            rows={10}
+                            required
+                            placeholder="Write full post content here..."
+                            value={editingResource.summary || ""}
+                            onChange={(e) => setEditingResource({ ...editingResource, summary: e.target.value })}
+                            className="w-full p-4 bg-transparent font-medium resize-y outline-none text-xs text-gray-800 dark:text-gray-200"
+                          />
+                        ) : (
+                          <div className="p-6 min-h-[240px] prose dark:prose-invert max-w-none text-xs leading-relaxed whitespace-pre-wrap">
+                            {editingResource.summary || <span className="text-gray-400 italic">No content entered to preview yet...</span>}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+
+                    {/* Key Takeaways */}
+                    <div>
+                      <label className="block font-extrabold text-gray-700 dark:text-gray-300 mb-1">Key Takeaways (Comma-separated)</label>
+                      <input
+                        type="text"
+                        placeholder="Chunking strategies, Qdrant indexing, Hybrid search"
+                        value={Array.isArray(editingResource.takeaways) ? editingResource.takeaways.join(", ") : (editingResource.takeaways || "")}
+                        onChange={(e) => setEditingResource({ ...editingResource, takeaways: e.target.value })}
+                        className="w-full p-3.5 rounded-2xl border border-gray-200 dark:border-slate-800 bg-gray-50 dark:bg-slate-900 font-semibold outline-none focus:border-[#FF4D37] text-xs"
+                      />
+                    </div>
+
+                    {/* Form Action Buttons */}
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-slate-800">
+                      <button
+                        type="button"
+                        onClick={() => setEditingResource(null)}
+                        className="px-6 py-3.5 rounded-2xl text-gray-500 font-extrabold hover:bg-gray-100 dark:hover:bg-slate-800 transition text-xs"
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="brand-button px-8 py-3.5 text-xs font-black shadow-lg">
+                        Save & Publish Article
+                      </button>
+                    </div>
+                  </form>
                 </div>
               </div>
             ) : (
