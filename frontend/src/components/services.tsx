@@ -550,7 +550,8 @@ const Services = ({ detailed = false }: ServicesProps) => {
         if (data.items && Array.isArray(data.items) && data.items.length > 0) {
           const cmsServices = data.items.map((item: any) => ({
             title: item.title,
-            icon: item.category?.toLowerCase().includes("ai") ? <Brain size={28} /> : <Code2 size={28} />,
+            rawCategory: item.category || "",
+            icon: (item.category?.toLowerCase().includes("ai") || item.title?.toLowerCase().includes("ai")) ? <Brain size={28} /> : <Code2 size={28} />,
             description: item.description || "Scalable digital solution engineered for enterprise reliability.",
             note: item.note || "Enterprise scale and performance.",
             detailedOverview: item.detailedOverview || item.description || "Full technical overview.",
@@ -566,8 +567,19 @@ const Services = ({ detailed = false }: ServicesProps) => {
       .catch((err) => console.warn("Backend services fetch fallback to static data:", err));
   }, []);
 
+  const filteredDynamicServices = dynamicServices.filter((item: any) => {
+    const cat = (item.rawCategory || "").toLowerCase();
+    const title = (item.title || "").toLowerCase();
+    if (activeCategory === "ai") {
+      return cat.includes("ai") || cat.includes("data") || cat.includes("machine") || cat.includes("automation") || title.includes("ai") || title.includes("data") || title.includes("analytics");
+    }
+    return !cat.includes("ai") || cat.includes("core") || cat.includes("mobile") || cat.includes("design") || cat.includes("devops") || title.includes("web") || title.includes("mobile");
+  });
+
   const baseServicesData = activeCategory === "core" ? coreServicesData : aiDataServicesData;
-  const currentServicesData = dynamicServices.length > 0 ? dynamicServices : baseServicesData;
+  const currentServicesData = dynamicServices.length > 0
+    ? (filteredDynamicServices.length > 0 ? filteredDynamicServices : dynamicServices)
+    : baseServicesData;
   const displayedServices = detailed ? currentServicesData : currentServicesData.slice(0, 6);
 
   const handleRequestDemo = (serviceTitle: string) => {
