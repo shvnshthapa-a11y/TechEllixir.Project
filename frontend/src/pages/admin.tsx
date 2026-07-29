@@ -1306,56 +1306,59 @@ export default function Admin() {
       {/* --------------------------------------------------------- */}
       <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         
-        {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/80 dark:bg-[#161c2a]/80 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl border border-gray-200 dark:border-slate-800 text-gray-600 dark:text-gray-300"
-            >
-              <Menu size={20} />
-            </button>
-            <h1 className="text-lg font-black text-[#182033] dark:text-white capitalize">
-              {activeTab.replace("_cms", "").replace("_", " ")}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => loadData()}
-              disabled={loading}
-              className="p-2.5 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#161c2a] text-gray-600 dark:text-gray-300 hover:text-[#FF4D37] transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-sm"
-            >
-              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-              <span className="hidden sm:inline">Sync Data</span>
-            </button>
-
-            <button
-              onClick={handleExportCSV}
-              className="p-2.5 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#161c2a] text-gray-600 dark:text-gray-300 hover:text-[#FF4D37] transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-sm"
-            >
-              <Download size={14} />
-              <span className="hidden sm:inline">Export CSV</span>
-            </button>
-          </div>
-        </header>
-
-        {/* Global Site Announcement Banner */}
-        {settings.announcementBanner && (
-          <div className="bg-[#FF4D37] text-white py-2.5 px-6 text-xs font-bold text-center flex items-center justify-between gap-3 shadow-sm border-b border-orange-600/20 shrink-0">
-            <div className="flex items-center gap-2 overflow-hidden truncate">
-              <Radio size={15} className="animate-pulse shrink-0 text-white" />
-              <span className="truncate">Active Site Announcement: <strong>"{settings.announcementBanner}"</strong></span>
+        {/* Sticky Header Bar & Global Announcement Wrapper */}
+        <div className="sticky top-0 z-30 shrink-0">
+          {/* Global Site Announcement Banner */}
+          {settings.announcementBanner && (
+            <div className="bg-[#FF4D37] text-white py-2 px-6 text-xs font-bold flex items-center justify-between gap-3 shadow-md border-b border-orange-600/30">
+              <div className="flex items-center gap-2 overflow-hidden truncate">
+                <Radio size={14} className="animate-pulse shrink-0 text-white" />
+                <span className="truncate">Active Site Announcement: <strong>"{settings.announcementBanner}"</strong></span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, announcementBanner: "" })}
+                className="text-white/90 hover:text-white hover:bg-white/20 px-2 py-0.5 rounded-lg text-[10px] font-black uppercase transition shrink-0 cursor-pointer"
+              >
+                Dismiss
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setSettings({ ...settings, announcementBanner: "" })}
-              className="text-white/90 hover:text-white hover:bg-white/20 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition shrink-0 cursor-pointer"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
+          )}
+
+          {/* Top Header Bar */}
+          <header className="bg-white/90 dark:bg-[#161c2a]/90 backdrop-blur-md border-b border-gray-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between shadow-sm">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 rounded-xl border border-gray-200 dark:border-slate-800 text-gray-600 dark:text-gray-300"
+              >
+                <Menu size={20} />
+              </button>
+              <h1 className="text-lg font-black text-[#182033] dark:text-white capitalize">
+                {activeTab.replace("_cms", "").replace("_", " ")}
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => loadData()}
+                disabled={loading}
+                className="p-2.5 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#161c2a] text-gray-600 dark:text-gray-300 hover:text-[#FF4D37] transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-sm"
+              >
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                <span className="hidden sm:inline">Sync Data</span>
+              </button>
+
+              <button
+                onClick={handleExportCSV}
+                className="p-2.5 rounded-xl border border-gray-200 dark:border-slate-800 bg-white dark:bg-[#161c2a] text-gray-600 dark:text-gray-300 hover:text-[#FF4D37] transition cursor-pointer flex items-center gap-1.5 text-xs font-bold shadow-sm"
+              >
+                <Download size={14} />
+                <span className="hidden sm:inline">Export CSV</span>
+              </button>
+            </div>
+          </header>
+        </div>
 
         <div className="p-6 sm:p-8 space-y-6 flex-1 overflow-y-auto max-w-7xl">
           
