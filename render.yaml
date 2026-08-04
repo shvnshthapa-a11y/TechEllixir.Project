@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: techellixir
+    runtime: node
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install
+    startCommand: cd backend && node index.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20.18.0
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: USER_PASSWORD
+        sync: false
+      - key: TOKEN_SECRET
+        generateValue: true
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
