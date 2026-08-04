@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "id": "82a4a3bb-ca33-4c25-bb6f-f45065778ffa",
+    "fullName": "Resource Subscriber",
+    "email": "mananarora0010@gmail.com",
+    "subject": "Resource Access: The 2026 Enterprise AI & LLM Implementation Blueprint",
+    "message": "User requested instant access to asset \"The 2026 Enterprise AI & LLM Implementation Blueprint\" (PDF (3.2 MB)).",
+    "status": "new",
+    "createdAt": "2026-07-24T14:58:44.448Z",
+    "updatedAt": "2026-07-24T14:58:44.450Z"
+  },
+  {
+    "id": "ddd42d04-d3b9-421a-8b7d-56f7bfedf7e8",
+    "fullName": "Resource Subscriber",
+    "email": "mananarora0010@gmail.com",
+    "subject": "Resource Access: The 2026 Enterprise AI & LLM Implementation Blueprint",
+    "message": "User requested instant access to asset \"The 2026 Enterprise AI & LLM Implementation Blueprint\" (PDF (3.2 MB)).",
+    "status": "new",
+    "createdAt": "2026-07-24T14:54:15.839Z",
+    "updatedAt": "2026-07-24T14:54:15.840Z"
+  },
+  {
+    "createdAt": "2026-07-24T14:51:12.474Z",
+    "email": "testingproject0099@gmail.com",
+    "fullName": "Avneesh TechEllixir",
+    "id": "272752ed-f6e7-4b4b-8f98-e68b0a4c7364",
+    "message": "This is a live test lead sent from TechEllixir platform to verify Resend inbox delivery.",
+    "status": "new",
+    "subject": "Request a Demo: AI & Data Solutions",
+    "updatedAt": "2026-07-24T14:51:12.476Z"
+  },
+  {
+    "createdAt": "2026-07-24T14:42:41.276Z",
+    "email": "test@example.com",
+    "fullName": "Test Lead",
+    "id": "1176a4fb-0c5e-41c9-b46c-e4af1e64f7f4",
+    "message": "Testing automated email dispatch.",
+    "status": "new",
+    "subject": "Request Demo: AI Solutions",
+    "updatedAt": "2026-07-24T14:42:41.276Z"
+  }
+]

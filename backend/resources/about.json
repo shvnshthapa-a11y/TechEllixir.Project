@@ -1,0 +1,51 @@
+[
+  {
+    "id": "abt_1",
+    "title": "100+ Projects Delivered",
+    "type": "metric",
+    "value": "100+",
+    "label": "Delivered Projects"
+  },
+  {
+    "id": "abt_2",
+    "title": "50+ Happy Clients",
+    "type": "metric",
+    "value": "50+",
+    "label": "Happy Clients"
+  },
+  {
+    "id": "abt_3",
+    "title": "10+ Years Tech Experience",
+    "type": "metric",
+    "value": "10+",
+    "label": "Years Experience"
+  },
+  {
+    "id": "abt_4",
+    "title": "24/7 Support",
+    "type": "metric",
+    "value": "24/7",
+    "label": "Enterprise Support"
+  },
+  {
+    "id": "abt_5",
+    "title": "Outcome-Driven Engineering",
+    "type": "principle",
+    "value": "Principle 1",
+    "label": "We build software aimed directly at solving core operational challenges and driving measurable revenue growth."
+  },
+  {
+    "id": "abt_6",
+    "title": "Built for Enterprise Scale",
+    "type": "principle",
+    "value": "Principle 2",
+    "label": "Our modular microservices and clean code bases are engineered to scale seamlessly as your user base expands."
+  },
+  {
+    "id": "abt_7",
+    "title": "Human-Centered Design",
+    "type": "principle",
+    "value": "Principle 3",
+    "label": "We prioritize intuitive UX, accessibility, and high performance to deliver software products users love."
+  }
+]

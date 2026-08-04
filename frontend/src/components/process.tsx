@@ -1,68 +1,96 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Code2, PenTool, Rocket, Search } from "lucide-react";
+import { useLanguage } from "../context/LanguageContext";
 
-const process = [
-  {
-    id: "01",
-    icon: <Search size={30} />,
-    title: "Discovery",
-    description:
-      "We clarify goals, users, workflows, constraints, and the first version that will create real value.",
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
   },
-  {
-    id: "02",
-    icon: <PenTool size={30} />,
-    title: "Design",
-    description:
-      "We create product flows, interface systems, and prototypes that make decisions visible early.",
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 35 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 100,
+      damping: 15,
+    },
   },
-  {
-    id: "03",
-    icon: <Code2 size={30} />,
-    title: "Development",
-    description:
-      "We build secure, scalable applications with clean handoffs, reviews, and steady progress updates.",
-  },
-  {
-    id: "04",
-    icon: <Rocket size={30} />,
-    title: "Launch & Support",
-    description:
-      "We test, deploy, monitor, and keep improving the product after it reaches real users.",
-  },
-];
+};
+
+const defaultProcessIcons = [<Search size={30} />, <PenTool size={30} />, <Code2 size={30} />, <Rocket size={30} />];
 
 const Process = () => {
+  const { t } = useLanguage();
+  const [dynamicProcess, setDynamicProcess] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/cms/process")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+          setDynamicProcess(data.items);
+        }
+      })
+      .catch((err) => console.warn("Backend process fetch fallback:", err));
+  }, []);
+
+  const fallbackProcess = [
+    { id: "01", icon: <Search size={30} />, title: t("process.steps.discovery"), description: t("process.steps.discoveryDesc") },
+    { id: "02", icon: <PenTool size={30} />, title: t("process.steps.design"), description: t("process.steps.designDesc") },
+    { id: "03", icon: <Code2 size={30} />, title: t("process.steps.development"), description: t("process.steps.developmentDesc") },
+    { id: "04", icon: <Rocket size={30} />, title: t("process.steps.launch"), description: t("process.steps.launchDesc") },
+  ];
+
+  const processList = dynamicProcess.length > 0
+    ? dynamicProcess.map((item, idx) => ({
+        id: item.step || `0${idx + 1}`,
+        icon: defaultProcessIcons[idx % defaultProcessIcons.length],
+        title: item.title,
+        description: item.description,
+      }))
+    : fallbackProcess;
+
   return (
-    <section className="section-shell bg-white">
+    <section className="section-shell bg-white dark:bg-[#0d111a] transition-colors duration-300">
       <div className="container-shell">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
+          transition={{ type: "spring", stiffness: 80, damping: 15 }}
           viewport={{ once: true }}
           className="mx-auto max-w-3xl text-center"
         >
-          <p className="eyebrow justify-center">Our Process</p>
+          <p className="eyebrow justify-center">{t("process.eyebrow")}</p>
           <h2 className="section-title mt-3 text-3xl md:text-4xl">
-            A calmer path from idea to launch
+            {t("process.title")}
           </h2>
           <p className="section-copy mt-5">
-            Our process keeps strategy, design, engineering, and delivery in the
-            same conversation, so projects move quickly without losing clarity.
+            {t("process.copy")}
           </p>
         </motion.div>
 
-        <div className="relative mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {process.map((item, index) => (
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          className="relative mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4"
+        >
+          {processList.map((item) => (
             <motion.article
               key={item.id}
-              initial={{ opacity: 0, y: 70 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.12 }}
-              viewport={{ once: true }}
-              whileHover={{ y: -7 }}
-              className="soft-card relative rounded-3xl p-7 transition"
+              variants={cardVariants}
+              whileHover={{ y: -7, scale: 1.02 }}
+              className="soft-card relative rounded-3xl p-7 cursor-pointer transition-shadow transition-colors duration-300 hover:shadow-xl"
             >
               <div className="mb-7 flex items-center justify-between">
                 <div className="icon-tile">{item.icon}</div>
@@ -70,11 +98,11 @@ const Process = () => {
                   {item.id}
                 </span>
               </div>
-              <h3 className="text-xl font-black text-[#182033]">{item.title}</h3>
+              <h3 className="text-xl font-black text-[#182033] dark:text-white">{item.title}</h3>
               <p className="section-copy mt-3 text-sm">{item.description}</p>
             </motion.article>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

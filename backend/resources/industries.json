@@ -1,0 +1,56 @@
+[
+  {
+    "id": "finance",
+    "title": "Finance & FinTech",
+    "tagline": "High-Concurrency Trading & Micro-Services",
+    "description": "Architecting zero-trust banking APIs, automated fraud detection models, and high-frequency transaction engines."
+  },
+  {
+    "id": "retail",
+    "title": "E-Commerce & Retail",
+    "tagline": "Headless Commerce & AI Recommendation Engines",
+    "description": "Building omnichannel shopping experiences, inventory sync microservices, and personalized product engines."
+  },
+  {
+    "id": "manufacturing",
+    "title": "Manufacturing & Industry 4.0",
+    "tagline": "IoT Telemetry & Predictive Maintenance",
+    "description": "Connecting factory machinery with real-time IoT sensors, automated defect inspection, and supply chain visibility."
+  },
+  {
+    "id": "logistics",
+    "title": "Logistics & Supply Chain",
+    "tagline": "Real-Time Fleet Tracking & Route Optimization",
+    "description": "Building dispatch management platforms, driver mobile apps, and automated warehouse inventory systems."
+  },
+  {
+    "id": "real-estate",
+    "title": "Real Estate & PropTech",
+    "tagline": "Virtual Property Tours & Automated CRM Lead Flows",
+    "description": "Developing tenant portals, automated lease document generation, and MLS listing integrations."
+  },
+  {
+    "id": "education",
+    "title": "Education & EdTech",
+    "tagline": "Interactive Learning Systems & Proctored Exams",
+    "description": "Engineering LMS platforms, live virtual classroom video streaming, and AI automated grading tools."
+  },
+  {
+    "id": "marketing",
+    "title": "Marketing & AdTech",
+    "tagline": "Campaign Analytics & High-Volume Lead Engines",
+    "description": "Building real-time bidding analytics, automated email drip engines, and conversion rate optimization tools."
+  },
+  {
+    "id": "hr",
+    "title": "HR Tech & Recruitment",
+    "tagline": "AI Candidate Screening & Payroll Automation",
+    "description": "Building resume parser models, automated interview scheduling bots, and employee onboarding portals."
+  },
+  {
+    "id": "startups",
+    "title": "Startups & Venture Backed",
+    "tagline": "Rapid MVP Engineering & Scalable Seed Architecture",
+    "description": "Helping founders take ideas from pitch deck wireframes to production-grade applications in under 6 weeks."
+  }
+]

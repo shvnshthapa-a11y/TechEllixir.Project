@@ -1,4 +1,6 @@
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowRight,
   BrainCircuit,
@@ -37,52 +39,68 @@ import {
 
 const domains = [
   {
-    title: "Frontend Development",
-    icon: <Globe size={30} />,
+    title: "Artificial Intelligence",
+    category: "ai",
+    badge: "🔥 #1 Most Popular",
+    icon: <BrainCircuit size={30} />,
     description:
-      "Learn React, HTML, CSS, Tailwind CSS, TypeScript, and modern frontend development.",
-  },
-  {
-    title: "Backend Development",
-    icon: <Database size={30} />,
-    description:
-      "Build scalable APIs using Node.js, Express, MongoDB, and REST architecture.",
+      "Build intelligent applications using AI, LLMs, prompt engineering, and automation tools.",
   },
   {
     title: "Full Stack Development",
+    category: "web",
+    badge: "🚀 High Demand",
     icon: <Code2 size={30} />,
     description:
-      "Work across frontend and backend systems while understanding real product delivery.",
+      "Work across frontend and backend systems using MERN / Python while understanding real product delivery.",
+  },
+  {
+    title: "Frontend Development",
+    category: "web",
+    badge: "⚡ Trending 2026",
+    icon: <Globe size={30} />,
+    description:
+      "Learn React 19, HTML, CSS, Tailwind CSS, TypeScript, and modern high-performance frontend development.",
+  },
+  {
+    title: "Backend Development",
+    category: "web",
+    badge: "⚡ High Demand",
+    icon: <Database size={30} />,
+    description:
+      "Build scalable APIs using Node.js, Express, Python, PostgreSQL, and REST/GraphQL architecture.",
   },
   {
     title: "Mobile App Development",
+    category: "mobile",
+    badge: "⭐ Top Choice",
     icon: <Smartphone size={30} />,
     description:
-      "Develop Android and iOS applications using Flutter and React Native.",
+      "Develop Android and iOS applications using Flutter, React Native, and cross-platform tools.",
   },
   {
-    title: "Artificial Intelligence",
-    icon: <BrainCircuit size={30} />,
+    title: "Cloud Computing & DevOps",
+    category: "cloud",
+    badge: "🚀 2026 Hot Skill",
+    icon: <Cloud size={30} />,
     description:
-      "Build intelligent applications using AI, LLMs, and automation tools.",
+      "Deploy scalable applications using AWS, Azure, Docker, Kubernetes, and CI/CD pipelines.",
   },
   {
     title: "Machine Learning",
+    category: "ai",
+    badge: "🔥 High Demand",
     icon: <Bot size={30} />,
     description:
-      "Learn supervised learning, deep learning, model deployment, and AI workflows.",
+      "Learn supervised learning, deep learning, neural networks, model deployment, and AI workflows.",
   },
   {
     title: "Cyber Security",
+    category: "cloud",
+    badge: "🛡️ High Demand",
     icon: <Shield size={30} />,
     description:
-      "Learn ethical hacking, network security, penetration testing, and secure development.",
-  },
-  {
-    title: "Cloud Computing",
-    icon: <Cloud size={30} />,
-    description:
-      "Deploy applications using AWS, Azure, Docker, and Kubernetes.",
+      "Learn ethical hacking, network security, penetration testing, zero-trust, and secure development.",
   },
   {
     title: "UI / UX Design",
@@ -321,10 +339,44 @@ const domains = [
 ];
 
 export default function Career() {
+  const [filterTag, setFilterTag] = useState<string>("all");
+  const [dynamicCareers, setDynamicCareers] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch("/api/cms/careers")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.items && Array.isArray(data.items)) {
+          const cmsItems = data.items.map((item: any) => ({
+            title: item.title,
+            category: item.category || "Web & Full Stack",
+            badge: item.badge || "🔥 Trending 2026",
+            icon: <Code2 size={24} />,
+            trendRank: "🔥 Top Demand",
+            demandScore: "Very High",
+            duration: item.duration || "2 - 6 Months",
+            stipend: "Performance Based",
+            mode: "Online / Hybrid",
+            desc: item.desc || "",
+          }));
+          setDynamicCareers(cmsItems);
+        }
+      })
+      .catch((e) => console.warn("Using default domains:", e));
+  }, []);
+
+  const allDomainList = [...dynamicCareers, ...domains];
+
+  const filteredDomains = allDomainList.filter((d) => {
+    if (filterTag === "all") return true;
+    if (filterTag === "trending") return !!d.badge;
+    return d.category === filterTag;
+  });
+
   return (
-    <main className="bg-[#fffaf7]">
+    <main className="bg-[#fffaf7] dark:bg-[#0d111a] text-[#182033] dark:text-gray-100 transition-colors duration-300">
       <section className="relative overflow-hidden pt-32 pb-20 sm:pt-36">
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#fffaf7,#ffffff_48%,#fff0eb)]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(135deg,#fffaf7,#ffffff_48%,#fff0eb)] dark:bg-[linear-gradient(135deg,#0d111a,#131924_48%,#1a2234)]" />
         <div className="container-shell text-center">
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -337,7 +389,7 @@ export default function Career() {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="section-title mx-auto mt-5 max-w-3xl text-4xl sm:text-4xl md:text-6xl"
+            className="section-title mx-auto mt-5 max-w-3xl text-4xl sm:text-4xl md:text-6xl text-[#182033] dark:text-white"
           >
             Start your career with practical project experience
           </motion.h1>
@@ -345,7 +397,7 @@ export default function Career() {
             initial={{ opacity: 0, y: 25 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="section-copy mx-auto mt-7 max-w-3xl text-lg"
+            className="section-copy mx-auto mt-7 max-w-3xl text-lg text-gray-600 dark:text-gray-300"
           >
             Gain hands-on experience, learn modern technologies, and grow under
             mentors who help you understand how real products are planned,
@@ -356,79 +408,114 @@ export default function Career() {
 
       <section className="section-shell pt-8">
         <div className="container-shell">
-          <div className="mx-auto mb-14 max-w-3xl text-center">
+          <div className="mx-auto mb-10 max-w-3xl text-center">
             <p className="eyebrow justify-center">Internship Domains</p>
-            <h2 className="section-title mt-3 text-4xl">
+            <h2 className="section-title mt-3 text-4xl text-[#182033] dark:text-white">
               Choose your area of interest
             </h2>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {domains.map((domain, index) => (
-              <motion.article
-                key={domain.title}
-                initial={{ opacity: 0, y: 35 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.06 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -7 }}
-                className="soft-card rounded-3xl p-7 flex flex-col"
+          {/* Trend Filter Pills Bar */}
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+            {[
+              { id: "all", label: `⚡ All Domains (${domains.length})` },
+              { id: "trending", label: `🔥 Top Trending 2026 (${domains.filter(d => !!d.badge).length})` },
+              { id: "ai", label: "🤖 AI & Data Science" },
+              { id: "web", label: "💻 Web & Full Stack" },
+              { id: "mobile", label: "📱 Mobile Apps" },
+              { id: "cloud", label: "☁️ Cloud & Security" },
+            ].map((tab) => (
+              <motion.button
+                key={tab.id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setFilterTag(tab.id)}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition cursor-pointer ${
+                  filterTag === tab.id
+                    ? "bg-[#FF4D37] text-white shadow-lg shadow-[#FF4D37]/20 font-black"
+                    : tab.id === "trending"
+                    ? "bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 hover:bg-[#ffe5dc]"
+                    : "bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-700"
+                }`}
               >
-                {/* Title Left - Icon Right */}
-                <div className="flex items-center justify-between gap-4">
-                   <div className="icon-tile flex h-14 w-14 items-center justify-center flex-shrink-0">
-                    {domain.icon}
-                  </div>
-                  <h3 className="text-xl font-black text-[#182033] leading-snug flex-1">
-                    {domain.title}
-                  </h3>
-
-                 
-                </div>
-
-                {/* Description */}
-                <p className="section-copy mt-5 text-sm flex-1">
-                  {domain.description}
-                </p>
-
-                {/* Button */}
-                <a
-                  href="https://forms.gle/gedBkK75jMnxHF8t8"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group mt-7 inline-flex items-center gap-2 font-bold text-[#DF3420]"
-                >
-                  Register Now
-                  <ArrowUpRight
-                    size={18}
-                    className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
-                  />
-                </a>
-              </motion.article>
+                {tab.label}
+              </motion.button>
             ))}
           </div>
+
+          <motion.div layout className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <AnimatePresence mode="popLayout">
+              {filteredDomains.map((domain, index) => (
+                <motion.article
+                  layout
+                  key={domain.title}
+                  initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9, y: -20 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: index * 0.03 }}
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="soft-card rounded-3xl p-7 flex flex-col bg-white dark:bg-[#161c2a] border border-gray-200 dark:border-slate-800 shadow-sm hover:shadow-2xl hover:border-[#ffd5ca] dark:hover:border-slate-700 transition-all duration-300 group"
+                >
+                  {/* Trend Badge if present */}
+                  {domain.badge && (
+                    <div className="mb-3">
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-black bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] border border-orange-200 dark:border-slate-700 inline-block group-hover:scale-105 transition">
+                        {domain.badge}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Icon Left - Title Right */}
+                  <div className="flex items-center gap-4">
+                    <div className="icon-tile flex h-14 w-14 items-center justify-center flex-shrink-0 bg-[#FFF1EC] dark:bg-slate-800 text-[#FF4D37] rounded-2xl group-hover:scale-110 group-hover:rotate-3 group-hover:bg-[#FF4D37] group-hover:text-white transition-all duration-300 shadow-sm">
+                      {domain.icon}
+                    </div>
+                    <h3 className="text-xl font-black text-[#182033] dark:text-white leading-snug flex-1 group-hover:text-[#FF4D37] transition-colors duration-200">
+                      {domain.title}
+                    </h3>
+                  </div>
+
+                  {/* Description */}
+                  <p className="section-copy mt-5 text-sm flex-1 text-gray-600 dark:text-gray-300 leading-relaxed">
+                    {domain.description}
+                  </p>
+
+                  {/* Button */}
+                  <Link
+                    to={`/register-internship?domain=${encodeURIComponent(domain.title)}`}
+                    className="group/btn mt-7 inline-flex items-center gap-2 font-bold text-[#FF4D37] hover:underline cursor-pointer text-left"
+                  >
+                    Register Now
+                    <ArrowUpRight
+                      size={18}
+                      className="transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
+                    />
+                  </Link>
+                </motion.article>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </section>
 
       <section className="pb-24">
         <div className="container-shell">
-          <div className="glass-card mx-auto max-w-4xl rounded-3xl p-8 text-center sm:p-12">
-            <h2 className="section-title text-3xl sm:text-4xl">
+          <div className="glass-card mx-auto max-w-4xl rounded-3xl p-8 text-center sm:p-12 bg-white/80 dark:bg-slate-900/80 border border-gray-200 dark:border-slate-800 shadow-xl">
+            <h2 className="section-title text-3xl sm:text-4xl text-[#182033] dark:text-white">
               Ready to join our internship program?
             </h2>
-            <p className="section-copy mx-auto mt-5 max-w-2xl">
+            <p className="section-copy mx-auto mt-5 max-w-2xl text-gray-600 dark:text-gray-300">
               Complete your registration and we will review your application.
               Shortlisted candidates will be contacted with the next steps.
             </p>
-            <a
-              href="https://forms.gle/gedBkK75jMnxHF8t8"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="brand-button mt-9 px-9 py-4"
+            <Link
+              to="/register-internship?domain=Full%20Stack%20Development"
+              className="brand-button mt-9 px-9 py-4 inline-flex items-center gap-2"
             >
               Register Now
               <ArrowRight size={20} />
-            </a>
+            </Link>
           </div>
         </div>
       </section>

@@ -1,0 +1,70 @@
+[
+  {
+    "id": "usr_1785358317212",
+    "name": "m",
+    "email": "m@gmail.com",
+    "phone": "1234567890",
+    "company": "1",
+    "role": "admin",
+    "status": "active",
+    "password": "111111",
+    "createdAt": "2026-07-29T20:51:57.212Z",
+    "updatedAt": "2026-07-29T20:52:45.497Z"
+  },
+  {
+    "id": "usr_1785358252517",
+    "name": "End To End Test User",
+    "email": "newuser_1785358252432@techellixir.com",
+    "phone": "+1 555-9988",
+    "company": "Testing Corp",
+    "role": "user",
+    "status": "active",
+    "password": "mypassword123",
+    "createdAt": "2026-07-29T20:50:52.517Z"
+  },
+  {
+    "id": "usr_1785358179613",
+    "name": "Test Verification User",
+    "email": "testuser30@techellixir.com",
+    "phone": "+1 555-0199",
+    "company": "TechEllixir Testing Inc",
+    "role": "user",
+    "status": "active",
+    "password": "testuser@123",
+    "createdAt": "2026-07-29T20:49:39.613Z"
+  },
+  {
+    "id": "usr_101",
+    "name": "Rudra Pratap",
+    "email": "rudra@example.com",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-07-29T20:35:21.008Z",
+    "password": "user@123"
+  },
+  {
+    "id": "usr_102",
+    "name": "Shivansh Thapa",
+    "email": "shivansh@techellixir.com",
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.306Z",
+    "updatedAt": "2026-07-29T15:34:49.367Z"
+  },
+  {
+    "id": "usr_103",
+    "name": "Ananya Sharma",
+    "email": "ananya.sharma@dit.edu.in",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.306Z"
+  },
+  {
+    "id": "usr_104",
+    "name": "Vikram Malhotra",
+    "email": "vikram@geu.ac.in",
+    "role": "user",
+    "status": "active",
+    "createdAt": "2026-07-28T09:58:26.306Z"
+  }
+]

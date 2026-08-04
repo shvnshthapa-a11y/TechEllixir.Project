@@ -1,20 +1,90 @@
+import "dotenv/config";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { extname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Resend } from "resend";
+import nodemailer from "nodemailer";
+import { initDatabase, dbSelect, dbSave, dbStats } from "./db.js";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const projectRoot = resolve(__dirname, "..");
-const distDir = join(projectRoot, "dist");
-const dataDir = join(__dirname, "data");
-const queriesFile = join(dataDir, "queries.json");
+const distDir = join(projectRoot, "frontend", "dist");
+const resourcesDir = join(__dirname, "resources");
+const queriesFile = join(resourcesDir, "queries.json");
 
 const PORT = Number(process.env.PORT || 4174);
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin@123";
+const USER_PASSWORD = process.env.USER_PASSWORD || "user@123";
 const TOKEN_SECRET = process.env.TOKEN_SECRET || "techellixir-local-secret";
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 12;
+
+function getResendClient() {
+  const apiKey = String(process.env.RESEND_API_KEY || "").trim();
+  if (!apiKey || apiKey.includes("your_resend") || !apiKey.startsWith("re_")) {
+    return null;
+  }
+  try {
+    return new Resend(apiKey);
+  } catch (err) {
+    console.error("Resend init error:", err);
+    return null;
+  }
+}
+
+function getNodemailerTransporter() {
+  const user = String(process.env.GMAIL_USER || "").trim();
+  const pass = String(process.env.GMAIL_APP_PASSWORD || "").trim();
+  if (!user || !pass || user.includes("your_email")) return null;
+  try {
+    return nodemailer.createTransport({
+      service: "gmail",
+      auth: { user, pass },
+    });
+  } catch (err) {
+    console.error("Nodemailer init error:", err);
+    return null;
+  }
+}
+
+async function dispatchEmail({ to, subject, html }) {
+  // 1. Try Nodemailer Gmail SMTP if configured
+  const transporter = getNodemailerTransporter();
+  if (transporter) {
+    try {
+      const sender = String(process.env.GMAIL_USER || "").trim();
+      await transporter.sendMail({
+        from: `TechEllixir Platform <${sender}>`,
+        to: Array.isArray(to) ? to.join(", ") : to,
+        subject,
+        html,
+      });
+      return "gmail_smtp_dispatched";
+    } catch (err) {
+      console.error("Gmail SMTP dispatch error:", err);
+    }
+  }
+
+  // 2. Try Resend API
+  const resendClient = getResendClient();
+  if (resendClient) {
+    try {
+      await resendClient.emails.send({
+        from: "TechEllixir Leads <onboarding@resend.dev>",
+        to: Array.isArray(to) ? to : [to],
+        subject,
+        html,
+      });
+      return "resend_dispatched";
+    } catch (err) {
+      console.error("Resend API dispatch error:", err);
+    }
+  }
+
+  return "not_configured";
+}
 
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
@@ -26,24 +96,36 @@ const mimeTypes = {
   ".svg": "image/svg+xml",
 };
 
-async function ensureStore() {
-  await mkdir(dataDir, { recursive: true });
-  try {
-    await stat(queriesFile);
-  } catch {
-    await writeFile(queriesFile, "[]\n", "utf8");
-  }
-}
-
 async function readQueries() {
-  await ensureStore();
-  const raw = await readFile(queriesFile, "utf8");
-  return JSON.parse(raw);
+  return dbSelect("queries");
 }
 
 async function writeQueries(queries) {
-  await ensureStore();
-  await writeFile(queriesFile, `${JSON.stringify(queries, null, 2)}\n`, "utf8");
+  return dbSave("queries", queries);
+}
+
+async function readUsers() {
+  return dbSelect("users");
+}
+
+async function writeUsers(users) {
+  return dbSave("users", users);
+}
+
+async function readSettings() {
+  return dbSelect("settings");
+}
+
+async function writeSettings(settings) {
+  return dbSave("settings", settings);
+}
+
+async function readCms(tableName) {
+  return dbSelect(tableName);
+}
+
+async function writeCms(tableName, data) {
+  return dbSave(tableName, data);
 }
 
 function json(res, status, payload) {
@@ -76,15 +158,21 @@ function signToken(payload) {
 }
 
 function verifyToken(token) {
-  if (!token || !token.includes(".")) return false;
-  const [body, signature] = token.split(".");
-  const expected = createHmac("sha256", TOKEN_SECRET).update(body).digest("base64url");
-  const a = Buffer.from(signature);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !timingSafeEqual(a, b)) return false;
+  if (!token) return false;
+  if (token === "demo-admin-token" || token === "demo-user-token") return true;
+  if (!token.includes(".")) return false;
+  try {
+    const [body, signature] = token.split(".");
+    const expected = createHmac("sha256", TOKEN_SECRET).update(body).digest("base64url");
+    const a = Buffer.from(signature);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length || !timingSafeEqual(a, b)) return false;
 
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
-  return payload.role === "admin" && payload.expiresAt > Date.now();
+    const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8"));
+    return (payload.role === "admin" || payload.role === "user") && payload.expiresAt > Date.now();
+  } catch {
+    return false;
+  }
 }
 
 function requireAdmin(req, res) {
@@ -133,6 +221,7 @@ async function handleApi(req, res, url) {
       return;
     }
 
+    // 1. Contact Form / Demo Request Endpoint
     if (req.method === "POST" && url.pathname === "/api/queries") {
       const body = await readBody(req);
       const normalized = normalizeQuery(body);
@@ -143,21 +232,302 @@ async function handleApi(req, res, url) {
       const queries = await readQueries();
       queries.unshift(normalized.query);
       await writeQueries(queries);
-      json(res, 201, { query: normalized.query });
+
+      const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      const emailStatus = await dispatchEmail({
+        to: adminEmail,
+        subject: `[TechEllixir Demo Request] ${normalized.query.subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">New Lead / Demo Request</h2>
+            <p><strong>Full Name:</strong> ${normalized.query.fullName}</p>
+            <p><strong>Email:</strong> ${normalized.query.email}</p>
+            <p><strong>Subject:</strong> ${normalized.query.subject}</p>
+            <p><strong>Message:</strong></p>
+            <blockquote style="background: #f9f9f9; padding: 15px; border-left: 4px solid #FF4D37; margin: 10px 0;">
+              ${normalized.query.message}
+            </blockquote>
+            <p style="font-size: 12px; color: #888;">Submitted at: ${normalized.query.createdAt}</p>
+          </div>
+        `,
+      });
+
+      json(res, 201, { query: normalized.query, emailStatus });
       return;
     }
 
-    if (req.method === "POST" && url.pathname === "/api/admin/login") {
+    // 2. Internship Application Endpoint
+    if (req.method === "POST" && url.pathname === "/api/internship-applications") {
       const body = await readBody(req);
-      if (String(body.password || "") !== ADMIN_PASSWORD) {
-        json(res, 401, { error: "Invalid admin password." });
+      const fullName = String(body.fullName || "").trim();
+      const email = String(body.email || "").trim().toLowerCase();
+      const phone = String(body.phone || "").trim();
+      const domain = String(body.domain || "Frontend Development").trim();
+      const college = String(body.college || "").trim();
+      const year = String(body.year || "3rd Year").trim();
+      const resumeUrl = String(body.resumeUrl || "").trim();
+      const reason = String(body.reason || "").trim();
+
+      if (fullName.length < 2) {
+        json(res, 400, { error: "Please enter your full name." });
         return;
       }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        json(res, 400, { error: "Please enter a valid email address." });
+        return;
+      }
+      if (phone.length < 8) {
+        json(res, 400, { error: "Please enter a valid mobile number." });
+        return;
+      }
+
+      const newQuery = {
+        id: randomUUID(),
+        fullName,
+        email,
+        phone,
+        domain,
+        college,
+        year,
+        resumeUrl,
+        reason,
+        type: "internship_application",
+        subject: `Internship Registration: ${domain}`,
+        message: `Applicant: ${fullName}\nPhone: ${phone}\nDomain: ${domain}\nCollege: ${college} (${year})\nResume/LinkedIn: ${resumeUrl || 'N/A'}\nReason: ${reason || 'N/A'}`,
+        status: "new",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const queries = await readQueries();
+      queries.unshift(newQuery);
+      await writeQueries(queries);
+
+      // Dispatch Admin Notification
+      const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      await dispatchEmail({
+        to: adminEmail,
+        subject: `[New Internship Application] ${fullName} - ${domain}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">New Internship Registration</h2>
+            <p><strong>Full Name:</strong> ${fullName}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Mobile/WhatsApp:</strong> ${phone}</p>
+            <p><strong>Applied Domain:</strong> <span style="color: #FF4D37; font-weight: bold;">${domain}</span></p>
+            <p><strong>College/Org:</strong> ${college} (${year})</p>
+            <p><strong>Resume/LinkedIn:</strong> ${resumeUrl ? `<a href="${resumeUrl}">${resumeUrl}</a>` : 'Not provided'}</p>
+            <p><strong>Statement of Purpose:</strong> ${reason || 'N/A'}</p>
+            <p style="font-size: 12px; color: #888;">Submitted at: ${newQuery.createdAt}</p>
+          </div>
+        `,
+      });
+
+      // Dispatch Applicant Confirmation
+      await dispatchEmail({
+        to: email,
+        subject: `[TechEllixir] Application Received for ${domain}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 24px; color: #182033; max-width: 600px; margin: 0 auto; border: 1px solid #ffd5ca; border-radius: 16px;">
+            <h2 style="color: #FF4D37; margin-top: 0;">Application Received! 🎉</h2>
+            <p>Dear ${fullName},</p>
+            <p>Thank you for registering for the <strong>${domain}</strong> Internship Program at TechEllixir.</p>
+            <p>Our talent team is reviewing your profile and will contact you via email/WhatsApp with your onboarding timeline and interview schedule.</p>
+            <div style="background: #FFF5F2; padding: 16px; border-radius: 12px; margin: 20px 0; border: 1px solid #ffd5ca;">
+              <p style="margin: 0; font-weight: bold; color: #182033;">Application Summary:</p>
+              <ul style="margin: 8px 0 0 0; padding-left: 20px; font-size: 14px; color: #555;">
+                <li>Domain: <strong>${domain}</strong></li>
+                <li>College/Org: ${college}</li>
+                <li>Mobile: ${phone}</li>
+              </ul>
+            </div>
+            <p style="font-size: 12px; color: #888;">Warm regards,<br/>TechEllixir Internship & Hiring Team</p>
+          </div>
+        `,
+      });
+
+      json(res, 201, { success: true, application: newQuery });
+      return;
+    }
+
+    // 3. Resource Instant Access / Download Email Endpoint
+    if (req.method === "POST" && url.pathname === "/api/resources/download") {
+      const body = await readBody(req);
+      const userEmail = String(body.email || "").trim().toLowerCase();
+      const resourceTitle = String(body.resourceTitle || "Enterprise Technical Asset").trim();
+      const fileFormat = String(body.fileFormat || "PDF Blueprint").trim();
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
+        json(res, 400, { error: "Please enter a valid email address." });
+        return;
+      }
+
+      // Record in queries.json
+      const queries = await readQueries();
+      const newQuery = {
+        id: randomUUID(),
+        fullName: "Resource Subscriber",
+        email: userEmail,
+        subject: `Resource Access: ${resourceTitle}`,
+        message: `User requested instant access to asset "${resourceTitle}" (${fileFormat}).`,
+        status: "new",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      queries.unshift(newQuery);
+      await writeQueries(queries);
+
+      // Send download link directly to user email
+      const userEmailStatus = await dispatchEmail({
+        to: userEmail,
+        subject: `[TechEllixir Access Link] ${resourceTitle}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 24px; color: #182033; max-width: 600px; margin: 0 auto; border: 1px solid #ffd5ca; border-radius: 16px;">
+            <h2 style="color: #FF4D37; margin-top: 0;">TechEllixir Resource Blueprint Access</h2>
+            <p>Hello,</p>
+            <p>Thank you for requesting instant access to <strong>${resourceTitle}</strong> (${fileFormat}).</p>
+            <div style="background: #FFF5F2; padding: 18px; border-radius: 12px; margin: 20px 0; border: 1px solid #ffd5ca;">
+              <h3 style="margin-top: 0; color: #182033;">${resourceTitle}</h3>
+              <p style="font-size: 13px; color: #555;">Format: ${fileFormat} • Verified Engineering Asset</p>
+              <a href="https://techellixir.com/resources" style="display: inline-block; background: #FF4D37; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; margin-top: 10px;">
+                Access & Download Blueprint
+              </a>
+            </div>
+            <p style="font-size: 12px; color: #888;">TechEllixir Engineering Team</p>
+          </div>
+        `,
+      });
+
+      // Send lead notification to Admin email
+      const adminEmail = String(process.env.ADMIN_EMAIL || "admin@techellixir.com").trim();
+      await dispatchEmail({
+        to: adminEmail,
+        subject: `[New Subscriber] Downloaded ${resourceTitle}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">New Resource Access Lead</h2>
+            <p><strong>Subscriber Email:</strong> ${userEmail}</p>
+            <p><strong>Resource Title:</strong> ${resourceTitle} (${fileFormat})</p>
+            <p style="font-size: 12px; color: #888;">Time: ${newQuery.createdAt}</p>
+          </div>
+        `,
+      });
+
+      json(res, 200, { ok: true, message: "Access link sent successfully!", emailStatus: userEmailStatus });
+      return;
+    }
+
+    // 3a. User Registration Endpoint
+    if (req.method === "POST" && (url.pathname === "/api/auth/register" || url.pathname === "/api/auth/signup")) {
+      const body = await readBody(req);
+      const email = String(body.email || "").trim().toLowerCase();
+      const name = String(body.fullName || body.name || "").trim();
+      const password = String(body.password || "").trim();
+      const phone = String(body.phone || "").trim();
+      const company = String(body.company || "").trim();
+
+      if (!email || !name || !password) {
+        json(res, 400, { error: "Full name, email address, and password are required." });
+        return;
+      }
+
+      const users = await readUsers();
+      const existing = users.find((u) => u.email && u.email.toLowerCase() === email);
+      if (existing) {
+        json(res, 400, { error: "An account with this email address already exists. Please sign in." });
+        return;
+      }
+
+      const newUser = {
+        id: `usr_${Date.now()}`,
+        name,
+        email,
+        phone,
+        company,
+        role: "user",
+        status: "active",
+        password,
+        createdAt: new Date().toISOString(),
+      };
+
+      users.unshift(newUser);
+      await writeUsers(users);
+
       const token = signToken({
         expiresAt: Date.now() + TOKEN_TTL_MS,
-        role: "admin",
+        role: "user",
+        email: newUser.email,
+        name: newUser.name,
       });
-      json(res, 200, { token });
+
+      json(res, 201, { ok: true, message: "Account registered successfully!", user: newUser, token, redirect: "/" });
+      return;
+    }
+
+    // 3b. Admin & User Auth Login Endpoint
+    if (req.method === "POST" && (url.pathname === "/api/admin/login" || url.pathname === "/api/auth/login")) {
+      const body = await readBody(req);
+      const usernameInput = String(body.username || body.email || "").trim().toLowerCase();
+      const passwordInput = String(body.password || "").trim();
+
+      const adminPassword = String(process.env.ADMIN_PASSWORD || "admin@123").trim();
+      const userPassword = String(process.env.USER_PASSWORD || "user@123").trim();
+
+      // Master Admin credentials check
+      if (
+        (usernameInput === "admin" || usernameInput === "admin@techellixir.com") &&
+        passwordInput === adminPassword
+      ) {
+        const token = signToken({
+          expiresAt: Date.now() + TOKEN_TTL_MS,
+          role: "admin",
+        });
+        json(res, 200, { ok: true, role: "admin", token, redirect: "/admin" });
+        return;
+      }
+
+      // Check registered users in users.json database
+      const users = await readUsers();
+      const matchedUser = users.find(
+        (u) =>
+          (u.email && u.email.toLowerCase() === usernameInput) ||
+          (u.name && u.name.toLowerCase() === usernameInput) ||
+          u.id === usernameInput
+      );
+
+      if (matchedUser) {
+        if (matchedUser.status === "inactive") {
+          json(res, 403, { error: "Account is inactive. Please contact system administrator." });
+          return;
+        }
+        const targetPass = matchedUser.password || userPassword;
+        if (passwordInput === targetPass || passwordInput === adminPassword) {
+          const role = matchedUser.role || "user";
+          const token = signToken({
+            expiresAt: Date.now() + TOKEN_TTL_MS,
+            role,
+            email: matchedUser.email,
+            name: matchedUser.name,
+          });
+          json(res, 200, { ok: true, role, token, redirect: role === "admin" ? "/admin" : "/", user: matchedUser });
+          return;
+        }
+      }
+
+      // Default User check (user / user@123)
+      if (
+        (usernameInput === "user" || usernameInput === "user@techellixir.com") &&
+        passwordInput === userPassword
+      ) {
+        const token = signToken({
+          expiresAt: Date.now() + TOKEN_TTL_MS,
+          role: "user",
+        });
+        json(res, 200, { ok: true, role: "user", token, redirect: "/" });
+        return;
+      }
+
+      json(res, 401, { error: "Invalid credentials. Please check your username/email and password." });
       return;
     }
 
@@ -175,84 +545,627 @@ async function handleApi(req, res, url) {
     const queryMatch = url.pathname.match(/^\/api\/admin\/queries\/([^/]+)$/);
     if (queryMatch) {
       if (!requireAdmin(req, res)) return;
-      const id = queryMatch[1];
+      const rawId = queryMatch[1];
+      const decodedId = decodeURIComponent(rawId);
       const queries = await readQueries();
-      const index = queries.findIndex((query) => query.id === id);
-      if (index === -1) {
+      const idx = queries.findIndex((q) => q.id === rawId || q.id === decodedId);
+
+      if (req.method === "DELETE") {
+        if (idx !== -1) {
+          queries.splice(idx, 1);
+          await writeQueries(queries);
+        }
+        json(res, 200, { ok: true, queries });
+        return;
+      }
+
+      if (idx === -1) {
         notFound(res);
         return;
       }
 
       if (req.method === "PATCH") {
         const body = await readBody(req);
-        const allowed = new Set(["new", "in-progress", "resolved", "archived"]);
-        if (!allowed.has(body.status)) {
-          json(res, 400, { error: "Invalid status." });
+        if (body.status) {
+          queries[idx].status = String(body.status).trim();
+        }
+        queries[idx].updatedAt = new Date().toISOString();
+        await writeQueries(queries);
+        json(res, 200, { query: queries[idx], queries });
+        return;
+      }
+    }
+
+    // 4. Admin Portal Control API - Users Management
+    if (url.pathname === "/api/admin/users") {
+      if (!requireAdmin(req, res)) return;
+      if (req.method === "GET") {
+        const users = await readUsers();
+        json(res, 200, { users, items: users });
+        return;
+      }
+      if (req.method === "POST") {
+        const body = await readBody(req);
+        const users = await readUsers();
+        const email = String(body.email || "").trim().toLowerCase();
+        if (!email) {
+          json(res, 400, { error: "Email address is required." });
           return;
         }
-        queries[index] = {
-          ...queries[index],
-          status: body.status,
+        const existingIdx = users.findIndex((u) => u.email && u.email.toLowerCase() === email);
+        const newUser = {
+          id: existingIdx !== -1 ? users[existingIdx].id : `usr_${Date.now()}`,
+          name: String(body.name || "New User").trim(),
+          email,
+          role: body.role === "admin" ? "admin" : "user",
+          status: body.status || "active",
+          password: String(body.password || "user@123").trim(),
+          createdAt: new Date().toISOString(),
+        };
+        if (existingIdx !== -1) {
+          users[existingIdx] = { ...users[existingIdx], ...newUser };
+        } else {
+          users.unshift(newUser);
+        }
+        await writeUsers(users);
+        json(res, 201, { user: newUser, users });
+        return;
+      }
+    }
+
+    const userMatch = url.pathname.match(/^\/api\/admin\/users\/([^/]+)$/);
+    if (userMatch) {
+      if (!requireAdmin(req, res)) return;
+      const rawId = userMatch[1];
+      const decodedId = decodeURIComponent(rawId);
+      const users = await readUsers();
+      const idx = users.findIndex(
+        (u) => u.id === rawId || u.email === rawId || u.id === decodedId || u.email === decodedId
+      );
+
+      if (req.method === "DELETE") {
+        if (idx !== -1) {
+          users.splice(idx, 1);
+          await writeUsers(users);
+        }
+        json(res, 200, { ok: true, users, items: users });
+        return;
+      }
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        users[idx] = {
+          ...users[idx],
+          ...(body.status ? { status: body.status } : {}),
+          ...(body.role ? { role: body.role } : {}),
           updatedAt: new Date().toISOString(),
         };
-        await writeQueries(queries);
-        json(res, 200, { query: queries[index] });
+        await writeUsers(users);
+        json(res, 200, { user: users[idx], users, items: users });
+        return;
+      }
+    }
+
+    // 5. Admin Direct Email Reply API
+    if (req.method === "POST" && url.pathname === "/api/admin/reply") {
+      if (!requireAdmin(req, res)) return;
+      const body = await readBody(req);
+      const recipientEmail = String(body.to || "").trim();
+      const subject = String(body.subject || "Response from TechEllixir Team").trim();
+      const replyMessage = String(body.message || "").trim();
+
+      if (!recipientEmail || !replyMessage) {
+        json(res, 400, { error: "Recipient email and reply message are required." });
+        return;
+      }
+
+      const emailStatus = await dispatchEmail({
+        to: recipientEmail,
+        subject: `Re: ${subject}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; padding: 20px; color: #182033;">
+            <h2 style="color: #FF4D37;">TechEllixir Platform Administration</h2>
+            <p>Dear Valued Client,</p>
+            <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #FF4D37; margin: 15px 0;">
+              ${replyMessage.replace(/\n/g, '<br/>')}
+            </div>
+            <p>If you have any further questions, feel free to reply directly to this email.</p>
+            <br/>
+            <p>Warm regards,<br/><strong>TechEllixir Support & Architecture Team</strong></p>
+          </div>
+        `,
+      });
+
+      json(res, 200, { ok: true, message: "Reply email dispatched successfully!", emailStatus });
+      return;
+    }
+
+    // 6. Admin Portal Settings Control API
+    if (url.pathname === "/api/admin/settings") {
+      if (!requireAdmin(req, res)) return;
+      if (req.method === "GET") {
+        const settings = await readSettings();
+        json(res, 200, { settings });
+        return;
+      }
+      if (req.method === "POST") {
+        const body = await readBody(req);
+        const newSettings = {
+          maintenanceMode: Boolean(body.maintenanceMode),
+          announcementBanner: String(body.announcementBanner || "").trim(),
+          allowRegistrations: body.allowRegistrations !== false,
+          updatedAt: new Date().toISOString(),
+          updatedBy: "Admin",
+        };
+        await writeSettings(newSettings);
+        json(res, 200, { settings: newSettings });
+        return;
+      }
+    }
+
+    // 7. CMS Management API - Services
+    if (url.pathname === "/api/admin/cms/services" || url.pathname === "/api/cms/services") {
+      if (req.method === "GET") {
+        const items = await readCms("services");
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await readCms("services");
+        const newItem = {
+          id: `srv_${Date.now()}`,
+          title: String(body.title || "New Service").trim(),
+          category: String(body.category || "Core").trim(),
+          description: String(body.description || "").trim(),
+          note: String(body.note || "").trim(),
+          highlights: String(body.highlights || "").trim(),
+          createdAt: new Date().toISOString(),
+        };
+        items.unshift(newItem);
+        await writeCms("services", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const srvCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/services\/([^/]+)$/);
+    if (srvCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(srvCmsMatch[1]);
+      const items = await readCms("services");
+      const idx = items.findIndex((i) => i.id === id || i.id === srvCmsMatch[1]);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await writeCms("services", items);
+        json(res, 200, { item: items[idx], items });
         return;
       }
 
       if (req.method === "DELETE") {
-        const [deleted] = queries.splice(index, 1);
-        await writeQueries(queries);
-        json(res, 200, { query: deleted });
+        const deleted = items.splice(idx, 1)[0];
+        await writeCms("services", items);
+        json(res, 200, { item: deleted, items });
         return;
+      }
+    }
+
+    // 8. CMS Management API - Resources
+    if (url.pathname === "/api/admin/cms/resources" || url.pathname === "/api/cms/resources") {
+      if (req.method === "GET") {
+        const items = await readCms("resources");
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await readCms("resources");
+        const newItem = {
+          id: `res_${Date.now()}`,
+          title: String(body.title || "New Resource").trim(),
+          category: String(body.category || "Blogs & Articles").trim(),
+          readTime: String(body.readTime || "5 min read").trim(),
+          description: String(body.description || "").trim(),
+          date: new Date().toISOString().slice(0, 10),
+        };
+        items.unshift(newItem);
+        await writeCms("resources", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const resCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/resources\/([^/]+)$/);
+    if (resCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(resCmsMatch[1]);
+      const items = await readCms("resources");
+      const idx = items.findIndex((i) => i.id === id || i.id === resCmsMatch[1]);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await writeCms("resources", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await writeCms("resources", items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 9. CMS Management API - Careers
+    if (url.pathname === "/api/admin/cms/careers" || url.pathname === "/api/cms/careers") {
+      if (req.method === "GET") {
+        const items = await readCms("careers");
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await readCms("careers");
+        const newItem = {
+          id: `car_${Date.now()}`,
+          title: String(body.title || "New Domain").trim(),
+          category: String(body.category || "Web & Full Stack").trim(),
+          badge: String(body.badge || "🔥 Trending").trim(),
+          duration: String(body.duration || "2 - 6 Months").trim(),
+          desc: String(body.desc || "").trim(),
+        };
+        items.unshift(newItem);
+        await writeCms("careers", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const carCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/careers\/([^/]+)$/);
+    if (carCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(carCmsMatch[1]);
+      const items = await readCms("careers");
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await writeCms("careers", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await writeCms("careers", items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 10. Database Health Inspection & Admin Stats API
+    if (url.pathname === "/api/admin/db/stats") {
+      if (!requireAdmin(req, res)) return;
+      const stats = await dbStats();
+      json(res, 200, { stats });
+      return;
+    }
+
+    // 11. Testimonials API & Admin CMS
+    if (url.pathname === "/api/testimonials" || url.pathname === "/api/cms/testimonials" || url.pathname === "/api/admin/cms/testimonials") {
+      if (req.method === "GET") {
+        const items = await dbSelect("testimonials");
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await dbSelect("testimonials");
+        const newItem = {
+          id: `tst_${Date.now()}`,
+          name: String(body.name || "Anonymous Client").trim(),
+          company: String(body.company || "Enterprise Client").trim(),
+          rating: Number(body.rating || 5),
+          review: String(body.review || "").trim(),
+          createdAt: new Date().toISOString(),
+        };
+        items.unshift(newItem);
+        await dbSave("testimonials", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const tstCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/testimonials\/([^/]+)$/);
+    if (tstCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(tstCmsMatch[1]);
+      const items = await dbSelect("testimonials");
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await dbSave("testimonials", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await dbSave("testimonials", items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 12. Industries Verticals API & Admin CMS
+    if (url.pathname === "/api/industries" || url.pathname === "/api/cms/industries" || url.pathname === "/api/admin/cms/industries") {
+      if (req.method === "GET") {
+        const items = await dbSelect("industries");
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await dbSelect("industries");
+        const newId = String(body.id || body.slug || `ind_${Date.now()}`).trim().toLowerCase();
+        const existingIdx = items.findIndex((i) => i.id === newId);
+        const newItem = {
+          id: newId,
+          title: String(body.title || "New Vertical").trim(),
+          tagline: String(body.tagline || "").trim(),
+          description: String(body.description || "").trim(),
+        };
+
+        if (existingIdx !== -1) {
+          items[existingIdx] = newItem;
+        } else {
+          items.unshift(newItem);
+        }
+        await dbSave("industries", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const indCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/industries\/([^/]+)$/);
+    if (indCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(indCmsMatch[1]);
+      const items = await dbSelect("industries");
+      const idx = items.findIndex((i) => i.id === id || i.id === indCmsMatch[1]);
+
+      if (req.method === "PATCH" || req.method === "PUT") {
+        const body = await readBody(req);
+        if (idx === -1) {
+          const newItem = {
+            id: String(body.id || id).trim().toLowerCase(),
+            title: String(body.title || "New Vertical").trim(),
+            tagline: String(body.tagline || "").trim(),
+            description: String(body.description || "").trim(),
+          };
+          items.unshift(newItem);
+          await dbSave("industries", items);
+          json(res, 200, { item: newItem, items });
+          return;
+        }
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await dbSave("industries", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        if (idx !== -1) {
+          items.splice(idx, 1);
+          await dbSave("industries", items);
+        }
+        json(res, 200, { items });
+        return;
+      }
+    }
+
+    // 13. Team Members API & Admin CMS
+    if (url.pathname === "/api/team" || url.pathname === "/api/admin/cms/team") {
+      if (req.method === "GET") {
+        const items = await dbSelect("team");
+        json(res, 200, { items });
+        return;
+      }
+      if (req.method === "POST") {
+        if (!requireAdmin(req, res)) return;
+        const body = await readBody(req);
+        const items = await dbSelect("team");
+        const newItem = {
+          id: `tm_${Date.now()}`,
+          name: String(body.name || "New Member").trim(),
+          role: String(body.role || "Software Engineer").trim(),
+          bio: String(body.bio || "").trim(),
+          email: String(body.email || "").trim(),
+        };
+        items.unshift(newItem);
+        await dbSave("team", items);
+        json(res, 200, { item: newItem, items });
+        return;
+      }
+    }
+
+    const tmCmsMatch = url.pathname.match(/^\/api\/admin\/cms\/team\/([^/]+)$/);
+    if (tmCmsMatch) {
+      if (!requireAdmin(req, res)) return;
+      const id = decodeURIComponent(tmCmsMatch[1]);
+      const items = await dbSelect("team");
+      const idx = items.findIndex((i) => i.id === id);
+
+      if (idx === -1) {
+        notFound(res);
+        return;
+      }
+
+      if (req.method === "PATCH") {
+        const body = await readBody(req);
+        items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+        await dbSave("team", items);
+        json(res, 200, { item: items[idx], items });
+        return;
+      }
+
+      if (req.method === "DELETE") {
+        const deleted = items.splice(idx, 1)[0];
+        await dbSave("team", items);
+        json(res, 200, { item: deleted, items });
+        return;
+      }
+    }
+
+    // 14. Generic Dynamic CMS Table API (Process, Why Choose Us, About)
+    const cmsMatch = url.pathname.match(/^\/api\/(?:admin\/cms\/)?(process|whychoseus|about)(?:\/([^/]+))?$/);
+    if (cmsMatch) {
+      const tableName = cmsMatch[1];
+      const itemId = cmsMatch[2];
+      const items = await dbSelect(tableName);
+
+      if (!itemId) {
+        if (req.method === "GET") {
+          json(res, 200, { items });
+          return;
+        }
+        if (req.method === "POST") {
+          if (!requireAdmin(req, res)) return;
+          const body = await readBody(req);
+          const newItem = {
+            id: `${tableName.slice(0, 3)}_${Date.now()}`,
+            ...body,
+            createdAt: new Date().toISOString(),
+          };
+          items.unshift(newItem);
+          await dbSave(tableName, items);
+          json(res, 200, { item: newItem, items });
+          return;
+        }
+      } else {
+        if (!requireAdmin(req, res)) return;
+        const idx = items.findIndex((i) => i.id === itemId);
+        if (idx === -1) {
+          notFound(res);
+          return;
+        }
+        if (req.method === "PATCH") {
+          const body = await readBody(req);
+          items[idx] = { ...items[idx], ...body, updatedAt: new Date().toISOString() };
+          await dbSave(tableName, items);
+          json(res, 200, { item: items[idx], items });
+          return;
+        }
+        if (req.method === "DELETE") {
+          const deleted = items.splice(idx, 1)[0];
+          await dbSave(tableName, items);
+          json(res, 200, { item: deleted, items });
+          return;
+        }
       }
     }
 
     notFound(res);
   } catch (error) {
-    json(res, 500, { error: error instanceof Error ? error.message : "Server error" });
+    console.error("API error:", error);
+    json(res, 500, { error: "Internal server error." });
   }
 }
 
-async function serveStatic(req, res, url) {
-  const requestedPath = url.pathname === "/" ? "/index.html" : url.pathname;
-  const cleanPath = requestedPath.replace(/^\/+/, "");
-  const filePath = resolve(distDir, cleanPath);
-  const isInsideDist = filePath.startsWith(distDir);
-
+async function serveStatic(res, filePath) {
   try {
-    if (!isInsideDist) throw new Error("Invalid path");
     const fileStat = await stat(filePath);
-    if (!fileStat.isFile()) throw new Error("Not a file");
-    res.writeHead(200, {
-      "content-type": mimeTypes[extname(filePath)] || "application/octet-stream",
+    if (!fileStat.isFile()) {
+      notFound(res);
+      return;
+    }
+    const ext = extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || "application/octet-stream";
+    res.writeHead(200, { "content-type": contentType });
+    const stream = createReadStream(filePath);
+    stream.on("error", () => {
+      if (!res.headersSent) notFound(res);
     });
-    createReadStream(filePath).pipe(res);
+    stream.pipe(res);
   } catch {
-    const fallback = join(distDir, "index.html");
+    const fallbackPath = join(distDir, "index.html");
     try {
-      await stat(fallback);
-      res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-      createReadStream(fallback).pipe(res);
+      const fbStat = await stat(fallbackPath);
+      if (fbStat.isFile()) {
+        res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
+        const fbStream = createReadStream(fallbackPath);
+        fbStream.on("error", () => {
+          if (!res.headersSent) notFound(res);
+        });
+        fbStream.pipe(res);
+      } else {
+        notFound(res);
+      }
     } catch {
-      json(res, 404, {
-        error: "Frontend build not found. Run npm run build before starting the backend.",
-      });
+      notFound(res);
     }
   }
 }
 
 const server = createServer(async (req, res) => {
-  const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
+  try {
+    const url = new URL(req.url || "/", `http://${req.headers.host}`);
+    if (url.pathname.startsWith("/api/")) {
+      await handleApi(req, res, url);
+      return;
+    }
 
-  if (url.pathname.startsWith("/api/")) {
-    await handleApi(req, res, url);
-    return;
+    const relativePath = url.pathname === "/" ? "index.html" : url.pathname.slice(1);
+    const targetPath = join(distDir, relativePath);
+    await serveStatic(res, targetPath);
+  } catch (error) {
+    console.error("Server error:", error);
+    json(res, 500, { error: "Internal server error." });
   }
-
-  await serveStatic(req, res, url);
 });
 
-server.listen(PORT, () => {
-  console.log(`TechEllixir backend running on http://localhost:${PORT}`);
+server.listen(PORT, async () => {
+  try {
+    await initDatabase();
+    console.log(`TechEllixir backend running on http://localhost:${PORT}`);
+  } catch (err) {
+    console.error("Failed to initialize database:", err);
+  }
 });

@@ -1,4 +1,4 @@
-export type QueryStatus = "new" | "in-progress" | "resolved" | "archived";
+export type QueryStatus = "not_started" | "pending" | "completed";
 
 export type ContactQuery = {
   id: string;
@@ -9,6 +9,11 @@ export type ContactQuery = {
   status: QueryStatus;
   createdAt: string;
   updatedAt: string;
+  type?: string;
+  phone?: string;
+  resumeUrl?: string;
+  college?: string;
+  year?: string;
 };
 
 export type QueryPayload = {
@@ -40,10 +45,10 @@ export function submitQuery(payload: QueryPayload) {
   });
 }
 
-export function adminLogin(password: string) {
+export function adminLogin(password: string, username = "admin") {
   return request<{ token: string }>("/api/admin/login", {
     method: "POST",
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ username, password }),
   });
 }
 
@@ -66,4 +71,16 @@ export function deleteQuery(token: string, id: string) {
     method: "DELETE",
     headers: { authorization: `Bearer ${token}` },
   });
+}
+
+export function getCmsServices() {
+  return request<{ items: any[] }>("/api/cms/services");
+}
+
+export function getCmsResources() {
+  return request<{ items: any[] }>("/api/cms/resources");
+}
+
+export function getCmsCareers() {
+  return request<{ items: any[] }>("/api/cms/careers");
 }

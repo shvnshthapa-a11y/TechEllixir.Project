@@ -1,0 +1,23 @@
+[
+  {
+    "id": "tm_1",
+    "name": "Shivansh Thapa",
+    "role": "Chief Executive Officer & Founder",
+    "bio": "Tech visionary specializing in full-stack architecture, enterprise growth, and AI product execution.",
+    "email": "shivansh@techellixir.com"
+  },
+  {
+    "id": "tm_2",
+    "name": "Rudra Pratap Singh Bisht",
+    "role": "Lead Systems Architect",
+    "bio": "Expert in distributed cloud systems, high-concurrency microservices, and DevOps infrastructure.",
+    "email": "rudra@techellixir.com"
+  },
+  {
+    "id": "tm_3",
+    "name": "Avneesh Singh",
+    "role": "Head of AI & Machine Learning",
+    "bio": "Leading Generative AI, RAG architecture, and custom LLM deployments for enterprise clients.",
+    "email": "avneesh@techellixir.com"
+  }
+]
