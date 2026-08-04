@@ -3,11 +3,11 @@ services:
     name: techellixir
     runtime: node
     plan: free
-    buildCommand: npm install -g npm@11 && cd frontend && rm -rf node_modules package-lock.json && npm install && npm run build && cd ../backend && rm -rf node_modules package-lock.json && npm install
+    buildCommand: cd frontend && npm install && npm run build && cd ../backend && npm install
     startCommand: cd backend && node index.js
     envVars:
       - key: NODE_VERSION
-        value: 20.18.0
+        value: 22.22.2
       - key: ADMIN_PASSWORD
         sync: false
       - key: USER_PASSWORD
